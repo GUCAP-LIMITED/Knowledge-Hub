@@ -30,6 +30,82 @@ const tokens = {
   ring: '0 0 0 3px rgba(4, 93, 94, 0.22)',
 };
 
+/* ── Permission modules – defined outside component so useState initialiser can reference them ── */
+const permissionModules = [
+  { id:'courses',      label:'Course Catalog',       icon:PlayCircle,
+    base:    { id:'view',   label:'View',   desc:'Browse and open courses • Controls "Course Catalog" sidebar item' },
+    granular:[ { id:'start',    label:'Start course',     desc:'Enrol in and begin new courses',            requires:['view'] },
+               { id:'continue', label:'Continue course',  desc:'Resume in-progress courses',                requires:['view'] },
+               { id:'review',   label:'Rate & review',    desc:'Submit ratings and written feedback',        requires:['view'] },
+               { id:'filter',   label:'Search & filter',  desc:'Use advanced search, filters and sort',     requires:['view'] } ] },
+  { id:'mylearning',   label:'My Learning',           icon:BookOpen,
+    base:    { id:'view',   label:'View',   desc:'Personal learning dashboard' },
+    granular:[ { id:'track',    label:'Track progress',   desc:'View detailed completion stats',             requires:['view'] } ] },
+  { id:'tutorials',    label:'Tutorials',             icon:Lightbulb,
+    base:    { id:'view',   label:'View',   desc:'Browse tutorial library' },
+    granular:[ { id:'watch',    label:'Watch tutorials',  desc:'Start and complete tutorials',               requires:['view'] } ] },
+  { id:'resources',    label:'Resources',             icon:FolderOpen,
+    base:    { id:'view',   label:'View',   desc:'Access knowledge base and articles' },
+    granular:[ { id:'search',   label:'Search',           desc:'Search articles and guides',                 requires:['view'] },
+               { id:'download', label:'Download',         desc:'Download documents and files',               requires:['view'] } ] },
+  { id:'certificates', label:'Certificates',          icon:Award,
+    base:    { id:'view',   label:'View',   desc:'View earned certificates' },
+    granular:[ { id:'download', label:'Download',         desc:'Download certificate as HTML file',          requires:['view'] },
+               { id:'share',    label:'Share',            desc:'Copy credential ID and share link',          requires:['view'] } ] },
+  { id:'upload',       label:'Upload Document',       icon:Upload,
+    base:    { id:'access', label:'Access', desc:'Open the upload area' },
+    granular:[ { id:'submit',   label:'Submit for review',desc:'Upload files into admin review queue',       requires:['access'] },
+               { id:'publish',  label:'Publish directly', desc:'Bypass review — publish immediately',        requires:['access'] } ] },
+  { id:'submissions',  label:'My Submissions',        icon:FileCheck,
+    base:    { id:'view',   label:'View',   desc:'View own submission history and status' },
+    granular:[ { id:'track',    label:'Track status',     desc:'Monitor approval status in real time',       requires:['view'] } ] },
+  { id:'approvals',    label:'Approval Queue',        icon:CheckCircle,
+    base:    { id:'view',   label:'View',   desc:'See all pending submissions' },
+    granular:[ { id:'approve',  label:'Approve',          desc:'Approve and publish submissions',            requires:['view'] },
+               { id:'reject',   label:'Reject',           desc:'Reject with a required reason note',         requires:['view'] },
+               { id:'flag',     label:'Flag for review',  desc:'Move submission to under-review status',     requires:['view'] } ] },
+  { id:'content',      label:'Content Management',    icon:Grid,
+    base:    { id:'view',   label:'View',   desc:'Browse all platform content' },
+    granular:[ { id:'create',   label:'Create',           desc:'Add new courses, articles and tutorials',    requires:['view'] },
+               { id:'edit',     label:'Edit',             desc:'Modify existing content',                    requires:['view'] },
+               { id:'delete',   label:'Delete',           desc:'Permanently remove content',                 requires:['view'] },
+               { id:'publish',  label:'Publish / Unpublish',desc:'Control content live visibility',          requires:['view'] } ] },
+  { id:'team',         label:'Team Progress',         icon:BarChart3,
+    base:    { id:'view',   label:'View',   desc:'Access team analytics dashboard' },
+    granular:[ { id:'export',   label:'Export reports',   desc:'Download team progress reports',             requires:['view'] },
+               { id:'remind',   label:'Send reminders',   desc:'Notify non-completers via email',            requires:['view'] } ] },
+  { id:'assign',       label:'Assign Training',       icon:ClipboardList,
+    base:    { id:'view',   label:'View',   desc:'See all active training assignments' },
+    granular:[ { id:'create',   label:'Create assignment',    desc:'Assign courses to users or groups',          requires:['view'] },
+               { id:'delete',   label:'Delete assignment',    desc:'Remove existing assignments',                requires:['view'] },
+               { id:'progress', label:'View per-person detail',desc:'Drill into individual completion rates',    requires:['view'] } ] },
+  { id:'settings',     label:'Platform Settings',     icon:Settings,
+    base:    { id:'view',   label:'View',   desc:'Access the settings area' },
+    granular:[ { id:'platform',    label:'Edit platform config', desc:'Toggle platform-wide feature flags',    requires:['view'] },
+               { id:'users',       label:'Manage users',         desc:'Activate, deactivate and edit roles',    requires:['view'] },
+               { id:'permissions', label:'Edit permission sets', desc:'Create and modify permission groups',    requires:['view'] } ] },
+];
+
+const _buildPerms = (enabledIds, overrides = {}) => {
+  const result = {};
+  permissionModules.forEach(mod => {
+    const on = enabledIds.includes(mod.id);
+    result[mod.id] = { [mod.base.id]: on };
+    mod.granular.forEach(g => { result[mod.id][g.id] = on; });
+  });
+  Object.entries(overrides).forEach(([mId, perms]) => { if (result[mId]) Object.assign(result[mId], perms); });
+  return result;
+};
+const _all  = permissionModules.map(m => m.id);
+const _mgr  = ['courses','mylearning','tutorials','resources','certificates','upload','submissions','team','assign'];
+const _cons = ['courses','mylearning','tutorials','resources','certificates'];
+
+const initialPermSets = [
+  { id:'full',       label:'Full Access',        desc:'Complete access to all Knowledge Hub features',           locked:true, perms:_buildPerms(_all) },
+  { id:'manager',    label:'Manager Access',     desc:'Upload content, track team, full learning access',                   perms:_buildPerms(_mgr,  { upload:{ access:true, submit:true, publish:false } }) },
+  { id:'consultant', label:'Consultant Access',  desc:'Standard learner — courses, tutorials, resources & certificates',   perms:_buildPerms(_cons) },
+];
+
 const KnowledgeHub = () => {
 
   /* ── Brand Logo ── */
@@ -107,9 +183,9 @@ const KnowledgeHub = () => {
     secondary: '#FC7300',
     secondaryHover: '#e56700',
     secondaryLight: isDark ? 'rgba(252, 115, 0, 0.18)' : 'rgba(252, 115, 0, 0.10)',
-    bg: isDark ? '#0b1220' : '#f8fafc',
-    bgSubtle: isDark ? '#0f172a' : '#f1f5f9',
-    surface: isDark ? '#1e293b' : '#ffffff',
+    bg: isDark ? '#0b1220' : '#F1F4F3',
+    bgSubtle: isDark ? '#0f172a' : '#e5eae9',
+    surface: isDark ? '#1e293b' : '#FFFFFF',
     surfaceHover: isDark ? '#293548' : '#f8fafc',
     text: isDark ? '#f1f5f9' : '#0f172a',
     textMuted: isDark ? '#cbd5e1' : '#475569',
@@ -271,19 +347,23 @@ const KnowledgeHub = () => {
     { courseId: 2, userId: 'admin', userName: 'Md Shamim', userRole: 'Administrator', rating: 4, feedback: 'Good course overall, though some modules could be shorter.', date: 'Jan 15, 2024', helpful: 4 },
   ]);
 
+  const [permSets, setPermSets] = useState(initialPermSets);
+  const [userPermOverrides, setUserPermOverrides] = useState({});
+  const [editPermUser, setEditPermUser] = useState(null);
+
   const [certificates] = useState([
-    { id: 'CERT-2024-001', courseId: 1, courseName: 'Getting Started with UAPP Portal', userName: 'Simona', userRole: 'Consultant', issuedDate: '2024-01-15', expiryDate: '2026-01-15', credentialId: 'UAPP-GS-001-2024', category: 'Onboarding', grade: 'Distinction' },
-    { id: 'CERT-2024-002', courseId: 1, courseName: 'Getting Started with UAPP Portal', userName: 'Raj Ahmed', userRole: 'Admission Manager', issuedDate: '2024-01-18', expiryDate: '2026-01-18', credentialId: 'UAPP-GS-002-2024', category: 'Onboarding', grade: 'Merit' },
-    { id: 'CERT-2024-003', courseId: 1, courseName: 'Getting Started with UAPP Portal', userName: 'Bob Johnson', userRole: 'Consultant', issuedDate: '2024-01-20', expiryDate: '2026-01-20', credentialId: 'UAPP-GS-003-2024', category: 'Onboarding', grade: 'Distinction' },
-    { id: 'CERT-2024-004', courseId: 3, courseName: 'Compliance & Legal Requirements', userName: 'Simona', userRole: 'Consultant', issuedDate: '2024-02-05', expiryDate: '2026-02-05', credentialId: 'UAPP-CL-001-2024', category: 'Compliance', grade: 'Pass' },
-    { id: 'CERT-2024-005', courseId: 3, courseName: 'Compliance & Legal Requirements', userName: 'Alice Wong', userRole: 'Consultant', issuedDate: '2024-02-08', expiryDate: '2026-02-08', credentialId: 'UAPP-CL-002-2024', category: 'Compliance', grade: 'Merit' },
-    { id: 'CERT-2024-006', courseId: 3, courseName: 'Compliance & Legal Requirements', userName: 'Bob Johnson', userRole: 'Consultant', issuedDate: '2024-02-10', expiryDate: '2026-02-10', credentialId: 'UAPP-CL-003-2024', category: 'Compliance', grade: 'Distinction' },
-    { id: 'CERT-2024-007', courseId: 2, courseName: 'Student Application Processing', userName: 'Raj Ahmed', userRole: 'Admission Manager', issuedDate: '2024-03-01', expiryDate: '2026-03-01', credentialId: 'UAPP-SA-001-2024', category: 'Operations', grade: 'Distinction' },
-    { id: 'CERT-2024-008', courseId: 18, courseName: 'Python Programming for Beginners', userName: 'Simona', userRole: 'Consultant', issuedDate: '2024-03-12', expiryDate: '2026-03-12', credentialId: 'UAPP-PY-001-2024', category: 'Programming', grade: 'Merit' },
-    { id: 'CERT-2024-009', courseId: 15, courseName: 'Microsoft Excel for Beginners', userName: 'Alice Wong', userRole: 'Consultant', issuedDate: '2024-03-20', expiryDate: '2026-03-20', credentialId: 'UAPP-EX-001-2024', category: 'Skills', grade: 'Distinction' },
-    { id: 'CERT-2024-010', courseId: 21, courseName: 'Public Speaking: Be a Professional Speaker', userName: 'Bob Johnson', userRole: 'Consultant', issuedDate: '2024-04-03', expiryDate: '2026-04-03', credentialId: 'UAPP-PS-001-2024', category: 'Soft Skills', grade: 'Merit' },
-    { id: 'CERT-2024-011', courseId: 14, courseName: 'Microsoft Word for Beginners', userName: 'Carol Davis', userRole: 'Consultant', issuedDate: '2024-04-10', expiryDate: '2026-04-10', credentialId: 'UAPP-WD-001-2024', category: 'Skills', grade: 'Pass' },
-    { id: 'CERT-2024-012', courseId: 10, courseName: 'Fundamentals of Algebra', userName: 'David Lee', userRole: 'Consultant', issuedDate: '2024-04-15', expiryDate: '2026-04-15', credentialId: 'UAPP-AL-001-2024', category: 'Math', grade: 'Merit' },
+    { id: 'CERT-2026-001', courseId: 1,  courseName: 'Getting Started with UAPP Portal',           userName: 'Simona',     userRole: 'Consultant',        issuedDate: '2026-01-10', credentialId: 'UAPP-GS-001-2026', category: 'Onboarding'  },
+    { id: 'CERT-2026-002', courseId: 1,  courseName: 'Getting Started with UAPP Portal',           userName: 'Raj Ahmed',  userRole: 'Admission Manager', issuedDate: '2026-01-18', credentialId: 'UAPP-GS-002-2026', category: 'Onboarding'  },
+    { id: 'CERT-2026-003', courseId: 1,  courseName: 'Getting Started with UAPP Portal',           userName: 'Bob Johnson',userRole: 'Consultant',        issuedDate: '2026-01-25', credentialId: 'UAPP-GS-003-2026', category: 'Onboarding'  },
+    { id: 'CERT-2026-004', courseId: 3,  courseName: 'Compliance & Legal Requirements',            userName: 'Simona',     userRole: 'Consultant',        issuedDate: '2026-02-14', credentialId: 'UAPP-CL-001-2026', category: 'Compliance'  },
+    { id: 'CERT-2026-005', courseId: 3,  courseName: 'Compliance & Legal Requirements',            userName: 'Alice Wong', userRole: 'Consultant',        issuedDate: '2026-02-20', credentialId: 'UAPP-CL-002-2026', category: 'Compliance'  },
+    { id: 'CERT-2026-006', courseId: 3,  courseName: 'Compliance & Legal Requirements',            userName: 'Bob Johnson',userRole: 'Consultant',        issuedDate: '2026-03-03', credentialId: 'UAPP-CL-003-2026', category: 'Compliance'  },
+    { id: 'CERT-2026-007', courseId: 2,  courseName: 'Student Application Processing',             userName: 'Raj Ahmed',  userRole: 'Admission Manager', issuedDate: '2026-03-15', credentialId: 'UAPP-SA-001-2026', category: 'Operations'  },
+    { id: 'CERT-2026-008', courseId: 18, courseName: 'Python Programming for Beginners',           userName: 'Simona',     userRole: 'Consultant',        issuedDate: '2026-04-02', credentialId: 'UAPP-PY-001-2026', category: 'Programming' },
+    { id: 'CERT-2026-009', courseId: 15, courseName: 'Microsoft Excel for Beginners',              userName: 'Alice Wong', userRole: 'Consultant',        issuedDate: '2026-04-18', credentialId: 'UAPP-EX-001-2026', category: 'Skills'      },
+    { id: 'CERT-2026-010', courseId: 21, courseName: 'Public Speaking: Be a Professional Speaker', userName: 'Bob Johnson',userRole: 'Consultant',        issuedDate: '2026-05-05', credentialId: 'UAPP-PS-001-2026', category: 'Soft Skills' },
+    { id: 'CERT-2026-011', courseId: 14, courseName: 'Microsoft Word for Beginners',               userName: 'Carol Davis',userRole: 'Consultant',        issuedDate: '2026-05-20', credentialId: 'UAPP-WD-001-2026', category: 'Skills'      },
+    { id: 'CERT-2026-012', courseId: 10, courseName: 'Fundamentals of Algebra',                    userName: 'David Lee',  userRole: 'Consultant',        issuedDate: '2026-06-01', credentialId: 'UAPP-AL-001-2026', category: 'Math'        },
   ]);
 
   /* ════ HELPERS ════ */
@@ -303,6 +383,21 @@ const KnowledgeHub = () => {
   };
 
   const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  const categoryMeta = {
+    Onboarding:   { color: '#045D5E', icon: Rocket },
+    Operations:   { color: '#0891b2', icon: Settings },
+    Compliance:   { color: '#7c3aed', icon: Shield },
+    Leadership:   { color: '#b45309', icon: Star },
+    Analytics:    { color: '#0369a1', icon: BarChart3 },
+    Skills:       { color: '#0f766e', icon: Lightbulb },
+    English:      { color: '#1d4ed8', icon: BookOpen },
+    Math:         { color: '#7e22ce', icon: Hash },
+    Science:      { color: '#065f46', icon: Lightbulb },
+    Programming:  { color: '#FC7300', icon: FileText },
+    'Soft Skills':{ color: '#be185d', icon: Users },
+  };
+  const getCatMeta = (cat) => categoryMeta[cat] || { color: c.primarySolid, icon: PlayCircle };
 
   /* ════ STATUS CONFIG (icon + label, never colour-only) ════ */
   const statusConfig = {
@@ -636,20 +731,33 @@ const KnowledgeHub = () => {
     }, [open, onClose]);
 
     if (!open) return null;
+    const mobileSheet = isMobile;
     return (
       <>
         <div onClick={onClose} aria-hidden="true" style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', zIndex: 1000, backdropFilter: 'blur(2px)' }} />
         <div role="dialog" aria-modal="true" aria-labelledby="modal-title" ref={modalRef}
-          style={{
+          className={mobileSheet ? 'modal-sheet' : ''}
+          style={mobileSheet ? {
+            position: 'fixed', bottom: 0, left: 0, right: 0,
+            background: c.surface, borderRadius: '20px 20px 0 0',
+            width: '100%', maxHeight: '92vh',
+            display: 'flex', flexDirection: 'column',
+            boxShadow: tokens.shadow['2xl'], zIndex: 1001, overflow: 'hidden',
+          } : {
             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
             background: c.surface, borderRadius: tokens.radius.xl,
             width: 'calc(100% - 32px)', maxWidth: sizes[size], maxHeight: 'calc(100vh - 64px)',
             display: 'flex', flexDirection: 'column',
             boxShadow: tokens.shadow['2xl'], zIndex: 1001, overflow: 'hidden',
           }}>
+          {mobileSheet && (
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 10, paddingBottom: 4, flexShrink: 0 }}>
+              <div style={{ width: 36, height: 4, borderRadius: 2, background: c.borderStrong, opacity: 0.5 }} />
+            </div>
+          )}
           {(title || headerAccent) && (
             <div style={{
-              padding: '20px 24px 16px',
+              padding: mobileSheet ? '12px 20px 14px' : '20px 24px 16px',
               borderBottom: `1px solid ${c.border}`,
               background: headerAccent ? `linear-gradient(135deg, ${c.primarySolid} 0%, ${c.primaryHover} 100%)` : 'transparent',
               color: headerAccent ? '#fff' : c.text,
@@ -1056,6 +1164,8 @@ const KnowledgeHub = () => {
     const inProgress = courses.filter(x => x.progress > 0 && x.progress < 100);
     const completed = courses.filter(x => x.progress === 100);
     const continueCourse = inProgress[0];
+    const heroPct = Math.round((completed.length / courses.length) * 100);
+    const heroR = 26, heroCirc = 2 * Math.PI * heroR, heroDash = heroCirc * (heroPct / 100);
 
     /* Role-aware quick action set */
     const quickActions = useMemo(() => {
@@ -1083,15 +1193,15 @@ const KnowledgeHub = () => {
       <div>
         {/* Welcome hero */}
         <div style={{
-          background: `linear-gradient(135deg, ${c.primarySolid} 0%, ${c.primaryHover} 100%)`,
+          background: `linear-gradient(135deg, ${c.primarySolid} 0%, #034849 100%)`,
           borderRadius: tokens.radius.xl, padding: isMobile ? 20 : 28,
           color: '#fff', marginBottom: tokens.space[6], position: 'relative', overflow: 'hidden',
         }}>
-          <div style={{
-            position: 'absolute', right: -40, top: -40, width: 220, height: 220,
-            borderRadius: '50%', background: 'rgba(252, 115, 0, 0.15)',
-            pointerEvents: 'none',
-          }} />
+          <div style={{ position: 'absolute', right: -50, top: -50, width: 240, height: 240, borderRadius: '50%', background: 'rgba(252,115,0,0.12)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', right: 40, bottom: -60, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', right: isMobile ? -20 : 20, top: '50%', transform: 'translateY(-50%)', opacity: 0.06, pointerEvents: 'none' }}>
+            <UAPPLogo size={isMobile ? 100 : 140} />
+          </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', position: 'relative' }}>
             <div>
               <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 6 }}>
@@ -1106,21 +1216,37 @@ const KnowledgeHub = () => {
                 {isConsultant && (continueCourse ? `Continue your learning — ${continueCourse.progress}% through “${continueCourse.title}”.` : 'No active courses. Browse the catalog to start learning.')}
               </p>
             </div>
+            {!isMobile && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'rgba(255,255,255,0.10)', padding: '14px 20px', borderRadius: tokens.radius.lg, flexShrink: 0 }}>
+                <svg width={68} height={68} viewBox={'0 0 68 68'} style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx={34} cy={34} r={heroR} fill={'none'} stroke={'rgba(255,255,255,0.18)'} strokeWidth={6} />
+                  <circle cx={34} cy={34} r={heroR} fill={'none'} stroke={'#FC7300'} strokeWidth={6}
+                    strokeDasharray={`${heroDash} ${heroCirc}`} strokeLinecap={'round'} />
+                </svg>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontSize: 28, fontWeight: 900, lineHeight: 1 }}>{heroPct}%</div>
+                  <div style={{ fontSize: 11, opacity: 0.85, marginTop: 3, fontWeight: 600 }}>Overall Progress</div>
+                  <div style={{ fontSize: 11, opacity: 0.65, marginTop: 2 }}>{completed.length} of {courses.length} courses done</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Quick actions */}
-        <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${isMobile ? 140 : 200}px, 1fr))`, gap: 12, marginBottom: tokens.space[6] }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : `repeat(auto-fit, minmax(200px, 1fr))`, gap: isMobile ? 10 : 12, marginBottom: tokens.space[6] }}>
           {quickActions.map(q => (
             <button key={q.label} onClick={q.onClick}
               style={{
                 display: 'flex', alignItems: 'center', gap: 12, padding: 16,
-                background: c.surface, border: `1px solid ${c.border}`,
+                background: c.surface,
+                border: `1px solid ${c.border}`,
+                borderLeft: `4px solid ${q.color}`,
                 borderRadius: tokens.radius.lg, textAlign: 'left', cursor: 'pointer',
                 transition: tokens.transition,
               }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = q.color; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = tokens.shadow.md; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = c.border; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}>
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = tokens.shadow.md; e.currentTarget.style.background = q.color + '08'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.background = c.surface; }}>
               <div style={{ width: 40, height: 40, borderRadius: tokens.radius.md, background: q.color + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <q.icon size={18} color={q.color} />
               </div>
@@ -1296,28 +1422,30 @@ const KnowledgeHub = () => {
 
         {/* Filter bar */}
         <Card style={{ marginBottom: tokens.space[5] }}>
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(220px, 1fr) auto auto auto auto', gap: 10, alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <Input icon={Search} placeholder="Search by title or category…" value={catalogQuery} onChange={e => setCatalogQuery(e.target.value)} ariaLabel="Search courses" />
-            <Select value={catalogCategory} onChange={e => setCatalogCategory(e.target.value)} aria-label="Filter by category">
-              {categories.map(cat => <option key={cat} value={cat}>{cat === 'all' ? 'All categories' : cat}</option>)}
-            </Select>
-            <Select value={catalogStatus} onChange={e => setCatalogStatus(e.target.value)} aria-label="Filter by status">
-              <option value="all">All statuses</option>
-              <option value="not-started">Not started</option>
-              <option value="in-progress">In progress</option>
-              <option value="completed">Completed</option>
-            </Select>
-            <Select value={catalogMandatory} onChange={e => setCatalogMandatory(e.target.value)} aria-label="Filter by type">
-              <option value="all">All types</option>
-              <option value="mandatory">Mandatory</option>
-              <option value="optional">Optional</option>
-            </Select>
-            <Select value={catalogSort} onChange={e => setCatalogSort(e.target.value)} aria-label="Sort">
-              <option value="popular">Most popular</option>
-              <option value="rating">Highest rated</option>
-              <option value="newest">Newest</option>
-              <option value="duration">Shortest first</option>
-            </Select>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+              <Select value={catalogCategory} onChange={e => setCatalogCategory(e.target.value)} aria-label="Filter by category">
+                {categories.map(cat => <option key={cat} value={cat}>{cat === 'all' ? 'All categories' : cat}</option>)}
+              </Select>
+              <Select value={catalogStatus} onChange={e => setCatalogStatus(e.target.value)} aria-label="Filter by status">
+                <option value="all">All statuses</option>
+                <option value="not-started">Not started</option>
+                <option value="in-progress">In progress</option>
+                <option value="completed">Completed</option>
+              </Select>
+              <Select value={catalogMandatory} onChange={e => setCatalogMandatory(e.target.value)} aria-label="Filter by type">
+                <option value="all">All types</option>
+                <option value="mandatory">Mandatory</option>
+                <option value="optional">Optional</option>
+              </Select>
+              <Select value={catalogSort} onChange={e => setCatalogSort(e.target.value)} aria-label="Sort">
+                <option value="popular">Most popular</option>
+                <option value="rating">Highest rated</option>
+                <option value="newest">Newest</option>
+                <option value="duration">Shortest first</option>
+              </Select>
+            </div>
           </div>
         </Card>
 
@@ -1335,7 +1463,7 @@ const KnowledgeHub = () => {
               action={<Button onClick={clearFilters}>Clear all filters</Button>} />
           </Card>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? 260 : 280}px, 1fr))`, gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : `repeat(auto-fill, minmax(280px, 1fr))`, gap: isMobile ? 10 : 16 }}>
             {filtered.map(course => {
               const rd = getCourseRating(course.id);
               const rating = rd ? rd.avg : course.rating;
@@ -1344,10 +1472,11 @@ const KnowledgeHub = () => {
               return (
                 <Card key={course.id} hover padded={false} onClick={() => setDetailCourse(course.id)} ariaLabel={`View ${course.title}`}>
                   {/* Cover */}
-                  <div style={{ height: 110, background: `linear-gradient(135deg, ${c.primarySolid} 0%, ${c.primaryHover} 100%)`, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                    <PlayCircle size={48} color="rgba(255,255,255,0.25)" />
+                  {(() => { const cm = getCatMeta(course.category); const CatIcon = cm.icon; return (
+                  <div style={{ height: isMobile ? 80 : 110, background: `linear-gradient(135deg, ${cm.color} 0%, ${cm.color}cc 100%)`, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                    <CatIcon size={isMobile ? 32 : 48} color="rgba(255,255,255,0.22)" />
                     <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      <span style={{ padding: '3px 9px', background: 'rgba(255,255,255,0.92)', color: c.primary, borderRadius: tokens.radius.full, fontSize: 10, fontWeight: 700, letterSpacing: 0.4 }}>{course.category}</span>
+                      <span style={{ padding: '3px 9px', background: 'rgba(255,255,255,0.92)', color: cm.color, borderRadius: tokens.radius.full, fontSize: 10, fontWeight: 700, letterSpacing: 0.4 }}>{course.category}</span>
                       {course.mandatory && <span style={{ padding: '3px 9px', background: c.danger, color: '#fff', borderRadius: tokens.radius.full, fontSize: 10, fontWeight: 700, letterSpacing: 0.4 }}>MANDATORY</span>}
                     </div>
                     {status === 'completed' && (
@@ -1355,14 +1484,16 @@ const KnowledgeHub = () => {
                         <CheckCircle size={16} color="#fff" />
                       </div>
                     )}
-                  </div>
-                  <div style={{ padding: 16 }}>
-                    <h3 style={{ margin: 0, fontSize: 14.5, fontWeight: 700, color: c.text, lineHeight: 1.35, minHeight: 38 }}>{course.title}</h3>
+                  </div>); })()}
+                  <div style={{ padding: isMobile ? 10 : 16 }}>
+                    <h3 style={{ margin: 0, fontSize: isMobile ? 12.5 : 14.5, fontWeight: 700, color: c.text, lineHeight: 1.35, minHeight: isMobile ? 32 : 38, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{course.title}</h3>
+                    {!isMobile && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 11.5, color: c.textSubtle, marginTop: 8 }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><Clock size={12} />{course.duration}</span>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><BookOpen size={12} />{course.lessons}</span>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><Users size={12} />{course.enrolled.toLocaleString()}</span>
                     </div>
+                    )}
                     {course.progress > 0 && (
                       <div style={{ marginTop: 12 }}>
                         <ProgressBar value={course.progress} />
@@ -1654,7 +1785,7 @@ const KnowledgeHub = () => {
               description={tab === 'in-progress' ? 'Start a course from the catalog to see it here.' : tab === 'completed' ? 'Complete a course to earn your first certificate.' : 'Check back later — new courses are added regularly.'}
               action={<Button icon={Compass} onClick={() => setCurrentPage('courses')}>Browse Catalog</Button>} />
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? 260 : 260}px, 1fr))`, gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : `repeat(auto-fill, minmax(260px, 1fr))`, gap: isMobile ? 10 : 14 }}>
               {list.map(course => {
                 const rd = getCourseRating(course.id);
                 const reviewed = hasReviewed(course.id);
@@ -1721,10 +1852,10 @@ const KnowledgeHub = () => {
         <PageHeader title="Tutorials" subtitle="Short, focused how-to guides for everyday tasks" />
 
         <Card style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="pills-row">
             {cats.map(cat => (
               <button key={cat} onClick={() => setFilter(cat)}
-                style={{ padding: '7px 14px', border: 'none', borderRadius: tokens.radius.md, background: filter === cat ? c.primarySolid : c.bgSubtle, color: filter === cat ? '#fff' : c.textMuted, fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: tokens.transition }}>
+                style={{ padding: '7px 14px', border: 'none', borderRadius: tokens.radius.md, background: filter === cat ? c.primarySolid : c.bgSubtle, color: filter === cat ? '#fff' : c.textMuted, fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: tokens.transition, whiteSpace: 'nowrap', flexShrink: 0, minHeight: 38 }}>
                 {cat === 'all' ? 'All Tutorials' : cat}
               </button>
             ))}
@@ -1733,30 +1864,62 @@ const KnowledgeHub = () => {
 
         {list.length === 0 ? (
           <Card><EmptyState icon={Lightbulb} title="No tutorials in this category" /></Card>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? 260 : 280}px, 1fr))`, gap: 16 }}>
-            {list.map(t => (
-              <Card key={t.id} hover>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: tokens.radius.md, background: c.secondaryLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Lightbulb size={20} color={c.secondary} />
+        ) : (() => {
+          const maxViews = Math.max(...list.map(t => t.views));
+          const featured = list[0];
+          const rest = list.slice(1);
+          return (
+            <div>
+              {/* Featured tutorial */}
+              <Card hover style={{ marginBottom: 16, background: `linear-gradient(135deg, ${c.primarySolid}0d, ${c.surface})`, borderColor: c.primarySolid + '30' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
+                  <div style={{ width: 56, height: 56, borderRadius: tokens.radius.lg, background: `linear-gradient(135deg, ${c.primarySolid}, #034849)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Lightbulb size={26} color="#fff" />
                   </div>
-                  <Badge>{t.category}</Badge>
-                </div>
-                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: c.text, lineHeight: 1.35 }}>{t.title}</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: c.textSubtle, margin: '10px 0' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={12} />{t.duration}</span>
-                  <span>•</span>
-                  <Badge variant={difficultyVariant(t.difficulty)} size="sm">{t.difficulty}</Badge>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 11, color: c.textSubtle, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Eye size={11} /> {t.views.toLocaleString()}</span>
-                  <Button size="sm" icon={Play} onClick={() => toast('Tutorial started')}>Start</Button>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: c.primarySolid }}>Featured Tutorial</span>
+                      <Badge>{featured.category}</Badge>
+                    </div>
+                    <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: c.text }}>{featured.title}</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: c.textSubtle, marginTop: 6 }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={12} />{featured.duration}</span>
+                      <Badge variant={difficultyVariant(featured.difficulty)} size="sm">{featured.difficulty}</Badge>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Eye size={11} /> {featured.views.toLocaleString()} views</span>
+                    </div>
+                  </div>
+                  <Button icon={Play} block={isMobile} onClick={() => toast('Tutorial started')}>Start Now</Button>
                 </div>
               </Card>
-            ))}
-          </div>
-        )}
+              {/* Rest */}
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : `repeat(auto-fill, minmax(280px, 1fr))`, gap: isMobile ? 10 : 16 }}>
+                {rest.map(t => (
+                  <Card key={t.id} hover>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <div style={{ width: 44, height: 44, borderRadius: tokens.radius.md, background: c.secondaryLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Lightbulb size={20} color={c.secondary} />
+                      </div>
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        {t.views === maxViews && <Badge variant="warning" size="sm">Most viewed</Badge>}
+                        <Badge>{t.category}</Badge>
+                      </div>
+                    </div>
+                    <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: c.text, lineHeight: 1.35 }}>{t.title}</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: c.textSubtle, margin: '10px 0' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={12} />{t.duration}</span>
+                      <span>•</span>
+                      <Badge variant={difficultyVariant(t.difficulty)} size="sm">{t.difficulty}</Badge>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: 11, color: c.textSubtle, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Eye size={11} /> {t.views.toLocaleString()}</span>
+                      <Button size="sm" icon={Play} onClick={() => toast('Tutorial started')}>Start</Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
     );
   };
@@ -1807,19 +1970,31 @@ const KnowledgeHub = () => {
             </div>
             <Card>
               <h3 style={{ margin: '0 0 14px', fontSize: 16, fontWeight: 700, color: c.text }}>Popular articles</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                {knowledgeBaseArticles.slice(0, 5).map((a, i) => (
-                  <button key={a.id} onClick={() => toast('Article opened')}
-                    style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '12px 0', border: 'none', borderTop: i > 0 ? `1px solid ${c.border}` : 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left' }}>
-                    <FileText size={18} color={c.primarySolid} style={{ flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, color: c.text, fontSize: 13.5 }}>{a.title}</div>
-                      <div style={{ fontSize: 11, color: c.textSubtle, marginTop: 2 }}>{a.category} • Updated {a.updated} • {a.views.toLocaleString()} views</div>
-                    </div>
-                    <ChevronRight size={16} color={c.textSubtle} />
-                  </button>
-                ))}
-              </div>
+              {(() => {
+                const topFive = knowledgeBaseArticles.slice(0, 5);
+                const maxV = Math.max(...topFive.map(a => a.views));
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                    {topFive.map((a, i) => (
+                      <button key={a.id} onClick={() => toast('Article opened')}
+                        style={{ display: 'flex', alignItems: 'flex-start', gap: 12, width: '100%', padding: '13px 0', border: 'none', borderTop: i > 0 ? `1px solid ${c.border}` : 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left' }}>
+                        <FileText size={18} color={c.primarySolid} style={{ flexShrink: 0, marginTop: 2 }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, color: c.text, fontSize: 13.5 }}>{a.title}</div>
+                          <div style={{ fontSize: 11, color: c.textSubtle, marginTop: 2, marginBottom: 6 }}>{a.category} • Updated {a.updated}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{ flex: 1, height: 4, background: c.bgSubtle, borderRadius: tokens.radius.full, overflow: 'hidden' }}>
+                              <div style={{ height: '100%', width: `${(a.views / maxV) * 100}%`, background: c.primarySolid, borderRadius: tokens.radius.full }} />
+                            </div>
+                            <span style={{ fontSize: 11, color: c.textSubtle, fontWeight: 600, minWidth: 50, textAlign: 'right' }}>{a.views.toLocaleString()} views</span>
+                          </div>
+                        </div>
+                        <ChevronRight size={16} color={c.textSubtle} style={{ flexShrink: 0, marginTop: 2 }} />
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
             </Card>
           </>
         ) : (
@@ -2345,16 +2520,52 @@ const KnowledgeHub = () => {
   /* ════════════════════════════════════════════════════════════════════
      PAGE — TEAM PROGRESS (admin)
      ════════════════════════════════════════════════════════════════════ */
-  const TeamProgressPage = () => (
+  const TeamProgressPage = () => {
+    const avgProg = Math.round(teamMembers.reduce((s, m) => s + m.progress, 0) / teamMembers.length);
+    const buckets = [
+      { label: 'On Track', count: teamMembers.filter(m => m.progress >= 75).length, color: c.success },
+      { label: 'In Progress', count: teamMembers.filter(m => m.progress >= 40 && m.progress < 75).length, color: c.info },
+      { label: 'At Risk', count: teamMembers.filter(m => m.progress < 40).length, color: c.danger },
+    ];
+    return (
     <div>
       <PageHeader title="Team Progress" subtitle="Track learning across your team" />
 
       <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${isMobile ? 'calc(50% - 8px)' : '220px'}, 1fr))`, gap: 16, marginBottom: tokens.space[6] }}>
         <StatCard label="Team Members" value={teamMembers.length} icon={Users} color={c.primarySolid} />
-        <StatCard label="Avg Progress" value={Math.round(teamMembers.reduce((s, m) => s + m.progress, 0) / teamMembers.length) + '%'} icon={TrendingUp} color={c.success} />
+        <StatCard label="Avg Progress" value={avgProg + '%'} icon={TrendingUp} color={c.success} />
         <StatCard label="Active Now" value={teamMembers.filter(m => m.status === 'online').length} icon={Eye} color={c.info} />
-        <StatCard label="At Risk" value={teamMembers.filter(m => m.progress < 50).length} icon={AlertCircle} color={c.warning} />
+        <StatCard label="At Risk" value={teamMembers.filter(m => m.progress < 40).length} icon={AlertCircle} color={c.warning} />
       </div>
+
+      {/* Visual distribution bar */}
+      <Card style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: c.text }}>Progress Distribution</h3>
+          <span style={{ fontSize: 12, color: c.textSubtle }}>{teamMembers.length} members</span>
+        </div>
+        <div style={{ display: 'flex', height: 20, borderRadius: tokens.radius.full, overflow: 'hidden', gap: 2 }}>
+          {buckets.filter(b => b.count > 0).map(b => (
+            <div key={b.label} title={`${b.label}: ${b.count}`} style={{ flex: b.count, background: b.color, transition: 'flex 0.5s ease', minWidth: 4 }} />
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 20, marginTop: 12, flexWrap: 'wrap' }}>
+          {buckets.map(b => (
+            <div key={b.label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+              <div style={{ width: 10, height: 10, borderRadius: 2, background: b.color, flexShrink: 0 }} />
+              <span style={{ color: c.textMuted, fontWeight: 600 }}>{b.label}</span>
+              <span style={{ color: c.text, fontWeight: 700 }}>{b.count}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 12 }}>
+            <span style={{ color: c.textSubtle, fontWeight: 600 }}>Team average</span>
+            <span style={{ color: c.primarySolid, fontWeight: 700 }}>{avgProg}%</span>
+          </div>
+          <ProgressBar value={avgProg} />
+        </div>
+      </Card>
 
       {isMobile ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -2422,7 +2633,8 @@ const KnowledgeHub = () => {
         </Card>
       )}
     </div>
-  );
+    );
+  };
 
   /* ════════════════════════════════════════════════════════════════════
      PAGE — ASSIGN TRAINING (admin)
@@ -2821,15 +3033,157 @@ const KnowledgeHub = () => {
   /* ════════════════════════════════════════════════════════════════════
      PAGE — ADMIN SETTINGS
      ════════════════════════════════════════════════════════════════════ */
+
+  /* Per-user permission override modal */
+  const UserPermModal = ({ user, onClose }) => {
+    const roleDefaultId = { admin:'full', manager:'manager', consultant:'consultant' }[user.role] || 'consultant';
+    const saved = userPermOverrides[user.id] || { setId: null, overrides: {} };
+    const [local, setLocal] = useState(saved);
+
+    const activeSetId = local.setId || roleDefaultId;
+    const activeSet   = permSets.find(s => s.id === activeSetId);
+
+    const effectivePerm = (modId, permId) => {
+      if (local.overrides[modId]?.[permId] !== undefined) return local.overrides[modId][permId];
+      return activeSet?.perms[modId]?.[permId] ?? false;
+    };
+
+    const toggleOverride = (modId, permId) => {
+      const current  = effectivePerm(modId, permId);
+      const setVal   = activeSet?.perms[modId]?.[permId] ?? false;
+      setLocal(prev => {
+        const ov = JSON.parse(JSON.stringify(prev.overrides));
+        if (!ov[modId]) ov[modId] = {};
+        if (!current === setVal) { delete ov[modId][permId]; if (!Object.keys(ov[modId]).length) delete ov[modId]; }
+        else ov[modId][permId] = !current;
+        return { ...prev, overrides: ov };
+      });
+    };
+
+    const save = () => {
+      setUserPermOverrides(prev => ({ ...prev, [user.id]: local }));
+      toast(`Permissions saved for ${user.name}`);
+      onClose();
+    };
+
+    const roleDefaultLabel = permSets.find(s => s.id === roleDefaultId)?.label || '';
+
+    return (
+      <Modal open={true} onClose={onClose} size="xl"
+        footer={<><Button variant="outline" onClick={onClose}>Cancel</Button><Button icon={Save} onClick={save}>Save Permissions</Button></>}>
+        {/* Header */}
+        <div style={{ display:'flex', alignItems:'center', gap:14, marginBottom:16, paddingBottom:16, borderBottom:`1px solid ${c.border}` }}>
+          <Avatar name={user.name} size={48} color={user.role==='admin' ? c.danger : user.role==='manager' ? c.info : c.primarySolid} />
+          <div>
+            <div style={{ fontSize:18, fontWeight:800, color:c.text }}>{user.name}'s Permissions</div>
+            <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:4 }}>
+              <Badge variant={user.role==='admin'?'danger':user.role==='manager'?'info':'primary'}>{roleConfig[user.role]?.label}</Badge>
+              <span style={{ fontSize:12, color:c.textSubtle }}>• {user.email}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Role default info */}
+        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', background:c.infoLight, borderRadius:tokens.radius.md, marginBottom:20, fontSize:13 }}>
+          <AlertCircle size={15} color={c.infoText} />
+          <span style={{ color:c.infoText }}>
+            <strong>Role default:</strong> {roleConfig[user.role]?.label} → <strong>{roleDefaultLabel}</strong>.{' '}
+            {local.setId ? `Using custom set: ${activeSet?.label}.` : 'Using role default.'}
+          </span>
+        </div>
+
+        {/* Permission set assignment */}
+        <div style={{ marginBottom:20 }}>
+          <div style={{ fontSize:11, fontWeight:700, color:c.textSubtle, textTransform:'uppercase', letterSpacing:1, marginBottom:10 }}>Permission Set Assignment</div>
+          <div className="pills-row" style={{ flexWrap:'wrap' }}>
+            <button onClick={() => setLocal(p=>({...p,setId:null}))}
+              style={{ padding:'8px 14px', border:`2px solid ${!local.setId?c.primarySolid:c.border}`, borderRadius:tokens.radius.md, background:!local.setId?c.primaryLight:'transparent', color:!local.setId?c.primarySolid:c.textMuted, fontWeight:600, fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', gap:6, whiteSpace:'nowrap', minHeight:38 }}>
+              ↺ Use Role Default {!local.setId && '✓'}
+            </button>
+            {permSets.map(set => (
+              <button key={set.id} onClick={() => setLocal(p=>({...p,setId:set.id}))}
+                style={{ padding:'8px 14px', border:`2px solid ${local.setId===set.id?c.primarySolid:c.border}`, borderRadius:tokens.radius.md, background:local.setId===set.id?c.primaryLight:'transparent', color:local.setId===set.id?c.primarySolid:c.textMuted, fontWeight:600, fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', gap:6, whiteSpace:'nowrap', minHeight:38 }}>
+                {set.label}
+                {set.id===roleDefaultId && <span style={{ fontSize:9, padding:'1px 5px', background:c.bgSubtle, borderRadius:3, fontWeight:700, letterSpacing:0.5, textTransform:'uppercase' }}>Role Default</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Individual overrides */}
+        <div style={{ fontSize:11, fontWeight:700, color:c.textSubtle, textTransform:'uppercase', letterSpacing:1, marginBottom:14 }}>Individual Permission Overrides</div>
+        <div style={{ display:'grid', gridTemplateColumns:isMobile?'1fr':'1fr 1fr', gap:14 }}>
+          {permissionModules.map(mod => {
+            const ModIcon = mod.icon;
+            const allPerms = [{ id:mod.base.id, label:mod.base.label, isBase:true }, ...mod.granular.map(g=>({...g, isBase:false}))];
+            return (
+              <div key={mod.id} style={{ border:`1px solid ${c.border}`, borderRadius:tokens.radius.md, overflow:'hidden' }}>
+                <div style={{ padding:'10px 14px', background:c.bgSubtle, borderBottom:`1px solid ${c.border}`, display:'flex', alignItems:'center', gap:8 }}>
+                  <ModIcon size={14} color={c.primarySolid} />
+                  <span style={{ fontWeight:700, color:c.text, fontSize:13 }}>{mod.label}</span>
+                </div>
+                {allPerms.map((perm,idx) => {
+                  const eff = effectivePerm(mod.id, perm.id);
+                  const setVal = activeSet?.perms[mod.id]?.[perm.id] ?? false;
+                  const hasOv  = local.overrides[mod.id]?.[perm.id] !== undefined;
+                  return (
+                    <div key={perm.id} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'9px 14px', borderTop:idx>0?`1px solid ${c.border}`:'none' }}>
+                      <div style={{ minWidth:0, paddingRight:10 }}>
+                        <div style={{ fontSize:13, fontWeight:600, color:c.text }}>{perm.label}</div>
+                        <div style={{ fontSize:10.5, color:hasOv?c.warningText:c.textSubtle, marginTop:1 }}>
+                          {hasOv ? `Overridden: ${eff?'Enabled':'Disabled'}` : `From ${activeSet?.label||'role default'}: ${setVal?'Enabled':'Disabled'}`}
+                        </div>
+                      </div>
+                      <button onClick={() => toggleOverride(mod.id, perm.id)}
+                        style={{ width:40, height:22, borderRadius:11, border:hasOv?`2px solid ${c.warning}`:'none', cursor:'pointer', background:eff?c.primarySolid:c.borderStrong, position:'relative', flexShrink:0, transition:tokens.transition }}>
+                        <div style={{ width:14, height:14, borderRadius:'50%', background:'#fff', position:'absolute', top:hasOv?2:4, left:eff?(hasOv?20:22):3, transition:'left 0.15s' }} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </Modal>
+    );
+  };
+
   const AdminSettingsPage = () => {
     const [section, setSection] = useState('platform');
+    const [selSetId, setSelSetId]     = useState('full');
+    const [selModId, setSelModId]     = useState('courses');
+
+    const selSet = permSets.find(s => s.id === selSetId);
+    const selMod = permissionModules.find(m => m.id === selModId);
+
+    const countEnabled = (set) => permissionModules.reduce((n, mod) => {
+      if (set.perms[mod.id]?.[mod.base.id]) n++;
+      mod.granular.forEach(g => { if (set.perms[mod.id]?.[g.id]) n++; });
+      return n;
+    }, 0);
+
+    const togglePerm = (modId, permId, val) => {
+      if (selSet?.locked) return;
+      setPermSets(prev => prev.map(s => s.id !== selSetId ? s : { ...s, perms: { ...s.perms, [modId]: { ...s.perms[modId], [permId]: val } } }));
+    };
+
+    const MiniToggle = ({ on, onChange, disabled }) => (
+      <button onClick={onChange} disabled={disabled}
+        style={{ width:44, height:24, borderRadius:12, border:'none', cursor:disabled?'default':'pointer', background:on?c.primarySolid:c.borderStrong, position:'relative', transition:tokens.transition, flexShrink:0 }}>
+        <div style={{ width:18, height:18, borderRadius:'50%', background:'#fff', position:'absolute', top:3, left:on?23:3, transition:'left 0.15s' }} />
+      </button>
+    );
+
     return (
       <div>
         <PageHeader title="Platform Settings" subtitle="Configure platform-wide settings and users" />
 
         <Card>
           <Tabs value={section} onChange={setSection} tabs={[
-            { id: 'platform', label: 'Platform' }, { id: 'users', label: 'Users', count: allUsers.length }, { id: 'security', label: 'Security' },
+            { id:'platform', label:'Platform' },
+            { id:'users',    label:'Users', count:allUsers.length },
+            { id:'permissions', label:'Permissions' },
           ]} />
           {section === 'platform' && (
             <div>
@@ -2855,10 +3209,14 @@ const KnowledgeHub = () => {
                         </div>
                         <Badge variant={u.status === 'active' ? 'success' : 'neutral'}>{u.status}</Badge>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: c.textSubtle }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', fontSize:12, color:c.textSubtle, marginBottom:8 }}>
                         <span>{roleConfig[u.role]?.label}</span>
                         <span>{u.lastActive}</span>
                       </div>
+                      <button onClick={() => setEditPermUser(u)}
+                        style={{ width:'100%', padding:'7px 0', border:`1px solid ${c.primarySolid}`, borderRadius:tokens.radius.sm, background:'transparent', color:c.primarySolid, fontSize:12, fontWeight:600, cursor:'pointer' }}>
+                        Edit Permissions
+                      </button>
                     </Card>
                   ))}
                 </div>
@@ -2884,10 +3242,16 @@ const KnowledgeHub = () => {
                         <td style={{ padding: '12px 16px', color: c.textMuted, fontSize: 13 }}>{u.joined}</td>
                         <td style={{ padding: '12px 16px', color: c.textSubtle, fontSize: 13 }}>{u.lastActive}</td>
                         <td style={{ padding: '12px 16px' }}>
-                          <button onClick={() => { setAllUsers(prev => prev.map(x => x.id === u.id ? { ...x, status: x.status === 'active' ? 'inactive' : 'active' } : x)); toast(`User ${u.status === 'active' ? 'deactivated' : 'activated'}`); }}
-                            style={{ padding: '5px 12px', border: `1px solid ${c.border}`, borderRadius: tokens.radius.sm, background: 'transparent', color: c.textMuted, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                            {u.status === 'active' ? 'Deactivate' : 'Activate'}
-                          </button>
+                          <div style={{ display:'flex', gap:6 }}>
+                            <button onClick={() => setEditPermUser(u)}
+                              style={{ padding:'5px 10px', border:`1px solid ${c.primarySolid}`, borderRadius:tokens.radius.sm, background:'transparent', color:c.primarySolid, fontSize:12, fontWeight:600, cursor:'pointer' }}>
+                              Permissions
+                            </button>
+                            <button onClick={() => { setAllUsers(prev => prev.map(x => x.id === u.id ? { ...x, status: x.status === 'active' ? 'inactive' : 'active' } : x)); toast(`User ${u.status === 'active' ? 'deactivated' : 'activated'}`); }}
+                              style={{ padding: '5px 10px', border: `1px solid ${c.border}`, borderRadius: tokens.radius.sm, background: 'transparent', color: c.textMuted, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                              {u.status === 'active' ? 'Deactivate' : 'Activate'}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}</tbody>
@@ -2896,17 +3260,153 @@ const KnowledgeHub = () => {
               )}
             </>
           )}
-          {section === 'security' && (
+          {section === 'permissions' && (
             <div>
-              <Toggle checked={true} onChange={() => {}} label="Two-Factor Auth Required" description="Force 2FA for all admin accounts" />
-              <Toggle checked={true} onChange={() => {}} label="Audit Logging" description="Log all admin actions for compliance" />
-              <Toggle checked={false} onChange={() => {}} label="IP Restrictions" description="Restrict access to known office IP ranges" />
+              {/* Permission set cards */}
+              <div style={{ display:'grid', gridTemplateColumns:`repeat(auto-fill, minmax(${isMobile?'100%':220}px,1fr))`, gap:12, marginBottom:24 }}>
+                {permSets.map(set => {
+                  const n = countEnabled(set);
+                  const active = selSetId === set.id;
+                  return (
+                    <div key={set.id} onClick={() => setSelSetId(set.id)} role="button" tabIndex={0}
+                      onKeyDown={e => e.key==='Enter' && setSelSetId(set.id)}
+                      style={{ padding:16, borderRadius:tokens.radius.lg, cursor:'pointer', border:`2px solid ${active?c.primarySolid:c.border}`, background:active?c.primaryLight:c.surface, transition:tokens.transition }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:10 }}>
+                        <div style={{ width:36, height:36, borderRadius:tokens.radius.md, background:active?c.primarySolid:c.bgSubtle, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                          <Shield size={17} color={active?'#fff':c.textSubtle} />
+                        </div>
+                        {set.locked && <CheckCircle size={15} color={c.primarySolid} />}
+                      </div>
+                      <div style={{ fontWeight:700, color:c.text, fontSize:14, marginBottom:3 }}>{set.label}</div>
+                      <div style={{ fontSize:11.5, color:c.textSubtle, marginBottom:8, lineHeight:1.4 }}>{set.desc}</div>
+                      <div style={{ fontSize:11, color:c.textSubtle, fontWeight:600 }}>{n} permissions enabled</div>
+                    </div>
+                  );
+                })}
+                {/* Add new */}
+                <div onClick={() => toast('Custom permission sets coming soon')} role="button" tabIndex={0}
+                  style={{ padding:16, borderRadius:tokens.radius.lg, border:`2px dashed ${c.border}`, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', cursor:'pointer', minHeight:130, gap:6 }}>
+                  <Plus size={20} color={c.textSubtle} />
+                  <div style={{ fontWeight:600, color:c.textMuted, fontSize:13 }}>Add New Permission Group</div>
+                  <div style={{ fontSize:11, color:c.textSubtle }}>Create custom permission set</div>
+                </div>
+              </div>
+
+              {selSet && (
+                <div style={{ border:`1px solid ${c.border}`, borderRadius:tokens.radius.lg, overflow:'hidden' }}>
+                  {/* Set header */}
+                  <div style={{ padding:'14px 20px', background:c.bgSubtle, borderBottom:`1px solid ${c.border}`, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:10 }}>
+                    <div>
+                      <div style={{ fontWeight:700, color:c.text, fontSize:15 }}>{selSet.label}</div>
+                      <div style={{ fontSize:12, color:c.textSubtle, marginTop:2 }}>{selSet.desc}</div>
+                    </div>
+                    {selSet.locked ? <Badge variant="primary">System Default</Badge> : <Button icon={Save} onClick={() => toast('Permission set saved')}>Save Changes</Button>}
+                  </div>
+
+                  {/* Legend */}
+                  <div style={{ padding:'8px 20px', borderBottom:`1px solid ${c.border}`, display:'flex', gap:18, flexWrap:'wrap' }}>
+                    {[['Module Access (Sidebar)',c.primarySolid],['Base Permission (Required)',c.success],['Dependent (Requires others)',c.secondary]].map(([lbl,col])=>(
+                      <span key={lbl} style={{ fontSize:11, color:c.textSubtle, display:'flex', alignItems:'center', gap:5 }}>
+                        <span style={{ width:10, height:10, borderRadius:2, background:col, display:'inline-block' }} />{lbl}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Module list + detail */}
+                  <div style={{ display:'grid', gridTemplateColumns:isMobile?'1fr':'200px 1fr' }}>
+                    {/* Module list */}
+                    <div style={{ borderRight:`1px solid ${c.border}` }}>
+                      {permissionModules.map(mod => {
+                        const baseOn = selSet.perms[mod.id]?.[mod.base.id];
+                        const enabledCnt = permissionModules.find(m=>m.id===mod.id)
+                          ? (baseOn?1:0) + mod.granular.filter(g=>selSet.perms[mod.id]?.[g.id]).length : 0;
+                        const total = 1 + mod.granular.length;
+                        const isActive = selModId === mod.id;
+                        return (
+                          <button key={mod.id} onClick={() => setSelModId(mod.id)}
+                            style={{ display:'flex', alignItems:'center', gap:10, width:'100%', padding:'11px 14px', border:'none', borderLeft:`3px solid ${isActive?c.primarySolid:'transparent'}`, background:isActive?c.primaryLight:'transparent', cursor:'pointer', textAlign:'left' }}>
+                            <button onClick={e=>{e.stopPropagation();if(!selSet.locked)togglePerm(mod.id,mod.base.id,!baseOn);}}
+                              style={{ width:34, height:18, borderRadius:9, border:'none', cursor:selSet.locked?'default':'pointer', background:baseOn?c.primarySolid:c.borderStrong, position:'relative', flexShrink:0 }}>
+                              <div style={{ width:12, height:12, borderRadius:'50%', background:'#fff', position:'absolute', top:3, left:baseOn?19:3, transition:'left 0.15s' }} />
+                            </button>
+                            <div style={{ minWidth:0 }}>
+                              <div style={{ fontSize:12.5, fontWeight:isActive?700:600, color:isActive?c.primarySolid:c.text, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{mod.label}</div>
+                              <div style={{ fontSize:10, color:c.textSubtle }}>{enabledCnt}/{total} permissions</div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Permission detail */}
+                    {selMod && (
+                      <div style={{ padding:20 }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:18 }}>
+                          <div style={{ width:40, height:40, borderRadius:tokens.radius.md, background:c.primaryLight, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                            <selMod.icon size={20} color={c.primarySolid} />
+                          </div>
+                          <div>
+                            <div style={{ fontWeight:700, color:c.text, fontSize:15 }}>{selMod.label}</div>
+                            <div style={{ fontSize:12, color:c.textSubtle }}>Manage module access and granular permissions</div>
+                          </div>
+                        </div>
+
+                        {/* Base permission */}
+                        <div style={{ fontSize:10, fontWeight:700, color:c.textSubtle, textTransform:'uppercase', letterSpacing:1, marginBottom:8, display:'flex', alignItems:'center', gap:6 }}>
+                          <span style={{ width:10, height:10, borderRadius:2, background:c.success, display:'inline-block' }} />Base Permission (Required for all others)
+                        </div>
+                        <div style={{ padding:14, border:`1px solid ${c.success}40`, borderRadius:tokens.radius.md, background:c.successLight, marginBottom:18, display:'flex', justifyContent:'space-between', alignItems:'center', gap:12 }}>
+                          <div>
+                            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                              <span style={{ fontWeight:700, color:c.text, fontSize:14 }}>{selMod.base.label}</span>
+                              <span style={{ padding:'1px 7px', background:c.success, color:'#fff', borderRadius:tokens.radius.full, fontSize:9, fontWeight:700, textTransform:'uppercase' }}>Required</span>
+                            </div>
+                            <div style={{ fontSize:12, color:c.textSubtle, marginTop:3 }}>{selMod.base.desc}</div>
+                          </div>
+                          <MiniToggle on={!!selSet.perms[selMod.id]?.[selMod.base.id]} disabled={selSet.locked} onChange={() => togglePerm(selMod.id, selMod.base.id, !selSet.perms[selMod.id]?.[selMod.base.id])} />
+                        </div>
+
+                        {/* Granular permissions */}
+                        <div style={{ fontSize:10, fontWeight:700, color:c.textSubtle, textTransform:'uppercase', letterSpacing:1, marginBottom:10, display:'flex', alignItems:'center', gap:6 }}>
+                          <span style={{ width:10, height:10, borderRadius:2, background:c.secondary, display:'inline-block' }} />Granular Permissions (Depends on base)
+                        </div>
+                        <div style={{ display:'grid', gridTemplateColumns:`repeat(auto-fill,minmax(${isMobile?'100%':240}px,1fr))`, gap:10 }}>
+                          {selMod.granular.map(perm => {
+                            const on    = !!selSet.perms[selMod.id]?.[perm.id];
+                            const baseOn= !!selSet.perms[selMod.id]?.[selMod.base.id];
+                            return (
+                              <div key={perm.id} style={{ padding:14, border:`1px solid ${c.border}`, borderRadius:tokens.radius.md, background:c.surface, opacity:baseOn?1:0.5 }}>
+                                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:10, marginBottom:8 }}>
+                                  <div>
+                                    <div style={{ fontWeight:600, color:c.text, fontSize:13.5 }}>{perm.label}</div>
+                                    <div style={{ fontSize:11.5, color:c.textSubtle, marginTop:2 }}>{perm.desc}</div>
+                                  </div>
+                                  <MiniToggle on={on && baseOn} disabled={selSet.locked || !baseOn} onChange={() => togglePerm(selMod.id, perm.id, !on)} />
+                                </div>
+                                <div style={{ fontSize:10, color:c.textSubtle }}>
+                                  Requires:{' '}
+                                  {perm.requires.map(r => (
+                                    <span key={r} style={{ padding:'1px 6px', background:c.bgSubtle, borderRadius:3, fontSize:10, marginRight:3, fontWeight:600 }}>
+                                      {r===selMod.base.id ? selMod.base.label : r}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </Card>
       </div>
     );
   };
+
 
   /* ════════════════════════════════════════════════════════════════════
      PAGE — CERTIFICATES (with detail modal, expiry, share)
@@ -2925,7 +3425,78 @@ const KnowledgeHub = () => {
     const visible = certFilter === 'all' ? myCerts : myCerts.filter(x => x.category === certFilter);
 
     const downloadCert = (cert) => {
-      const html = `<!DOCTYPE html><html><head><title>${cert.id}</title><style>body{font-family:'Georgia',serif;padding:40px;background:linear-gradient(135deg,#045D5E,#FC7300);color:#fff;text-align:center;}h1{font-size:48px;margin:20px;}h2{font-size:32px;color:#FC7300;}p{font-size:18px;line-height:1.6;}.box{background:rgba(255,255,255,0.1);padding:40px;border-radius:20px;max-width:800px;margin:auto;border:3px solid rgba(255,255,255,0.3);}</style></head><body><div class="box"><h1>Certificate of Achievement</h1><p>This certifies that</p><h2>${cert.userName}</h2><p>has successfully completed</p><h2>${cert.courseName}</h2><p>Issued ${formatDate(cert.issuedDate)} • Valid until ${formatDate(cert.expiryDate)}</p><p style="margin-top:30px;">Credential: <strong>${cert.credentialId}</strong></p></div></body></html>`;
+      const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>${cert.credentialId}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:#F1F4F3;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:32px}
+    .cert{background:#fff;width:780px;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(4,93,94,.15);position:relative;border:1px solid #e2e8f0}
+    .cert::after{content:'';position:absolute;inset:10px;border:1.5px solid rgba(4,93,94,.12);border-radius:6px;pointer-events:none}
+    .top-bar{height:8px;background:linear-gradient(90deg,#045D5E,#FC7300)}
+    .bottom-bar{height:8px;background:linear-gradient(90deg,#FC7300,#045D5E)}
+    .body{padding:44px 56px 36px;text-align:center}
+    .brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:24px}
+    .brand-name{font-size:18px;font-weight:900;color:#045D5E;letter-spacing:1.5px;text-transform:uppercase}
+    .brand-sub{font-size:10px;color:#64748b;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+    .cert-title{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#64748b;font-weight:600;margin-bottom:14px}
+    .divider{display:flex;align-items:center;gap:10px;margin:0 auto 28px;max-width:420px}
+    .divider-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(4,93,94,.35))}
+    .divider-line.r{background:linear-gradient(270deg,transparent,rgba(4,93,94,.35))}
+    .certifies{font-size:11px;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+    .recipient{font-size:42px;font-weight:900;color:#0f172a;letter-spacing:-1px;line-height:1;padding-bottom:12px;border-bottom:2.5px solid #FC7300;display:inline-block;margin-bottom:16px}
+    .completed{font-size:11px;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+    .course{font-size:20px;font-weight:800;color:#045D5E;line-height:1.3;margin-bottom:28px;max-width:500px;margin-left:auto;margin-right:auto}
+    .seal{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,#045D5E,#034849);border:3px solid #FC7300;box-shadow:0 0 0 5px rgba(4,93,94,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 32px}
+    .seal-icon{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+    .meta{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid #e2e8f0;padding-top:24px}
+    .meta-item{padding:0 12px;text-align:center;border-right:1px solid #e2e8f0}
+    .meta-item:last-child{border-right:none}
+    .meta-val{font-size:13px;font-weight:700;color:#0f172a}
+    .meta-key{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-top:3px}
+    .verify{margin-top:20px;font-size:10px;color:#94a3b8;letter-spacing:.5px}
+    .verify span{color:#045D5E;font-weight:600}
+  </style>
+</head>
+<body>
+  <div class="cert">
+    <div class="top-bar"></div>
+    <div class="body">
+      <div class="brand">
+        <svg width="36" height="40" viewBox="0 0 100 110" fill="none">
+          <defs><linearGradient id="g" x1="0" y1="0" x2="100" y2="110" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a9396"/><stop offset="100%" stop-color="#057a7b"/></linearGradient></defs>
+          <path d="M8 14 L8 72 Q8 106 50 106 Q92 106 92 72 L92 14 L70 14 L70 72 Q70 84 50 84 Q30 84 30 72 L30 14 Z" fill="url(#g)"/>
+          <rect x="8" y="8" width="22" height="22" rx="11" fill="url(#g)"/>
+          <rect x="70" y="8" width="22" height="22" rx="11" fill="url(#g)"/>
+          <path d="M50 25 C46 25 30 27 26 34 L26 66 C30 60 46 59 50 59 Z" fill="white"/>
+          <path d="M50 25 C54 25 70 27 74 34 L74 66 C70 60 54 59 50 59 Z" fill="rgba(255,255,255,0.72)"/>
+          <path d="M50 0 L53 9 L63 9 L55 15 L58 24 L50 18 L42 24 L45 15 L37 9 L47 9 Z" fill="#FC7300"/>
+        </svg>
+        <div>
+          <div class="brand-name">UAPP Academy</div>
+          <div class="brand-sub">Knowledge Hub</div>
+        </div>
+      </div>
+      <div class="cert-title">Certificate of Achievement</div>
+      <div class="divider"><div class="divider-line"></div>★<div class="divider-line r"></div></div>
+      <div class="certifies">This is to certify that</div>
+      <div class="recipient">${cert.userName}</div>
+      <div class="completed">has successfully completed</div>
+      <div class="course">${cert.courseName}</div>
+      <div class="seal"><div class="seal-icon">★</div></div>
+      <div class="meta">
+        <div class="meta-item"><div class="meta-val">${formatDate(cert.issuedDate)}</div><div class="meta-key">Issued On</div></div>
+        <div class="meta-item"><div class="meta-val">${cert.credentialId}</div><div class="meta-key">Credential ID</div></div>
+      </div>
+      <div class="verify">Verify at <span>uapp.academy/verify/${cert.credentialId}</span></div>
+    </div>
+    <div class="bottom-bar"></div>
+  </div>
+</body>
+</html>`;
       const blob = new Blob([html], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = `${cert.credentialId}.html`; a.click();
@@ -2937,20 +3508,25 @@ const KnowledgeHub = () => {
       <div>
         <PageHeader title={isAdmin ? 'All Certificates' : 'My Certificates'} subtitle={`${myCerts.length} certificate${myCerts.length === 1 ? '' : 's'} ${isAdmin ? 'issued' : 'earned'}`} />
 
-        {!isAdmin && (
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${isMobile ? 'calc(50% - 8px)' : 220}px, 1fr))`, gap: 16, marginBottom: tokens.space[6] }}>
-            <StatCard label="Total Earned" value={myCerts.length} icon={Award} color={c.secondary} />
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${isMobile ? 'calc(50% - 8px)' : 220}px, 1fr))`, gap: 16, marginBottom: tokens.space[6] }}>
+          {isAdmin ? (<>
+            <StatCard label="Total Issued" value={myCerts.length} icon={Award} color={c.secondary} />
             <StatCard label="Distinctions" value={myCerts.filter(x => x.grade === 'Distinction').length} icon={Star} color={c.warning} />
-            <StatCard label="Expiring Soon" value={myCerts.filter(x => daysUntil(x.expiryDate) < 90).length} icon={AlertTriangle} color={c.danger} hint="Within 90 days" />
+            <StatCard label="Merits" value={myCerts.filter(x => x.grade === 'Merit').length} icon={TrendingUp} color={c.info} />
+            <StatCard label="Unique Learners" value={new Set(myCerts.map(x => x.userName)).size} icon={Users} color={c.primarySolid} />
+          </>) : (<>
+            <StatCard label="Total Earned" value={myCerts.length} icon={Award} color={c.secondary} />
+            <StatCard label="Courses Done" value={new Set(myCerts.map(x => x.courseId)).size} icon={CheckCircle} color={c.success} />
             <StatCard label="Categories" value={new Set(myCerts.map(x => x.category)).size} icon={Grid} color={c.info} />
-          </div>
-        )}
+            <StatCard label="Latest" value={myCerts.length ? formatDate(myCerts.slice().sort((a,b) => new Date(b.issuedDate)-new Date(a.issuedDate))[0].issuedDate) : '—'} icon={Calendar} color={c.primarySolid} />
+          </>)}
+        </div>
 
         <Card style={{ marginBottom: 20 }}>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="pills-row">
             {cats.map(cat => (
               <button key={cat} onClick={() => setCertFilter(cat)}
-                style={{ padding: '7px 14px', border: 'none', borderRadius: tokens.radius.md, background: certFilter === cat ? c.primarySolid : c.bgSubtle, color: certFilter === cat ? '#fff' : c.textMuted, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                style={{ padding: '7px 14px', border: 'none', borderRadius: tokens.radius.md, background: certFilter === cat ? c.primarySolid : c.bgSubtle, color: certFilter === cat ? '#fff' : c.textMuted, fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, minHeight: 38 }}>
                 {cat === 'all' ? `All (${myCerts.length})` : `${cat} (${myCerts.filter(x => x.category === cat).length})`}
               </button>
             ))}
@@ -2960,89 +3536,154 @@ const KnowledgeHub = () => {
         {visible.length === 0 ? (
           <Card><EmptyState icon={Award} title="No certificates yet" description="Complete courses to earn certificates." action={<Button icon={Compass} onClick={() => setCurrentPage('courses')}>Browse courses</Button>} /></Card>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? 260 : 300}px, 1fr))`, gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : `repeat(auto-fill, minmax(300px, 1fr))`, gap: isMobile ? 10 : 16 }}>
             {visible.map(cert => {
-              const daysLeft = daysUntil(cert.expiryDate);
-              const expiringSoon = daysLeft < 90;
-              const g = gradeColor(cert.grade);
               return (
-                <Card key={cert.id} hover onClick={() => setActiveCert(cert)} padded={false}>
-                  <div style={{ background: `linear-gradient(135deg, ${c.primarySolid} 0%, ${c.primaryHover} 100%)`, padding: 20, color: '#fff', position: 'relative' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Award size={28} />
-                      <span style={{ padding: '3px 10px', background: g.bg, color: g.color, borderRadius: tokens.radius.full, fontSize: 10, fontWeight: 700, letterSpacing: 0.5 }}>{cert.grade.toUpperCase()}</span>
-                    </div>
-                    <div style={{ marginTop: 14, fontSize: 11, opacity: 0.85, letterSpacing: 1, textTransform: 'uppercase', fontWeight: 600 }}>Certificate of Achievement</div>
-                    <h3 style={{ margin: '6px 0 0', fontSize: 16, fontWeight: 800, lineHeight: 1.3 }}>{cert.courseName}</h3>
-                  </div>
-                  <div style={{ padding: 16 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                      <Avatar name={cert.userName} size={32} />
-                      <div>
-                        <div style={{ fontWeight: 700, color: c.text, fontSize: 13 }}>{cert.userName}</div>
-                        <div style={{ fontSize: 11, color: c.textSubtle }}>{cert.userRole}</div>
+                <div key={cert.id} onClick={() => setActiveCert(cert)} role="button" tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter') setActiveCert(cert); }}
+                  style={{
+                    background: '#fff', borderRadius: tokens.radius.lg, overflow: 'hidden',
+                    border: `1px solid ${c.border}`, cursor: 'pointer',
+                    boxShadow: tokens.shadow.xs,
+                    transition: tokens.transition,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = tokens.shadow.md; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = tokens.shadow.xs; e.currentTarget.style.transform = 'none'; }}>
+                  {/* Top gradient stripe */}
+                  <div style={{ height: 5, background: `linear-gradient(90deg, ${c.primarySolid}, ${c.secondary})` }} />
+
+                  <div style={{ padding: isMobile ? 12 : 18 }}>
+                    {/* Brand header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? 10 : 14 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <UAPPLogo size={isMobile ? 20 : 26} />
+                        {!isMobile && (
+                          <div>
+                            <div style={{ fontSize: 9.5, fontWeight: 800, color: c.primarySolid, letterSpacing: 1.2, textTransform: 'uppercase' }}>UAPP Academy</div>
+                            <div style={{ fontSize: 8, color: c.textSubtle, letterSpacing: 0.8, textTransform: 'uppercase' }}>Knowledge Hub</div>
+                          </div>
+                        )}
                       </div>
+                      <span style={{ padding: '2px 8px', background: c.primaryLight, color: c.primarySolid, borderRadius: tokens.radius.full, fontSize: 9, fontWeight: 700, letterSpacing: 0.5, border: `1px solid ${c.primarySolid}30`, textTransform: 'uppercase' }}>{cert.category}</span>
                     </div>
-                    <div style={{ fontSize: 11, color: c.textSubtle, marginBottom: 10 }}>
-                      Issued {formatDate(cert.issuedDate)} • ID {cert.credentialId}
+
+                    {/* Ornamental divider */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: isMobile ? 10 : 14 }}>
+                      <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${c.primarySolid}50, transparent)` }} />
+                      <Award size={isMobile ? 11 : 13} color={c.secondary} />
+                      <div style={{ flex: 1, height: 1, background: `linear-gradient(270deg, ${c.primarySolid}50, transparent)` }} />
                     </div>
-                    {expiringSoon && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', background: c.warningLight, color: c.warningText, borderRadius: tokens.radius.sm, fontSize: 11.5, fontWeight: 600, marginBottom: 8 }}>
-                        <AlertTriangle size={12} /> Expires in {daysLeft > 0 ? `${daysLeft} days` : 'soon'}
-                      </div>
-                    )}
-                    <Button block size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setActiveCert(cert); }}>View Details</Button>
+
+                    {/* Certificate body */}
+                    <div style={{ textAlign: 'center', marginBottom: isMobile ? 10 : 14 }}>
+                      <div style={{ fontSize: isMobile ? 8.5 : 9.5, color: c.textSubtle, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 5 }}>This certifies that</div>
+                      <div style={{ fontSize: isMobile ? 14 : 17, fontWeight: 900, color: c.text, lineHeight: 1.1, marginBottom: 5, letterSpacing: -0.3 }}>{cert.userName}</div>
+                      <div style={{ fontSize: isMobile ? 8.5 : 9.5, color: c.textSubtle, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>has successfully completed</div>
+                      <div style={{ fontSize: isMobile ? 10.5 : 12.5, fontWeight: 700, color: c.primarySolid, lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{cert.courseName}</div>
+                    </div>
+
+                    {/* Footer */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: isMobile ? 8 : 10, borderTop: `1px solid ${c.border}` }}>
+                      <span style={{ fontSize: isMobile ? 9 : 10, color: c.textSubtle }}>{formatDate(cert.issuedDate)}</span>
+                      <span style={{ fontSize: 9, color: c.primarySolid, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8 }}>{cert.category}</span>
+                    </div>
                   </div>
-                </Card>
+                </div>
               );
             })}
           </div>
         )}
 
         {/* Certificate Detail Modal */}
-        <Modal open={!!activeCert} onClose={() => setActiveCert(null)} title="Certificate of Achievement" size="lg" headerAccent
+        <Modal open={!!activeCert} onClose={() => setActiveCert(null)} size="lg"
           footer={activeCert && <>
             <Button variant="outline" icon={Copy} onClick={() => { navigator.clipboard?.writeText(activeCert.credentialId); toast('Credential ID copied'); }}>Copy ID</Button>
             <Button variant="outline" icon={Share2} onClick={() => toast('Verification link copied')}>Share</Button>
             <Button icon={Download} onClick={() => downloadCert(activeCert)}>Download</Button>
           </>}>
-          {activeCert && (
-            <div>
-              {daysUntil(activeCert.expiryDate) < 90 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 12, background: c.warningLight, color: c.warningText, borderRadius: tokens.radius.md, marginBottom: 20, border: `1px solid ${c.warning}40` }}>
-                  <AlertTriangle size={18} />
-                  <div style={{ fontSize: 13.5, fontWeight: 600 }}>
-                    This certificate expires in {daysUntil(activeCert.expiryDate)} days — consider re-certification.
+          {activeCert && (() => {
+            return (
+              <div>
+
+                {/* ── Certificate paper ── */}
+                <div style={{
+                  background: '#fff', borderRadius: tokens.radius.lg, overflow: 'hidden',
+                  border: `1px solid ${c.border}`, position: 'relative',
+                  boxShadow: '0 4px 24px rgba(4,93,94,0.10)',
+                }}>
+                  {/* Inner frame line */}
+                  <div style={{ position: 'absolute', inset: 10, border: `1.5px solid ${c.primarySolid}18`, borderRadius: 6, pointerEvents: 'none', zIndex: 1 }} />
+
+                  {/* Top bar */}
+                  <div style={{ height: 8, background: `linear-gradient(90deg, ${c.primarySolid}, ${c.secondary})` }} />
+
+                  <div style={{ padding: isMobile ? '24px 20px 20px' : '32px 44px 28px', textAlign: 'center', position: 'relative', zIndex: 2 }}>
+
+                    {/* Brand */}
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                      <UAPPLogo size={isMobile ? 32 : 42} />
+                      <div style={{ textAlign: 'left' }}>
+                        <div style={{ fontSize: isMobile ? 14 : 17, fontWeight: 900, color: c.primarySolid, letterSpacing: 1.5, textTransform: 'uppercase' }}>UAPP Academy</div>
+                        <div style={{ fontSize: isMobile ? 8 : 9, color: c.textSubtle, letterSpacing: 2.5, textTransform: 'uppercase', marginTop: 2 }}>Knowledge Hub</div>
+                      </div>
+                    </div>
+
+                    {/* Certificate title */}
+                    <div style={{ fontSize: isMobile ? 10 : 11, letterSpacing: 3, textTransform: 'uppercase', color: c.textSubtle, fontWeight: 600, marginBottom: 14 }}>Certificate of Achievement</div>
+
+                    {/* Ornamental divider */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 auto 22px', maxWidth: 380 }}>
+                      <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${c.primarySolid}50)` }} />
+                      <Award size={16} color={c.secondary} />
+                      <div style={{ flex: 1, height: 1, background: `linear-gradient(270deg, transparent, ${c.primarySolid}50)` }} />
+                    </div>
+
+                    {/* Body */}
+                    <div style={{ fontSize: 11, color: c.textSubtle, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 10 }}>This is to certify that</div>
+                    <div style={{ fontSize: isMobile ? 26 : 36, fontWeight: 900, color: c.text, letterSpacing: -0.5, lineHeight: 1.05, marginBottom: 14, display: 'inline-block', borderBottom: `3px solid ${c.secondary}`, paddingBottom: 10 }}>
+                      {activeCert.userName}
+                    </div>
+                    <div style={{ fontSize: 11, color: c.textSubtle, letterSpacing: 1.2, textTransform: 'uppercase', marginTop: 14, marginBottom: 10 }}>has successfully completed</div>
+                    <div style={{ fontSize: isMobile ? 15 : 20, fontWeight: 800, color: c.primarySolid, lineHeight: 1.3, marginBottom: 24, maxWidth: 500, marginLeft: 'auto', marginRight: 'auto' }}>
+                      {activeCert.courseName}
+                    </div>
+
+                    {/* Completion seal */}
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
+                      <div style={{
+                        width: isMobile ? 72 : 88, height: isMobile ? 72 : 88, borderRadius: '50%',
+                        background: `linear-gradient(135deg, ${c.primarySolid}, #034849)`,
+                        border: `3px solid ${c.secondary}`,
+                        boxShadow: `0 0 0 5px ${c.primarySolid}18`,
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <Award size={isMobile ? 22 : 28} color="#fff" />
+                      </div>
+                    </div>
+
+                    {/* Credential + date row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, borderTop: `1px solid ${c.border}`, paddingTop: 20, marginBottom: 12 }}>
+                      <div style={{ textAlign: 'center', borderRight: `1px solid ${c.border}`, paddingRight: 12 }}>
+                        <div style={{ fontSize: isMobile ? 11 : 13, fontWeight: 700, color: c.text }}>{formatDate(activeCert.issuedDate)}</div>
+                        <div style={{ fontSize: 9, color: c.textSubtle, letterSpacing: 1, textTransform: 'uppercase', marginTop: 3 }}>Issued On</div>
+                      </div>
+                      <div style={{ textAlign: 'center', paddingLeft: 12 }}>
+                        <div style={{ fontSize: isMobile ? 10 : 12, fontWeight: 700, color: c.primarySolid, wordBreak: 'break-all' }}>{activeCert.credentialId}</div>
+                        <div style={{ fontSize: 9, color: c.textSubtle, letterSpacing: 1, textTransform: 'uppercase', marginTop: 3 }}>Credential ID</div>
+                      </div>
+                    </div>
+
+                    <div style={{ fontSize: 10, color: c.textSubtle, textAlign: 'center' }}>
+                      Verify at <span style={{ color: c.primarySolid, fontWeight: 600 }}>uapp.academy/verify/{activeCert.credentialId}</span>
+                    </div>
                   </div>
-                </div>
-              )}
-              <div style={{ background: `linear-gradient(135deg, ${c.primarySolid}, ${c.primaryHover})`, padding: 28, borderRadius: tokens.radius.lg, color: '#fff', textAlign: 'center', marginBottom: 20 }}>
-                <Award size={48} style={{ margin: '0 auto 8px' }} />
-                <div style={{ fontSize: 11, letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.9, fontWeight: 600 }}>This is to certify that</div>
-                <div style={{ fontSize: 24, fontWeight: 800, margin: '8px 0' }}>{activeCert.userName}</div>
-                <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 8 }}>has successfully completed</div>
-                <div style={{ fontSize: 18, fontWeight: 700, margin: '4px 0' }}>{activeCert.courseName}</div>
-                <div style={{ marginTop: 18, display: 'inline-block', padding: '4px 12px', background: gradeColor(activeCert.grade).bg, color: gradeColor(activeCert.grade).color, borderRadius: tokens.radius.full, fontSize: 12, fontWeight: 700, letterSpacing: 0.5 }}>
-                  GRADE: {activeCert.grade.toUpperCase()}
+
+                  {/* Bottom bar */}
+                  <div style={{ height: 8, background: `linear-gradient(90deg, ${c.secondary}, ${c.primarySolid})` }} />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
-                {[
-                  ['Credential ID', activeCert.credentialId],
-                  ['Issued', formatDate(activeCert.issuedDate)],
-                  ['Expires', formatDate(activeCert.expiryDate)],
-                  ['Category', activeCert.category],
-                  ['Recipient', activeCert.userName + ' • ' + activeCert.userRole],
-                  ['Verify online', 'uapp.academy/verify/' + activeCert.credentialId],
-                ].map(([k, v]) => (
-                  <div key={k} style={{ padding: 12, background: c.bgSubtle, borderRadius: tokens.radius.md }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: c.textSubtle, textTransform: 'uppercase', letterSpacing: 0.8 }}>{k}</div>
-                    <div style={{ fontSize: 13, color: c.text, fontWeight: 600, marginTop: 3, wordBreak: 'break-word' }}>{v}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            );
+          })()}
         </Modal>
       </div>
     );
@@ -3060,6 +3701,7 @@ const KnowledgeHub = () => {
     const [draft, setDraft] = useState(profile);
     const inProgress = courses.filter(x => x.progress > 0 && x.progress < 100).length;
     const completed = courses.filter(x => x.progress === 100).length;
+    const hoursLogged = courses.reduce((sum, x) => sum + (x.progress > 0 ? parseFloat(x.duration) * (x.progress / 100) : 0), 0);
 
     const save = () => {
       if (!draft.name.trim()) { toast('Name is required', 'danger'); return; }
@@ -3084,10 +3726,10 @@ const KnowledgeHub = () => {
               <Badge variant={currentUser?.role === 'admin' ? 'danger' : currentUser?.role === 'manager' ? 'info' : 'primary'}>{roleConfig[currentUser?.role]?.label}</Badge>
               <p style={{ margin: '14px 0 0', fontSize: 13, color: c.textSubtle, lineHeight: 1.5 }}>{profile.bio}</p>
               <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: 18, paddingTop: 18, borderTop: `1px solid ${c.border}` }}>
-                {[['Courses', inProgress + completed], ['Done', completed], ['Certs', completed]].map(([k, v]) => (
+                {[['In Progress', inProgress, c.primarySolid], ['Completed', completed, c.success], ['Hours', Math.round(hoursLogged) + 'h', c.secondary]].map(([k, v, col]) => (
                   <div key={k} style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 22, fontWeight: 800, color: c.text }}>{v}</div>
-                    <div style={{ fontSize: 11, color: c.textSubtle }}>{k}</div>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: col }}>{v}</div>
+                    <div style={{ fontSize: 11, color: c.textSubtle, marginTop: 2 }}>{k}</div>
                   </div>
                 ))}
               </div>
@@ -3471,12 +4113,24 @@ const KnowledgeHub = () => {
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes slideIn { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         *:focus-visible { outline: none; box-shadow: ${tokens.ring}; }
         button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [role="button"]:focus-visible { outline: none; }
         body { margin: 0; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-thumb { background: ${c.borderStrong}; border-radius: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
+        /* Mobile global resets */
+        @media (max-width: 767px) {
+          html { -webkit-text-size-adjust: 100%; }
+          * { -webkit-tap-highlight-color: transparent; }
+          input, select, textarea { font-size: 16px !important; }
+          button, [role="button"], a { min-height: 44px; }
+          .modal-sheet { animation: slideUp 0.28s cubic-bezier(0.32,0.72,0,1); }
+        }
+        /* Horizontal-scroll pill rows */
+        .pills-row { display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px; flex-wrap: nowrap !important; }
+        .pills-row::-webkit-scrollbar { display: none; }
       `}</style>
 
       <a href="#main-content" style={{ position: 'absolute', left: -9999, top: 8, padding: '8px 16px', background: c.primarySolid, color: '#fff', borderRadius: tokens.radius.md, zIndex: 9999 }}
@@ -3485,12 +4139,13 @@ const KnowledgeHub = () => {
       <Sidebar />
       <div style={{ marginLeft: mainPaddingLeft, transition: 'margin-left 0.2s' }}>
         <Header />
-        <main id="main-content" style={{ padding: isMobile ? 16 : 24, minHeight: 'calc(100vh - 64px)' }}>
+        <main id="main-content" style={{ padding: isMobile ? 16 : 24, paddingBottom: isMobile ? 'calc(16px + env(safe-area-inset-bottom))' : 32, minHeight: 'calc(100vh - 64px)' }}>
           <PageContent />
         </main>
       </div>
 
       <ReviewModalUI />
+      {editPermUser && <UserPermModal user={editPermUser} onClose={() => setEditPermUser(null)} />}
       <UserSwitchPanel />
       <SearchPanel />
       <ToastContainer />
