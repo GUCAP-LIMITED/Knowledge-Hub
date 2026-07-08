@@ -112,6 +112,65 @@ const QueueList = ({
   );
 };
 
+const ApprovalTabs = ({
+  data,
+  activeTab,
+  onTabChange,
+  renderActions,
+}: {
+  readonly data: readonly Submission[];
+  readonly activeTab: string;
+  readonly onTabChange: (value: string) => void;
+  readonly renderActions: (submission: Submission) => ReactNode;
+}): ReactElement => {
+  const tabs = TABS.map((tab) => ({
+    value: tab.value,
+    label: `${tab.label} (${String(data.filter((s) => s.status === tab.value).length)})`,
+  }));
+  return (
+    <Tabs tabs={tabs} value={activeTab} onValueChange={onTabChange}>
+      {TABS.map((tab) => (
+        <TabsPanel key={tab.value} value={tab.value}>
+          <QueueList
+            submissions={data.filter((s) => s.status === tab.value)}
+            renderActions={renderActions}
+          />
+        </TabsPanel>
+      ))}
+    </Tabs>
+  );
+};
+
+const RejectController = ({
+  rejectId,
+  isRejecting,
+  rejectError,
+  onConfirm,
+  onClose,
+}: {
+  readonly rejectId: string | null;
+  readonly isRejecting: boolean;
+  readonly rejectError: string | undefined;
+  readonly onConfirm: (id: string, reason: string) => void;
+  readonly onClose: () => void;
+}): ReactElement => (
+  <RejectDialog
+    open={rejectId !== null}
+    onOpenChange={(open) => {
+      if (!open) {
+        onClose();
+      }
+    }}
+    onConfirm={(reason) => {
+      if (rejectId !== null) {
+        onConfirm(rejectId, reason);
+      }
+    }}
+    isSubmitting={isRejecting}
+    error={rejectError}
+  />
+);
+
 /** Reviewer approval queue, grouped by status. Admin only. */
 export const ApprovalsPage = (): ReactElement => {
   const submissions = useSubmissions();
@@ -157,12 +216,6 @@ export const ApprovalsPage = (): ReactElement => {
     );
   }
 
-  const data = submissions.data ?? [];
-  const tabs = TABS.map((tab) => ({
-    value: tab.value,
-    label: `${tab.label} (${String(data.filter((s) => s.status === tab.value).length)})`,
-  }));
-
   return (
     <section className={styles.screen}>
       <header className={styles.header}>
@@ -171,39 +224,29 @@ export const ApprovalsPage = (): ReactElement => {
           Review, approve, publish or reject submitted content.
         </p>
       </header>
-
-      <Tabs tabs={tabs} value={activeTab} onValueChange={setActiveTab}>
-        {TABS.map((tab) => (
-          <TabsPanel key={tab.value} value={tab.value}>
-            <QueueList
-              submissions={data.filter((s) => s.status === tab.value)}
-              renderActions={renderActions}
-            />
-          </TabsPanel>
-        ))}
-      </Tabs>
-
-      <RejectDialog
-        open={rejectId !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setRejectId(null);
-          }
-        }}
-        onConfirm={(reason) => {
-          if (rejectId !== null) {
-            reject.mutate(
-              { id: rejectId, reason },
-              {
-                onSuccess: () => {
-                  setRejectId(null);
-                },
+      <ApprovalTabs
+        data={submissions.data ?? []}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        renderActions={renderActions}
+      />
+      <RejectController
+        rejectId={rejectId}
+        isRejecting={reject.isPending}
+        rejectError={reject.error?.message}
+        onConfirm={(id, reason) => {
+          reject.mutate(
+            { id, reason },
+            {
+              onSuccess: () => {
+                setRejectId(null);
               },
-            );
-          }
+            },
+          );
         }}
-        isSubmitting={reject.isPending}
-        error={reject.error?.message}
+        onClose={() => {
+          setRejectId(null);
+        }}
       />
     </section>
   );

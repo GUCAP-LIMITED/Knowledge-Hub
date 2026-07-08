@@ -20,7 +20,13 @@ export interface AppConfig {
 }
 
 const EnvSchema = z.object({
-  VITE_API_BASE_URL: z.string().url('VITE_API_BASE_URL must be a valid URL'),
+  // Defaulted so the demo runs with zero setup: this build serves all data from in-memory
+  // gateways, so the HTTP base URL is never actually called. Set VITE_API_BASE_URL in .env.local
+  // (and bind an HTTP gateway) to point at a real backend.
+  VITE_API_BASE_URL: z
+    .string()
+    .url('VITE_API_BASE_URL must be a valid URL')
+    .default('http://localhost/api'),
   VITE_LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error', 'silent']).default('info'),
   VITE_SENTRY_DSN: z.string().optional(),
 });
