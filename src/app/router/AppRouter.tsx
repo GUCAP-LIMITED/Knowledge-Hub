@@ -22,6 +22,14 @@ const CertificatesPage = lazy(async () => ({
   default: (await import('@features/certificates/presentation/CertificatesPage'))
     .CertificatesPage,
 }));
+const SubmissionsPage = lazy(async () => ({
+  default: (await import('@features/submissions/presentation/SubmissionsPage'))
+    .SubmissionsPage,
+}));
+const ApprovalsPage = lazy(async () => ({
+  default: (await import('@features/submissions/presentation/ApprovalsPage'))
+    .ApprovalsPage,
+}));
 const ForbiddenPage = lazy(async () => ({
   default: (await import('@app/pages/ForbiddenPage')).ForbiddenPage,
 }));
@@ -31,7 +39,8 @@ const NotFoundPage = lazy(async () => ({
 
 /**
  * Central route table. Public routes sit outside the guard; authenticated routes nest under
- * <ProtectedRoute> and the <AppLayout> shell. Routed pages lazy-load behind one <Suspense>.
+ * <ProtectedRoute> and the <AppLayout> shell. Role-restricted areas add an inner <ProtectedRoute
+ * anyOf=...> guard. Routed pages lazy-load behind one <Suspense>.
  */
 export const AppRouter = (): ReactElement => {
   return (
@@ -47,6 +56,16 @@ export const AppRouter = (): ReactElement => {
             <Route path="/tutorials" element={<TutorialsPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/certificates" element={<CertificatesPage />} />
+
+            {/* Content workspace — managers and admins. */}
+            <Route element={<ProtectedRoute anyOf={['admin', 'manager']} />}>
+              <Route path="/submissions" element={<SubmissionsPage />} />
+            </Route>
+
+            {/* Review queue — admins only. */}
+            <Route element={<ProtectedRoute anyOf={['admin']} />}>
+              <Route path="/approvals" element={<ApprovalsPage />} />
+            </Route>
           </Route>
         </Route>
 

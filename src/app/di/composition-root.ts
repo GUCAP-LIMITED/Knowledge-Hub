@@ -17,6 +17,7 @@ import {
   createCertificatesModule,
   type CertificatesModule,
 } from '@features/certificates';
+import { createSubmissionsModule, type SubmissionsModule } from '@features/submissions';
 
 export interface AppComposition {
   readonly logger: Logger;
@@ -25,6 +26,7 @@ export interface AppComposition {
   readonly tutorialsModule: TutorialsModule;
   readonly resourcesModule: ResourcesModule;
   readonly certificatesModule: CertificatesModule;
+  readonly submissionsModule: SubmissionsModule;
   readonly queryClient: QueryClient;
 }
 
@@ -101,6 +103,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
   const tutorialsModule = createTutorialsModule({ logger });
   const resourcesModule = createResourcesModule({ logger });
   const certificatesModule = createCertificatesModule({ logger });
+  const submissionsModule = createSubmissionsModule({ logger, clock });
 
   logger.info('Application composition complete');
 
@@ -111,6 +114,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
     tutorialsModule,
     resourcesModule,
     certificatesModule,
+    submissionsModule,
     queryClient,
   };
 };

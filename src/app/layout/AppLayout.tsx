@@ -8,6 +8,8 @@ import styles from './AppLayout.module.css';
 interface NavItem {
   readonly to: string;
   readonly label: string;
+  /** When set, the item shows only for users holding one of these roles. */
+  readonly anyOf?: readonly string[];
 }
 
 const NAV_ITEMS: readonly NavItem[] = [
@@ -16,12 +18,18 @@ const NAV_ITEMS: readonly NavItem[] = [
   { to: '/tutorials', label: 'Tutorials' },
   { to: '/resources', label: 'Resources' },
   { to: '/certificates', label: 'Certificates' },
+  { to: '/submissions', label: 'My Submissions', anyOf: ['admin', 'manager'] },
+  { to: '/approvals', label: 'Approvals', anyOf: ['admin'] },
 ];
 
-/** Authenticated app shell: brand + primary navigation + a header, wrapping the routed page. */
+/** Authenticated app shell: brand + role-aware navigation + a header, wrapping the routed page. */
 export const AppLayout = (): ReactElement => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const items = NAV_ITEMS.filter(
+    (item) => item.anyOf === undefined || (user?.hasAnyRole(item.anyOf) ?? false),
+  );
 
   const handleSignOut = (): void => {
     void logout().then(() => {
@@ -40,7 +48,7 @@ export const AppLayout = (): ReactElement => {
           </span>
         </div>
         <nav className={styles.nav}>
-          {NAV_ITEMS.map((item) => (
+          {items.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

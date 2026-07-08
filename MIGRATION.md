@@ -9,11 +9,13 @@ to continue the migration.
 
 - ✅ The full architectural **rails** are in place (strict TypeScript, ESLint layer-boundary
   enforcement, path aliases, Vitest/Playwright, Husky, the `new:feature` generator, docs).
-- ✅ **Four Knowledge Hub features** migrated end-to-end as vertical DDD slices: `courses`,
-  `tutorials`, `resources`, `certificates`.
-- ✅ **Auth** adapted to the UAPP demo directory (offline sign-in with real role-gating).
+- ✅ **Five Knowledge Hub features** migrated end-to-end as vertical DDD slices: `courses`,
+  `tutorials`, `resources`, `certificates`, and `submissions` (the review workflow — My Submissions
+  - Approvals, sharing one `Submission` aggregate).
+- ✅ **Auth** adapted to the UAPP demo directory (offline sign-in with real role-gating), and
+  role-gated routes/nav (`/submissions` for admin+manager, `/approvals` for admin).
 - ✅ A KH-branded **app shell** (sidebar + header layout, dashboard) and router.
-- ✅ `npm run validate` is **green** (typecheck + lint + **78 tests**), `npm run build` succeeds,
+- ✅ `npm run validate` is **green** (typecheck + lint + **84 tests**), `npm run build` succeeds,
   `npm run dev` runs.
 - 🔜 The remaining prototype areas are listed below — each is now a mechanical `new:feature` job.
 
@@ -65,6 +67,15 @@ and layer tests.
 | `resources`    | `withHelpful`, `isPopular`                  | list / markHelpful          | yes (helpful)           |
 | `certificates` | `belongsTo`, `issuedYear`                   | list / get                  | no (no VO — opaque ids) |
 
+`submissions` is the richest slice: the `Submission` **aggregate** owns a state machine — every
+transition (`flagForReview` / `approve` / `reject` / `publish`) validates the current status and
+returns a `Result`, so an illegal move is impossible from a component or store. A `RejectionReason`
+value object enforces "a rejection needs a reason". It exposes **two pages** from one feature
+(`SubmissionsPage` = author view + submit form via RHF + `domainResolver`; `ApprovalsPage` = admin
+queue with status tabs, approve/reject/flag/publish) — a separate `approvals` feature would have to
+import this one's internals, which the boundary rules forbid. Admins publish directly; everyone else
+enters the review queue.
+
 App shell: `src/app/layout/AppLayout.tsx` (sidebar nav + header), rebranded
 `src/app/pages/DashboardPage.tsx`, `src/app/styles/global.css` design tokens set to the UAPP palette
 (teal `#045D5E` / orange `#FC7300`, Inter, dark-mode aware), router + composition root + providers.
@@ -73,9 +84,6 @@ App shell: `src/app/layout/AppLayout.tsx` (sidebar nav + header), rebranded
 
 From the prototype's page inventory, still to migrate:
 
-- **submissions** & **approvals** — the review workflow (state machine: pending → review →
-  approved/rejected → published; reviewer notes; admin-only approve). Model the status transitions in
-  the `Submission` aggregate.
 - **content** — content-management CRUD (draft → review → published).
 - **content-creation** — port the Ant Design authoring wizard (`legacy/prototype/src/create`) to
   RHF + `domainResolver`, CSS Modules, and a `CreateContentUseCase` that emits a submission.

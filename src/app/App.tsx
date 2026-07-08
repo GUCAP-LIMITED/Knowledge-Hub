@@ -7,6 +7,7 @@ import { CoursesModuleProvider } from '@features/courses';
 import { TutorialsModuleProvider } from '@features/tutorials';
 import { ResourcesModuleProvider } from '@features/resources';
 import { CertificatesModuleProvider } from '@features/certificates';
+import { SubmissionsModuleProvider } from '@features/submissions';
 import { TooltipProvider } from '@shared/ui';
 import { AppErrorBoundary } from '@app/AppErrorBoundary';
 import { AppRouter } from '@app/router/AppRouter';
@@ -36,11 +37,16 @@ export const App = (): ReactElement => {
                 <TutorialsModuleProvider module={composition.tutorialsModule}>
                   <ResourcesModuleProvider module={composition.resourcesModule}>
                     <CertificatesModuleProvider module={composition.certificatesModule}>
-                      <BrowserRouter
-                        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-                      >
-                        <AppRouter />
-                      </BrowserRouter>
+                      <SubmissionsModuleProvider module={composition.submissionsModule}>
+                        <BrowserRouter
+                          future={{
+                            v7_startTransition: true,
+                            v7_relativeSplatPath: true,
+                          }}
+                        >
+                          <AppRouter />
+                        </BrowserRouter>
+                      </SubmissionsModuleProvider>
                     </CertificatesModuleProvider>
                   </ResourcesModuleProvider>
                 </TutorialsModuleProvider>

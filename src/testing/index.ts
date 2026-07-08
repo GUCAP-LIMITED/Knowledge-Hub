@@ -11,3 +11,5 @@ export * from './fakes/fake-resource-gateway';
 export * from './builders/resource.builder';
 export * from './fakes/fake-certificate-gateway';
 export * from './builders/certificate.builder';
+export * from './fakes/fake-submission-gateway';
+export * from './builders/submission.builder';
