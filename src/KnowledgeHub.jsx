@@ -11,6 +11,8 @@ import {
   GraduationCap, AlertTriangle, Hash, Loader2, Copy, Link2,
   CircleDashed, FileQuestion, FileVideo, FileSpreadsheet
 } from 'lucide-react';
+import CreateFlow from './create/CreateFlow.jsx';
+import { getType } from './create/contentTypes.js';
 
 /* ════════════════════════════════════════════════════════════════════════
    DESIGN TOKENS
@@ -4088,7 +4090,29 @@ const KnowledgeHub = () => {
       case 'tutorials':       return <TutorialsPage />;
       case 'resources':       return <ResourcesPage />;
       case 'certificates':    return <CertificatesPage />;
-      case 'upload':          return canUpload ? <UploadPage /> : <DashboardPage />;
+      case 'upload':          return canUpload ? (
+        <CreateFlow
+          embedded
+          isDark={isDark}
+          role={currentUser?.role}
+          author={currentUser?.name || 'You'}
+          onExit={() => setCurrentPage('submissions')}
+          onComplete={(payload) => {
+            setSubmissions(prev => [
+              {
+                id: Date.now(),
+                title: payload.details?.title || 'Untitled',
+                type: getType(payload.typeKey)?.label || 'Content',
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                status: payload.status === 'published' ? 'published' : 'pending',
+                submittedBy: currentUser?.name || 'You',
+                notes: '',
+              },
+              ...prev,
+            ]);
+          }}
+        />
+      ) : <DashboardPage />;
       case 'submissions':     return canUpload ? <SubmissionsPage /> : <DashboardPage />;
       case 'approvals':       return canApprove ? <ApprovalsPage /> : <DashboardPage />;
       case 'course-reviews':  return canApprove ? <AdminCourseReviewsPage /> : <DashboardPage />;
