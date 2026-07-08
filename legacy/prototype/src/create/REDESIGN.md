@@ -8,15 +8,15 @@
 
 ## 0. TL;DR — what changed and why
 
-| Before | After | Why it matters |
-|---|---|---|
-| One generic "Upload Document" flow | Three purpose-built tracks (Course / Tutorial / Resource) chosen up front | The system now matches the user's mental model. A course author and a "drop a PDF" author have opposite needs; one flow served neither well. |
-| Horizontal 3-step stepper (File → Details → Review) | **Vertical progress sidebar** with a sticky footer; steps adapt per type | Vertical rail scales to 4–5 steps, shows sub-labels, survives on mobile as a drawer, and lets users jump back to visited steps. |
-| One giant details form | **Sectioned form** (General / Media / Metadata / Visibility / SEO) | Chunking lowers cognitive load and perceived effort, and groups validation errors. |
-| "Module Name" text field | **Udemy-style Curriculum Builder** (sections → lessons, drag reorder, collapse) | Real course structure, typed lessons (Video/PDF/Quiz/Assignment/Link/Download). |
-| "Review" summary table | **Learner-accurate multi-device Preview** (desktop/tablet/mobile) | WYSIWYG trust: what you preview is literally the component learners see. |
-| Manual submit, easy to lose work | **Autosave + resume draft + confirm-on-exit** | Removes the #1 anxiety in long authoring flows. |
-| Generic Prev/Next | **Context-aware actions** (Continue / Save draft / Skip / Back / Preview / Publish / Submit for review) | Buttons state the actual next intent; role decides Publish vs Submit. |
+| Before                                              | After                                                                                                   | Why it matters                                                                                                                               |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| One generic "Upload Document" flow                  | Three purpose-built tracks (Course / Tutorial / Resource) chosen up front                               | The system now matches the user's mental model. A course author and a "drop a PDF" author have opposite needs; one flow served neither well. |
+| Horizontal 3-step stepper (File → Details → Review) | **Vertical progress sidebar** with a sticky footer; steps adapt per type                                | Vertical rail scales to 4–5 steps, shows sub-labels, survives on mobile as a drawer, and lets users jump back to visited steps.              |
+| One giant details form                              | **Sectioned form** (General / Media / Metadata / Visibility / SEO)                                      | Chunking lowers cognitive load and perceived effort, and groups validation errors.                                                           |
+| "Module Name" text field                            | **Udemy-style Curriculum Builder** (sections → lessons, drag reorder, collapse)                         | Real course structure, typed lessons (Video/PDF/Quiz/Assignment/Link/Download).                                                              |
+| "Review" summary table                              | **Learner-accurate multi-device Preview** (desktop/tablet/mobile)                                       | WYSIWYG trust: what you preview is literally the component learners see.                                                                     |
+| Manual submit, easy to lose work                    | **Autosave + resume draft + confirm-on-exit**                                                           | Removes the #1 anxiety in long authoring flows.                                                                                              |
+| Generic Prev/Next                                   | **Context-aware actions** (Continue / Save draft / Skip / Back / Preview / Publish / Submit for review) | Buttons state the actual next intent; role decides Publish vs Submit.                                                                        |
 
 ---
 
@@ -29,10 +29,10 @@ The brief asked to "redesign the workflow." Three assumptions were worth pushing
    styles). Rather than bolt on visually-foreign AntD-blue, the redesign drives
    **AntD through `ConfigProvider`, themed with the UAPP palette** (teal
    `#045D5E`, orange `#FC7300`, Inter, full dark-mode parity). You get AntD's
-   robustness *and* brand consistency. See `theme.js`.
+   robustness _and_ brand consistency. See `theme.js`.
 
 2. **"Choose type is step 1 of a linear wizard."** Type selection isn't really a
-   step — it's a *branch point* that reconfigures every later step. So choosing a
+   step — it's a _branch point_ that reconfigures every later step. So choosing a
    card **auto-advances** (the choice is the intent), and each type carries its
    own accent colour as a persistent "you are building X" cue. See
    `contentTypes.js`.
@@ -42,7 +42,7 @@ The brief asked to "redesign the workflow." Three assumptions were worth pushing
    4 steps (no curriculum), Course gets 5. Optional steps expose a **Skip**.
 
 **One more recommendation beyond the brief:** treat the preview component as the
-*single source of truth* for the learner page. `LearnerPreview` should be the
+_single source of truth_ for the learner page. `LearnerPreview` should be the
 same component the catalog renders post-publish — guaranteeing "preview == what
 students see" isn't a promise, it's an architectural fact.
 
@@ -294,4 +294,7 @@ src/create/
 - `onComplete` pushes a new record into the existing `submissions` state.
 - Inherits `isDark`, `role`, and author name from the host app.
 - `npm run dev` → sign in as an admin/manager → "Upload Document" in the sidebar.
+
+```
+
 ```

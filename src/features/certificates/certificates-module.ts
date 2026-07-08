@@ -1,0 +1,34 @@
+import type { Logger } from '@core/logger';
+import { GetCertificateUseCase, ListCertificatesUseCase } from './application';
+import { InMemoryCertificateGateway } from './infrastructure';
+
+export interface CertificatesModuleDeps {
+  readonly logger: Logger;
+}
+
+/** The use cases exposed by the certificates feature, consumed via a context provider. */
+export interface CertificatesModule {
+  readonly listCertificates: ListCertificatesUseCase;
+  readonly getCertificate: GetCertificateUseCase;
+}
+
+/**
+ * Composition root *for the certificates feature*. Wires the in-memory gateway to the use cases. The
+ * only place inside the feature where layers are joined. Bind an HTTP gateway here to go live.
+ */
+export const createCertificatesModule = (
+  deps: CertificatesModuleDeps,
+): CertificatesModule => {
+  const certificateGateway = new InMemoryCertificateGateway({ logger: deps.logger });
+
+  return {
+    listCertificates: new ListCertificatesUseCase({
+      certificateGateway,
+      logger: deps.logger,
+    }),
+    getCertificate: new GetCertificateUseCase({
+      certificateGateway,
+      logger: deps.logger,
+    }),
+  };
+};

@@ -1,0 +1,15 @@
+.content {
+  padding: 0.35rem 0.55rem;
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  line-height: 1.3;
+  box-shadow: var(--shadow-md);
+  z-index: 70;
+  user-select: none;
+}
+
+.arrow {
+  fill: var(--color-text);
+}

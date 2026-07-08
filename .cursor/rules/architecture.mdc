@@ -1,0 +1,81 @@
+---
+description: Architecture, layering and code-quality rules for this React frontend template. Read before writing or editing any code in src/.
+alwaysApply: true
+---
+
+# React-CleanWithDDD-Template — Engineering Rules
+
+This is a production-grade React + TypeScript SPA with a strict, DDD, layered architecture.
+These rules are enforced by `tsconfig`, `eslint.config.ts`, and tests. Follow them exactly.
+`AGENTS.md` is the complete rulebook (this file is the always-applied Cursor mirror — keep the two in
+sync). `ARCHITECTURE.md` and `CONTRIBUTING.md` are the long form.
+
+## Layering (dependencies point inward)
+
+```
+app  →  features  →  shared  →  core
+```
+
+- `core/` framework-agnostic foundation: `config`, `result`, `errors`, `http`, `domain` (shared value objects used by 2+ features), `time`, `logger`. Imports nothing above it.
+- `shared/` generic UI primitives + pure utils. May use `core` only.
+- `features/<name>/` vertical slices. May use `core` + `shared`. NEVER import `app` or another feature's internals.
+- `app/` the ONLY composition root — wires concretes, router, providers.
+
+## Inside a feature (DDD — enforced per layer)
+
+```
+presentation → store → application → domain   (infrastructure implements domain ports)
+```
+
+- `domain/` entities, value objects, aggregates, domain errors, and PORTS (interfaces). Pure TS. NO React, Zustand, HTTP, DI, or other layers.
+- `application/` one class per use case. Orchestration only; depends on domain ports. Returns `Result<T, AppError>`. No infra/UI/React.
+- `infrastructure/` implements domain ports (HTTP gateways, storage), DTOs + Zod, mappers. The only place that knows wire formats. No React/presentation/store.
+- `store/` Zustand store: UI state + actions delegating to use cases. NO business logic.
+- `presentation/` React components/hooks/guards. Talk to the store, never to infrastructure.
+- `index.ts` is the feature's public API — import features via `@features/<name>` only.
+
+## Modeling (DDD + OOP — how to model, not just where files go)
+
+Paradigm: Clean/Hexagonal (ports & adapters) + DDD tactical patterns + `Result`-based error handling. Domain is pure; frameworks plug in at the edges.
+
+- **Value object**: immutable, value equality, self-validating (private ctor + static `create(): Result`). Make one for values with rules/invariants (email, title, money); do NOT wrap opaque values (ids, tokens, free text) — a raw `string` is correct there, a VO is overengineering. Keep feature-local until a 2nd feature needs it, then move to `core/domain` (never copy across features).
+- **Entity**: identity + behavior, immutable (a state change returns a new instance); never anemic.
+- **Aggregate root**: owns its invariants (e.g. `AuthSession` token validity); reach internals only through it.
+- **Port** (`domain/ports`) declares what's needed; **adapter/gateway** (`infrastructure`) implements it over `HttpClient`, Zod-parses, and maps DTO→domain (anti-corruption layer).
+- **Use case** = one class, one action: validate → call ports → return `Result`. No business logic of its own, no HTTP/UI.
+- OOP/SOLID: encapsulate (private fields; factory-enforced invariants); immutability; one responsibility per class; depend on abstractions + constructor injection (no `new Concrete()` outside the composition root); composition over inheritance (HTTP decorators), inheritance only for the `AppError`/`DomainError` taxonomy; rich domain — an `if` about business meaning belongs in a domain object, never in a store/component/gateway.
+
+## Non-negotiable code rules
+
+1. Business rules live in the domain. If a store/component/use case has an `if` about business meaning, move it into a domain entity/value object/service.
+2. Stores are thin; components have no business logic.
+3. Expected failures return `Result<T, AppError>` (`@core/result`). Never `throw new Error()` — throw a concrete `AppError` subclass. Never swallow errors.
+4. Validate every external payload (env, API) with Zod at the boundary before it reaches the domain.
+5. Abstract the outside world: time → `Clock`, network → `HttpClient`, logging → `Logger`. Never use `new Date()`, `fetch`, or `console` directly in feature code.
+6. Model meaningful values as value objects (e.g. `Email`, `Password`), not raw strings. Encapsulate: private fields, constructors enforce invariants.
+7. No magic strings — use named constants. No `any`, no `!` non-null assertions, no `==`.
+8. Dependency injection is constructor/factory-based by hand — no IoC container, no reflection. The only app composition root is `src/app/di/composition-root.ts`; each feature has its own `<name>-module.ts`.
+9. Use path aliases (`@core`, `@shared`, `@features`, `@app`, `@testing`), never deep relative chains.
+10. Add tests at the right layer: domain in isolation, use cases with fake ports (`src/testing/fakes`), a component integration test.
+11. Forms use `react-hook-form` + `domainResolver` (`@shared/forms`) delegating to value objects — no Zod _form_ schemas. Server state goes through TanStack Query at the presentation edge; HTTP goes through the `HttpClient` port (custom `fetch` + decorators), never `axios`/`fetch` directly.
+
+## Code style (lint-enforced — 0 warnings)
+
+- Size/complexity caps: ≤ 300 lines/file, ≤ 80 lines/function, complexity ≤ 12, ≤ 4 params, depth ≤ 4. Hitting a cap means extract — don't suppress.
+- Explicit by default: every class member has `public`/`private`/`protected`; named/exported functions have explicit return types.
+- Banned: `any`, non-null `!`, `==`/`!=`, `var`, `alert`, `debugger`, param reassignment, `console` (use `Logger`). No floating/misused promises (`await` or `void`). `switch` over a union must be exhaustive.
+- Type-only imports use inline `import { type X }`; no import cycles; aliases over deep relative paths.
+- Files: `kebab-case.ts` for logic, `PascalCase.tsx` for components; tests next to the file (`x.test.ts`). Hooks `useX`.
+- Styling: CSS Modules + design tokens (`src/app/styles/global.css`) only — no inline styles, no Tailwind, no hard-coded colors; `cn()` for conditionals; reuse Radix-based `shared/ui` primitives.
+- Routed `*Page` components are NOT exported from the feature barrel; the router lazy-imports them from the module path (code-splitting).
+
+## Code smells to avoid
+
+Lint blocks the mechanical smells (size/complexity/depth/params, `any`, `!`, `==`, console, floating promises, unused code). These design smells are on you:
+
+- Anemic domain (logic outside the entity/VO); fat store / god object; primitive obsession (raw value with rules → VO, but not ids/tokens/free text); duplicated rules (extract or promote to `core/domain`); feature envy / DTO-Zod shapes leaking out of `infrastructure`; magic strings/numbers (use constants); prop explosion / boolean-trap params (compose; extract at ~150 lines or ~7 props); dead code & stubs (remove; flag half-built work); suppressing the checker (`eslint-disable`/`@ts-ignore`/`as any` = the code is wrong, fix the cause); speculative abstraction (no interface/layer with one trivial impl "just in case").
+
+## Definition of done
+
+`npm run validate` (typecheck + lint with 0 warnings + tests) and `npm run build` must pass.
+Scaffold new features with `npm run new:feature`; `src/features/tasks` (list + create + toggle + delete) and `src/features/auth` (store-backed) are the worked references.
