@@ -174,10 +174,6 @@ export const requiredSlotsFilled = (
     .filter((slot) => slot.required === true)
     .every((slot) => (files[slot.id]?.length ?? 0) > 0);
 
-/** Total number of attached files across every slot. */
-export const totalFileCount = (files: SlotFiles): number =>
-  Object.values(files).reduce((sum, list) => sum + list.length, 0);
-
 /** Human label for a content type key. */
 export const typeLabel = (key: ContentTypeKey | null): string =>
   UPLOAD_CONTENT_TYPES.find((type) => type.key === key)?.label ?? 'Content';
