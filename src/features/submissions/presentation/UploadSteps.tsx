@@ -30,7 +30,6 @@ export interface PickedFile {
   name: string;
   size: number;
 }
-export const EMPTY_DETAILS: Details = { title: '', type: 'Document', description: '' };
 
 const formatSize = (bytes: number): string =>
   bytes < 1024 * 1024

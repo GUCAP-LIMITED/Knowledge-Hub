@@ -1,130 +1,131 @@
-import { useMemo, type ReactElement } from 'react';
-import { CheckCircle2, TrendingUp, AlertTriangle } from 'lucide-react';
+import type { ReactElement } from 'react';
+import { AlertCircle, Eye, TrendingUp, Users } from 'lucide-react';
 import {
   Alert,
   Avatar,
   Badge,
-  type BadgeTone,
+  Button,
   EmptyState,
   PageHeader,
   ProgressBar,
   Spinner,
   StatCard,
 } from '@shared/ui';
-import type { TeamMember, TeamMemberBucket } from '../domain';
+import { cn } from '@shared/utils';
+import type { TeamMember } from '../domain';
 import { useTeamMembers } from './use-team';
 import styles from './TeamProgressPage.module.css';
 
-const BUCKET_TONE: Record<TeamMemberBucket, BadgeTone> = {
-  'on-track': 'success',
-  'in-progress': 'info',
-  'at-risk': 'warning',
-};
+const HEADERS = ['Member', 'Role', 'Progress', 'Courses', 'Last Active', ''] as const;
 
-const BUCKET_LABEL: Record<TeamMemberBucket, string> = {
-  'on-track': 'On track',
-  'in-progress': 'In progress',
-  'at-risk': 'At risk',
-};
-
-interface TeamStats {
-  readonly average: number;
-  readonly onTrack: number;
-  readonly atRisk: number;
-}
-
-const computeStats = (members: readonly TeamMember[]): TeamStats => {
-  if (members.length === 0) {
-    return { average: 0, onTrack: 0, atRisk: 0 };
-  }
-  const total = members.reduce((sum, member) => sum + member.progress, 0);
-  const onTrack = members.filter((member) => member.bucket() === 'on-track').length;
-  const atRisk = members.filter((member) => member.bucket() === 'at-risk').length;
-  return { average: Math.round(total / members.length), onTrack, atRisk };
-};
-
-const MemberRow = ({ member }: { readonly member: TeamMember }): ReactElement => {
-  const bucket = member.bucket();
-  return (
-    <li className={styles.row}>
-      <div className={styles.person}>
-        <Avatar name={member.name} online={member.status === 'online'} />
-        <div className={styles.identity}>
-          <span className={styles.name}>{member.name}</span>
-          <span className={styles.role}>{member.role}</span>
-          <span className={styles.email}>{member.email}</span>
+const MemberRow = ({ member }: { readonly member: TeamMember }): ReactElement => (
+  <tr className={styles.row}>
+    <td className={styles.cell}>
+      <div className={styles.member}>
+        <Avatar name={member.name} size={36} online={member.status === 'online'} />
+        <div className={styles.memberText}>
+          <div className={styles.name}>{member.name}</div>
+          <div className={styles.email}>{member.email}</div>
         </div>
       </div>
-      <div className={styles.progress}>
-        <ProgressBar value={member.progress} showLabel />
+    </td>
+    <td className={styles.cell}>
+      <Badge>{member.role}</Badge>
+    </td>
+    <td className={cn(styles.cell, styles.progressCell)}>
+      <div className={styles.progressWrap}>
+        <ProgressBar value={member.progress} tone="auto" />
       </div>
-      <Badge tone={BUCKET_TONE[bucket]}>{BUCKET_LABEL[bucket]}</Badge>
-      <span className={styles.count}>
-        {member.completed}/{member.total}
-      </span>
-    </li>
-  );
-};
+      <span className={styles.pct}>{member.progress}%</span>
+    </td>
+    <td className={cn(styles.cell, styles.muted)}>
+      {member.completed}/{member.total}
+    </td>
+    <td className={cn(styles.cell, styles.muted)}>{member.lastActive}</td>
+    <td className={styles.cell}>
+      <Button size="sm" variant="ghost">
+        View
+      </Button>
+    </td>
+  </tr>
+);
 
-/** Routed team-progress page: headline stats plus a per-member progress list. */
+/** Team progress: 4 stats + a member table. Admin only. */
 export const TeamProgressPage = (): ReactElement => {
   const team = useTeamMembers();
-  const members = useMemo(() => team.data ?? [], [team.data]);
-  const stats = useMemo(() => computeStats(members), [members]);
+  const members = team.data ?? [];
+  const avg =
+    members.length > 0
+      ? Math.round(
+          members.reduce((sum, member) => sum + member.progress, 0) / members.length,
+        )
+      : 0;
+  const online = members.filter((member) => member.status === 'online').length;
+  const atRisk = members.filter((member) => member.progress < 50).length;
+
+  if (team.isLoading) {
+    return (
+      <div className={styles.center}>
+        <Spinner size="lg" label="Loading team" />
+      </div>
+    );
+  }
+  if (team.isError) {
+    return (
+      <Alert tone="error" title="Could not load the team">
+        {team.error.message}
+      </Alert>
+    );
+  }
 
   return (
     <section className={styles.screen}>
-      <PageHeader title="Team Progress" subtitle="Track how your team is progressing" />
-
-      {team.isLoading ? (
-        <div className={styles.center}>
-          <Spinner size="lg" label="Loading team" />
-        </div>
-      ) : null}
-
-      {team.isError ? (
-        <Alert tone="error" title="Could not load team">
-          {team.error.message}
-        </Alert>
-      ) : null}
-
-      {!team.isLoading && !team.isError ? (
-        <>
-          <div className={styles.stats}>
-            <StatCard
-              label="Average progress"
-              value={`${String(stats.average)}%`}
-              icon={TrendingUp}
-              tone="primary"
-            />
-            <StatCard
-              label="On track"
-              value={stats.onTrack}
-              icon={CheckCircle2}
-              tone="success"
-            />
-            <StatCard
-              label="At risk"
-              value={stats.atRisk}
-              icon={AlertTriangle}
-              tone="warning"
-            />
-          </div>
-
-          {members.length === 0 ? (
-            <EmptyState
-              title="No team members yet"
-              description="Invite colleagues to see their learning progress here."
-            />
-          ) : (
-            <ul className={styles.list}>
+      <PageHeader title="Team Progress" subtitle="Track learning across your team" />
+      <div className={styles.stats}>
+        <StatCard
+          label="Team Members"
+          value={members.length}
+          icon={Users}
+          tone="primary"
+        />
+        <StatCard
+          label="Avg Progress"
+          value={`${String(avg)}%`}
+          icon={TrendingUp}
+          tone="success"
+        />
+        <StatCard label="Active Now" value={online} icon={Eye} tone="info" />
+        <StatCard label="At Risk" value={atRisk} icon={AlertCircle} tone="warning" />
+      </div>
+      {members.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title="No team members"
+          description="Team members will appear here."
+        />
+      ) : (
+        <div className={styles.tableCard}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                {HEADERS.map((header, index) => (
+                  <th
+                    key={header === '' ? `col-${String(index)}` : header}
+                    className={styles.th}
+                  >
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
               {members.map((member) => (
                 <MemberRow key={member.id} member={member} />
               ))}
-            </ul>
-          )}
-        </>
-      ) : null}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   );
 };

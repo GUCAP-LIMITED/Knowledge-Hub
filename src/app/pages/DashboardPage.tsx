@@ -11,11 +11,8 @@ import {
   QuickActions,
   StatsGrid,
   WelcomeHero,
-  buildActions,
-  buildStats,
-  type DashCtx,
-  type Role,
 } from './DashboardParts';
+import { buildActions, buildStats, type DashCtx, type Role } from './dashboard-data';
 import styles from './DashboardPage.module.css';
 
 const roleOf = (user: AuthenticatedUser | null): Role => {

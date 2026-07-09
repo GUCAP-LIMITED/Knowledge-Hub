@@ -4,13 +4,14 @@ import { useAuth } from '@features/auth';
 import { useSubmitContent } from './use-submissions';
 import {
   DoneCard,
-  EMPTY_DETAILS,
   UploadFooter,
   UploadWizard,
   type Details,
   type PickedFile,
 } from './UploadSteps';
 import styles from './UploadPage.module.css';
+
+const EMPTY_DETAILS: Details = { title: '', type: 'Document', description: '' };
 
 /** Upload Document: a 3-step drag-drop create flow that emits a submission. Admin+manager. */
 export const UploadPage = (): ReactElement => {
