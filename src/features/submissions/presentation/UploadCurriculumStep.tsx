@@ -1,22 +1,62 @@
 import type { ReactElement } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import { Button, IconButton, Select, TextField } from '@shared/ui';
 import {
   LESSON_KINDS,
   type Lesson,
   type LessonKind,
   type Section,
+  moveInArray,
   nextId,
 } from './upload-content-types';
 import styles from './UploadPage.module.css';
 
+const MoveControls = ({
+  canUp,
+  canDown,
+  label,
+  onMove,
+}: {
+  readonly canUp: boolean;
+  readonly canDown: boolean;
+  readonly label: string;
+  readonly onMove: (delta: number) => void;
+}): ReactElement => (
+  <>
+    <IconButton
+      label={`Move ${label} up`}
+      disabled={!canUp}
+      onClick={() => {
+        onMove(-1);
+      }}
+    >
+      <ChevronUp size={16} />
+    </IconButton>
+    <IconButton
+      label={`Move ${label} down`}
+      disabled={!canDown}
+      onClick={() => {
+        onMove(1);
+      }}
+    >
+      <ChevronDown size={16} />
+    </IconButton>
+  </>
+);
+
 const LessonRow = ({
   lesson,
+  index,
+  total,
   onChange,
+  onMove,
   onRemove,
 }: {
   readonly lesson: Lesson;
+  readonly index: number;
+  readonly total: number;
   readonly onChange: (lesson: Lesson) => void;
+  readonly onMove: (delta: number) => void;
   readonly onRemove: () => void;
 }): ReactElement => (
   <div className={styles.lessonRow}>
@@ -41,21 +81,33 @@ const LessonRow = ({
         </option>
       ))}
     </Select>
-    <IconButton label="Remove lesson" variant="danger" onClick={onRemove}>
-      <Trash2 size={16} />
-    </IconButton>
+    <div className={styles.rowActions}>
+      <MoveControls
+        canUp={index > 0}
+        canDown={index < total - 1}
+        label="lesson"
+        onMove={onMove}
+      />
+      <IconButton label="Remove lesson" variant="danger" onClick={onRemove}>
+        <Trash2 size={16} />
+      </IconButton>
+    </div>
   </div>
 );
 
 const SectionCard = ({
   section,
   index,
+  total,
   onChange,
+  onMove,
   onRemove,
 }: {
   readonly section: Section;
   readonly index: number;
+  readonly total: number;
   readonly onChange: (section: Section) => void;
+  readonly onMove: (delta: number) => void;
   readonly onRemove: () => void;
 }): ReactElement => {
   const setLessons = (lessons: readonly Lesson[]): void => {
@@ -73,16 +125,29 @@ const SectionCard = ({
             onChange({ ...section, title: event.target.value });
           }}
         />
-        <IconButton label="Remove section" variant="danger" onClick={onRemove}>
-          <Trash2 size={16} />
-        </IconButton>
+        <div className={styles.rowActions}>
+          <MoveControls
+            canUp={index > 0}
+            canDown={index < total - 1}
+            label="section"
+            onMove={onMove}
+          />
+          <IconButton label="Remove section" variant="danger" onClick={onRemove}>
+            <Trash2 size={16} />
+          </IconButton>
+        </div>
       </div>
-      {section.lessons.map((lesson) => (
+      {section.lessons.map((lesson, lessonIndex) => (
         <LessonRow
           key={lesson.id}
           lesson={lesson}
+          index={lessonIndex}
+          total={section.lessons.length}
           onChange={(next) => {
             setLessons(section.lessons.map((l) => (l.id === lesson.id ? next : l)));
+          }}
+          onMove={(delta) => {
+            setLessons(moveInArray(section.lessons, lessonIndex, delta));
           }}
           onRemove={() => {
             setLessons(section.lessons.filter((l) => l.id !== lesson.id));
@@ -110,7 +175,7 @@ export interface UploadCurriculumStepProps {
   readonly onChange: (sections: readonly Section[]) => void;
 }
 
-/** Course curriculum builder — sections each holding ordered lessons. */
+/** Course curriculum builder — reorderable sections each holding reorderable lessons. */
 export const UploadCurriculumStep = ({
   sections,
   onChange,
@@ -126,8 +191,12 @@ export const UploadCurriculumStep = ({
         key={section.id}
         section={section}
         index={index}
+        total={sections.length}
         onChange={(next) => {
           onChange(sections.map((s) => (s.id === section.id ? next : s)));
+        }}
+        onMove={(delta) => {
+          onChange(moveInArray(sections, index, delta));
         }}
         onRemove={() => {
           onChange(sections.filter((s) => s.id !== section.id));

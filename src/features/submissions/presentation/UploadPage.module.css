@@ -399,6 +399,12 @@
   flex: 1;
   min-width: 0;
 }
+.rowActions {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex-shrink: 0;
+}
 .stepper {
   display: flex;
   align-items: center;

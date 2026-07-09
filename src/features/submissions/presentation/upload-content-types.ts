@@ -182,6 +182,25 @@ export const totalFileCount = (files: SlotFiles): number =>
 export const typeLabel = (key: ContentTypeKey | null): string =>
   UPLOAD_CONTENT_TYPES.find((type) => type.key === key)?.label ?? 'Content';
 
+/** Return a copy of `items` with the element at `from` moved by `delta` (no-op if out of range). */
+export const moveInArray = <T>(
+  items: readonly T[],
+  from: number,
+  delta: number,
+): readonly T[] => {
+  const to = from + delta;
+  if (to < 0 || to >= items.length) {
+    return items;
+  }
+  const copy = [...items];
+  const [moved] = copy.splice(from, 1);
+  if (moved === undefined) {
+    return items;
+  }
+  copy.splice(to, 0, moved);
+  return copy;
+};
+
 let sequence = 0;
 
 /** Monotonic client-side id for curriculum sections/lessons (deterministic, no clock/random). */
