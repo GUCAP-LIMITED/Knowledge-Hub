@@ -1,66 +1,89 @@
 import type { ReactElement } from 'react';
-import type { UseQueryResult } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Upload } from 'lucide-react';
+import { CheckCircle, Upload } from 'lucide-react';
 import { Alert, PageHeader, Spinner } from '@shared/ui';
 import { useAuth } from '@features/auth';
 import type { Submission } from '../domain';
-import { SubmissionRow } from './SubmissionRow';
-import { useMySubmissions } from './use-submissions';
+import { SubmissionsTable } from './SubmissionsTable';
+import { useMySubmissions, useSubmissions } from './use-submissions';
 import styles from './SubmissionsPage.module.css';
 
-const MySubmissionsList = ({
-  query,
+const SubmissionsBody = ({
+  isLoading,
+  error,
+  data,
+  isAdmin,
 }: {
-  readonly query: UseQueryResult<readonly Submission[]>;
+  readonly isLoading: boolean;
+  readonly error: Error | null;
+  readonly data: readonly Submission[];
+  readonly isAdmin: boolean;
 }): ReactElement => {
-  if (query.isLoading) {
+  if (isLoading) {
     return (
       <div className={styles.center}>
         <Spinner size="lg" label="Loading submissions" />
       </div>
     );
   }
-  if (query.isError) {
+  if (error !== null) {
     return (
       <Alert tone="error" title="Could not load submissions">
-        {query.error.message}
+        {error.message}
       </Alert>
     );
   }
-  const data = query.data ?? [];
   if (data.length === 0) {
     return (
       <p className={styles.empty}>
-        No submissions yet — upload a document to get started.
+        {isAdmin
+          ? 'Documents you publish will appear here.'
+          : 'Documents you upload will appear here while they are reviewed.'}
       </p>
     );
   }
-  return (
-    <div className={styles.list}>
-      {data.map((submission) => (
-        <SubmissionRow key={submission.id} submission={submission} />
-      ))}
-    </div>
-  );
+  return <SubmissionsTable submissions={data} />;
 };
 
-/** "My Submissions": track the review status of everything you've uploaded. */
+/** "My Submissions": authors track their review status; admins see what they've published. */
 export const SubmissionsPage = (): ReactElement => {
   const { user } = useAuth();
+  const isAdmin = user?.hasAnyRole(['admin']) ?? false;
+  const all = useSubmissions();
   const mine = useMySubmissions(user?.fullName ?? '');
+  const active = isAdmin ? all : mine;
+  const data = isAdmin
+    ? (all.data ?? []).filter((submission) => submission.status === 'published')
+    : (mine.data ?? []);
 
   return (
     <section className={styles.screen}>
       <PageHeader
         title="My Submissions"
-        subtitle="Track the review status of your uploads."
+        subtitle={
+          isAdmin
+            ? 'Documents you have published'
+            : 'Track the status of your submissions'
+        }
       >
         <Link to="/upload" className={styles.uploadCta}>
           <Upload size={15} aria-hidden="true" /> Upload document
         </Link>
       </PageHeader>
-      <MySubmissionsList query={mine} />
+
+      {isAdmin ? (
+        <div className={styles.adminNote}>
+          <CheckCircle size={18} aria-hidden="true" />
+          <span>As an admin, your uploads are published directly without review.</span>
+        </div>
+      ) : null}
+
+      <SubmissionsBody
+        isLoading={active.isLoading}
+        error={active.isError ? active.error : null}
+        data={data}
+        isAdmin={isAdmin}
+      />
     </section>
   );
 };
