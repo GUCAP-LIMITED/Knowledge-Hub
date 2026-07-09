@@ -10,6 +10,7 @@ import {
   type UploadSlot,
 } from './upload-content-types';
 import type { Details } from './upload-details';
+import type { SaveStatus } from './use-upload-draft';
 import { UploadTypeStep } from './UploadTypeStep';
 import { UploadFileStep } from './UploadFileStep';
 import { UploadCurriculumStep } from './UploadCurriculumStep';
@@ -51,6 +52,7 @@ const Stepper = ({
 export interface UploadWizardProps {
   readonly steps: readonly StepKey[];
   readonly current: number;
+  readonly saveStatus: SaveStatus;
   readonly contentType: ContentTypeKey | null;
   readonly onType: (key: ContentTypeKey) => void;
   readonly slots: readonly UploadSlot[];
@@ -101,10 +103,28 @@ const StepBody = (props: UploadWizardProps): ReactElement | null => {
   }
 };
 
+const SaveStatusPill = ({
+  status,
+}: {
+  readonly status: SaveStatus;
+}): ReactElement | null => {
+  if (status === 'idle') {
+    return null;
+  }
+  return (
+    <span className={styles.savePill}>
+      {status === 'saving' ? 'Saving…' : 'Draft saved'}
+    </span>
+  );
+};
+
 /** Type-aware upload wizard shell: progress stepper, the active step, and a footer. */
 export const UploadWizard = (props: UploadWizardProps): ReactElement => (
   <div className={styles.card}>
-    <Stepper steps={props.steps} current={props.current} />
+    <div className={styles.wizardHead}>
+      <Stepper steps={props.steps} current={props.current} />
+      <SaveStatusPill status={props.saveStatus} />
+    </div>
     <StepBody {...props} />
     {props.submitError !== undefined ? (
       <Alert tone="error" title="Could not submit">

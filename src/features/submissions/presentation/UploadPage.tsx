@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { PageHeader } from '@shared/ui';
+import { Button, PageHeader } from '@shared/ui';
 import { DoneCard } from './UploadSteps';
 import { UploadWizard } from './UploadWizard';
 import { UploadFooter } from './UploadFooter';
@@ -29,9 +29,23 @@ export const UploadPage = (): ReactElement => {
             : 'Submit content for admin review.'
         }
       />
+      {flow.draft.hasDraft && flow.contentType === null ? (
+        <div className={styles.resumeBanner}>
+          <span>You have an unsaved draft from a previous session.</span>
+          <div className={styles.resumeActions}>
+            <Button size="sm" variant="ghost" onClick={flow.draft.dismiss}>
+              Discard
+            </Button>
+            <Button size="sm" onClick={flow.draft.resume}>
+              Resume draft
+            </Button>
+          </div>
+        </div>
+      ) : null}
       <UploadWizard
         steps={flow.steps}
         current={flow.current}
+        saveStatus={flow.draft.status}
         contentType={flow.contentType}
         onType={flow.chooseType}
         slots={flow.slots}
