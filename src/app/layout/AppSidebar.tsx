@@ -11,6 +11,9 @@ import {
   FileCheck,
   ClipboardList,
   MessageSquare,
+  BarChart3,
+  CalendarCheck,
+  LayoutGrid,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@shared/utils';
@@ -48,6 +51,21 @@ const NAV: readonly NavEntry[] = [
     icon: FileCheck,
     anyOf: ['admin', 'manager'],
   },
+  { kind: 'section', label: 'Team', anyOf: ['admin', 'manager'] },
+  {
+    kind: 'link',
+    to: '/team-progress',
+    label: 'Team Progress',
+    icon: BarChart3,
+    anyOf: ['admin', 'manager'],
+  },
+  {
+    kind: 'link',
+    to: '/assign',
+    label: 'Assign Training',
+    icon: CalendarCheck,
+    anyOf: ['admin', 'manager'],
+  },
   { kind: 'section', label: 'Administration', anyOf: ['admin'] },
   {
     kind: 'link',
@@ -63,6 +81,7 @@ const NAV: readonly NavEntry[] = [
     icon: MessageSquare,
     anyOf: ['admin'],
   },
+  { kind: 'link', to: '/content', label: 'Content', icon: LayoutGrid, anyOf: ['admin'] },
 ];
 
 const NavItem = ({

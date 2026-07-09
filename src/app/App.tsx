@@ -9,6 +9,10 @@ import { ResourcesModuleProvider } from '@features/resources';
 import { CertificatesModuleProvider } from '@features/certificates';
 import { SubmissionsModuleProvider } from '@features/submissions';
 import { CourseReviewsModuleProvider } from '@features/course-reviews';
+import { TeamModuleProvider } from '@features/team';
+import { AssignmentsModuleProvider } from '@features/assignments';
+import { ContentModuleProvider } from '@features/content';
+import { NotificationsModuleProvider } from '@features/notifications';
 import { TooltipProvider } from '@shared/ui';
 import { AppErrorBoundary } from '@app/AppErrorBoundary';
 import { AppRouter } from '@app/router/AppRouter';
@@ -44,14 +48,26 @@ export const App = (): ReactElement => {
                           <CourseReviewsModuleProvider
                             module={composition.courseReviewsModule}
                           >
-                            <BrowserRouter
-                              future={{
-                                v7_startTransition: true,
-                                v7_relativeSplatPath: true,
-                              }}
-                            >
-                              <AppRouter />
-                            </BrowserRouter>
+                            <TeamModuleProvider module={composition.teamModule}>
+                              <AssignmentsModuleProvider
+                                module={composition.assignmentsModule}
+                              >
+                                <ContentModuleProvider module={composition.contentModule}>
+                                  <NotificationsModuleProvider
+                                    module={composition.notificationsModule}
+                                  >
+                                    <BrowserRouter
+                                      future={{
+                                        v7_startTransition: true,
+                                        v7_relativeSplatPath: true,
+                                      }}
+                                    >
+                                      <AppRouter />
+                                    </BrowserRouter>
+                                  </NotificationsModuleProvider>
+                                </ContentModuleProvider>
+                              </AssignmentsModuleProvider>
+                            </TeamModuleProvider>
                           </CourseReviewsModuleProvider>
                         </SubmissionsModuleProvider>
                       </CertificatesModuleProvider>

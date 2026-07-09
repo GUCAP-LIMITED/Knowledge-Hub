@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, Moon, Settings, Sun, User } from 'lucide-react';
 import { Avatar, DropdownMenu, IconButton } from '@shared/ui';
 import type { AuthenticatedUser } from '@features/auth';
+import { NotificationsBell } from '@features/notifications';
 import { useTheme } from '@app/theme/use-theme';
 import styles from './AppLayout.module.css';
 
@@ -20,6 +21,7 @@ export const AppHeader = ({ user, onSignOut }: AppHeaderProps): ReactElement => 
 
   return (
     <header className={styles.header}>
+      <NotificationsBell />
       <IconButton
         label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
         onClick={toggle}

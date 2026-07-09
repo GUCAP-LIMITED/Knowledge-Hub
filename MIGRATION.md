@@ -89,16 +89,26 @@ App shell: `src/app/layout/AppLayout.tsx` (sidebar nav + header), rebranded
 `src/app/pages/DashboardPage.tsx`, `src/app/styles/global.css` design tokens set to the UAPP palette
 (teal `#045D5E` / orange `#FC7300`, Inter, dark-mode aware), router + composition root + providers.
 
-## What remains (each is a `new:feature` + wiring job)
+## Also migrated (Phases 1–3)
 
-From the prototype's page inventory, still to migrate:
+Beyond the six data features above, the app now covers the full prototype:
 
-- **content** — content-management CRUD (draft → review → published).
+- **Design system + shell + dark mode** — token-driven `shared/ui` primitives (Badge, Avatar,
+  ProgressBar, StatCard, PageHeader, EmptyState, Toggle, Skeleton, Select, Textarea, CategoryBadge),
+  a `ThemeProvider` dark-mode toggle, a grouped role-aware sidebar + header user menu, and a
+  live-stats dashboard.
+- **Course detail + enroll** (`/courses/:id`) with hero, outcomes, generated curriculum, details
+  sidebar and an embedded reviews panel; **Approvals review modal + decision timeline**.
+- **My Learning**, **Profile**, **User Settings** (app pages; local persistence via `useLocalStorage`).
+- **team** (Team Progress), **assignments** (Assign Training), **content** (Content Management with a
+  draft→review→published state machine) — role-gated DDD feature slices.
+- **notifications** — announcements aggregate + a header bell with unread count and a panel.
+
+## What remains
+
 - **content-creation** — port the Ant Design authoring wizard (`legacy/prototype/src/create`) to
-  RHF + `domainResolver`, CSS Modules, and a `CreateContentUseCase` that emits a submission.
-- **team-progress** & **assignments** — manager/admin dashboards; assignment status derivation.
-- **my-learning**, **notifications/announcements**, **profile**, **user-settings**, and
-  **settings** (users + permission sets — the base/granular permission model).
+  RHF + `domainResolver`, CSS Modules, and a `CreateContentUseCase` that emits a submission. This is
+  the last prototype surface not yet ported into the architecture.
 
 Role gating for admin/manager pages: nest their routes under `<ProtectedRoute anyOf={['admin']} />`
 (or `['admin','manager']`) in `AppRouter.tsx` — the guard already supports it.

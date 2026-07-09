@@ -24,6 +24,14 @@ import {
   type CourseReviewsModule,
 } from '@features/course-reviews';
 
+import { createTeamModule, type TeamModule } from '@features/team';
+import { createAssignmentsModule, type AssignmentsModule } from '@features/assignments';
+import { createContentModule, type ContentModule } from '@features/content';
+import {
+  createNotificationsModule,
+  type NotificationsModule,
+} from '@features/notifications';
+
 export interface AppComposition {
   readonly logger: Logger;
   readonly authStore: AuthStore;
@@ -33,6 +41,10 @@ export interface AppComposition {
   readonly certificatesModule: CertificatesModule;
   readonly submissionsModule: SubmissionsModule;
   readonly courseReviewsModule: CourseReviewsModule;
+  readonly teamModule: TeamModule;
+  readonly assignmentsModule: AssignmentsModule;
+  readonly contentModule: ContentModule;
+  readonly notificationsModule: NotificationsModule;
   readonly queryClient: QueryClient;
 }
 
@@ -111,6 +123,10 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
   const certificatesModule = createCertificatesModule({ logger });
   const submissionsModule = createSubmissionsModule({ logger, clock });
   const courseReviewsModule = createCourseReviewsModule({ logger, clock });
+  const teamModule = createTeamModule({ logger });
+  const assignmentsModule = createAssignmentsModule({ logger });
+  const contentModule = createContentModule({ logger, clock });
+  const notificationsModule = createNotificationsModule({ logger });
 
   logger.info('Application composition complete');
 
@@ -123,6 +139,10 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
     certificatesModule,
     submissionsModule,
     courseReviewsModule,
+    teamModule,
+    assignmentsModule,
+    contentModule,
+    notificationsModule,
     queryClient,
   };
 };
