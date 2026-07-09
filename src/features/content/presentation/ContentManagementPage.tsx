@@ -1,14 +1,9 @@
 import { useMemo, useState, type ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { Button, PageHeader } from '@shared/ui';
-import { useAuth } from '@features/auth';
 import type { ContentItem } from '../domain';
-import {
-  useContent,
-  useCreateContent,
-  useDeleteContent,
-  useUpdateContent,
-} from './use-content';
+import { useContent, useDeleteContent, useUpdateContent } from './use-content';
 import { ContentFilters } from './ContentFilters';
 import { ContentResults } from './ContentResults';
 import { ContentFormModal, type ContentFormValues } from './ContentFormModal';
@@ -20,16 +15,18 @@ import {
 } from './content-filter';
 import styles from './ContentManagementPage.module.css';
 
-/** Admin content library: search/filter, create, edit, publish-via-status, and delete. */
+/**
+ * Admin content library: browse/filter existing content, edit its metadata, publish-via-status
+ * and delete. Authoring brand-new content happens in the shared upload wizard — "New content"
+ * launches it, so both entry points converge on one create flow.
+ */
 export const ContentManagementPage = (): ReactElement => {
-  const { user } = useAuth();
+  const navigate = useNavigate();
   const content = useContent();
-  const create = useCreateContent();
   const update = useUpdateContent();
   const remove = useDeleteContent();
 
   const [query, setQuery] = useState<ContentQuery>(EMPTY_QUERY);
-  const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<ContentItem | null>(null);
 
   const all = useMemo(() => content.data ?? [], [content.data]);
@@ -37,25 +34,18 @@ export const ContentManagementPage = (): ReactElement => {
   const types = useMemo(() => distinctTypes(all), [all]);
   const busyId = remove.isPending ? remove.variables : null;
 
-  const openCreate = (): void => {
-    setEditing(null);
-    setModalOpen(true);
-  };
-  const openEdit = (item: ContentItem): void => {
-    setEditing(item);
-    setModalOpen(true);
-  };
-  const close = (): void => {
-    setModalOpen(false);
-  };
-
   const submit = (values: ContentFormValues): void => {
-    const options = { onSuccess: close };
-    if (editing !== null) {
-      update.mutate({ id: editing.id, ...values }, options);
+    if (editing === null) {
       return;
     }
-    create.mutate({ ...values, author: user?.fullName ?? 'Unknown' }, options);
+    update.mutate(
+      { id: editing.id, ...values },
+      {
+        onSuccess: () => {
+          setEditing(null);
+        },
+      },
+    );
   };
 
   return (
@@ -64,7 +54,11 @@ export const ContentManagementPage = (): ReactElement => {
         title="Content Management"
         subtitle="Manage all content across the platform"
       >
-        <Button onClick={openCreate}>
+        <Button
+          onClick={() => {
+            navigate('/upload');
+          }}
+        >
           <Plus size={16} aria-hidden="true" /> New content
         </Button>
       </PageHeader>
@@ -76,7 +70,7 @@ export const ContentManagementPage = (): ReactElement => {
         isLoading={content.isLoading}
         error={content.isError ? content.error : null}
         busyId={busyId}
-        onEdit={openEdit}
+        onEdit={setEditing}
         onDelete={(id) => {
           remove.mutate(id);
         }}
@@ -86,11 +80,13 @@ export const ContentManagementPage = (): ReactElement => {
       />
 
       <ContentFormModal
-        key={editing?.id ?? 'new'}
-        open={modalOpen}
+        key={editing?.id ?? 'none'}
+        open={editing !== null}
         editing={editing}
-        isSubmitting={create.isPending || update.isPending}
-        onClose={close}
+        isSubmitting={update.isPending}
+        onClose={() => {
+          setEditing(null);
+        }}
         onSubmit={submit}
       />
     </section>
