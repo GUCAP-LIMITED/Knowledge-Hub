@@ -3,7 +3,13 @@ import type { ReactElement } from 'react';
 import { cn } from '@shared/utils';
 import styles from './StatCard.module.css';
 
-export type StatTone = 'primary' | 'secondary' | 'success' | 'info' | 'warning';
+export type StatTone =
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'info'
+  | 'warning'
+  | 'danger';
 
 export interface StatCardProps {
   readonly label: string;
