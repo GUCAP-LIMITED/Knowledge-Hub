@@ -11,3 +11,12 @@ export class UsersUnavailableError extends UserError {
     super('The user directory is currently unavailable. Please try again.', { cause });
   }
 }
+
+/** No user account exists for the given id. */
+export class UserNotFoundError extends UserError {
+  public readonly code = 'USER_NOT_FOUND';
+
+  public constructor(id: string) {
+    super(`No user found for id "${id}".`, { context: { id } });
+  }
+}

@@ -13,37 +13,81 @@
   padding: 3rem 0;
 }
 
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.row {
-  display: grid;
-  grid-template-columns: minmax(200px, 2fr) auto auto minmax(90px, 1fr) minmax(110px, 1fr);
-  align-items: center;
-  gap: 1.25rem;
-  padding: 1rem 1.25rem;
+.card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xs);
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+/* Toggle lists (Platform / Security) */
+.toggles {
+  display: flex;
+  flex-direction: column;
+}
+
+.toggles > * {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.toggles > *:last-child {
+  border-bottom: none;
+}
+
+/* Users table */
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-text-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: var(--color-surface-muted);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.tr {
+  border-top: 1px solid var(--color-border);
+}
+
+.cell {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+.cellMuted {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.cellSubtle {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+  color: var(--color-text-subtle);
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 .person {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.75rem;
   min-width: 0;
 }
 
@@ -55,26 +99,12 @@
 }
 
 .name {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-text);
 }
 
 .email {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--color-text-subtle);
-}
-
-.meta {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-text-subtle);
-  white-space: nowrap;
-}
-
-@media (max-width: 720px) {
-  .row {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
 }

@@ -1,108 +1,109 @@
-import { useMemo, type ReactElement } from 'react';
-import { UserCheck, Users as UsersIcon } from 'lucide-react';
-import {
-  Alert,
-  Avatar,
-  Badge,
-  type BadgeTone,
-  EmptyState,
-  PageHeader,
-  Spinner,
-  StatCard,
-} from '@shared/ui';
-import type { UserAccount, UserRole } from '../domain';
-import { useUsers } from './use-users';
+import { useMemo, useState, type ReactElement } from 'react';
+import { Alert, PageHeader, Spinner, Tabs, TabsPanel } from '@shared/ui';
+import type { UserAccount } from '../domain';
+import { useSetUserStatus, useUsers } from './use-users';
+import { SettingsToggles, type ToggleSetting } from './SettingsToggles';
+import { UsersTable } from './UsersTable';
 import styles from './AdminSettingsPage.module.css';
 
-const ROLE_TONE: Record<UserRole, BadgeTone> = {
-  admin: 'danger',
-  manager: 'info',
-  consultant: 'primary',
-};
+const PLATFORM_SETTINGS: readonly ToggleSetting[] = [
+  {
+    key: 'catalog',
+    label: 'Enable Public Catalog',
+    description: 'Show course catalog to logged-in users by default',
+    defaultOn: true,
+  },
+  {
+    key: 'approval',
+    label: 'Require Admin Approval',
+    description: 'New content must be approved before publishing',
+    defaultOn: true,
+  },
+  {
+    key: 'self-enrol',
+    label: 'Allow Self-Enrolment',
+    description: 'Let users enrol in optional courses on their own',
+    defaultOn: false,
+  },
+  {
+    key: 'email',
+    label: 'Email Notifications',
+    description: 'Send platform updates by email',
+    defaultOn: true,
+  },
+];
 
-const ROLE_LABEL: Record<UserRole, string> = {
-  admin: 'Admin',
-  manager: 'Manager',
-  consultant: 'Consultant',
-};
+const SECURITY_SETTINGS: readonly ToggleSetting[] = [
+  {
+    key: '2fa',
+    label: 'Two-Factor Auth Required',
+    description: 'Force 2FA for all admin accounts',
+    defaultOn: true,
+  },
+  {
+    key: 'audit',
+    label: 'Audit Logging',
+    description: 'Log all admin actions for compliance',
+    defaultOn: true,
+  },
+  {
+    key: 'ip',
+    label: 'IP Restrictions',
+    description: 'Restrict access to known office IP ranges',
+    defaultOn: false,
+  },
+];
 
-const UserRow = ({ user }: { readonly user: UserAccount }): ReactElement => {
-  const active = user.isActive();
-  return (
-    <li className={styles.row}>
-      <div className={styles.person}>
-        <Avatar name={user.name} online={active} />
-        <div className={styles.identity}>
-          <span className={styles.name}>{user.name}</span>
-          <span className={styles.email}>{user.email}</span>
-        </div>
-      </div>
-      <Badge tone={ROLE_TONE[user.role]}>{ROLE_LABEL[user.role]}</Badge>
-      <Badge tone={active ? 'success' : 'neutral'}>
-        {active ? 'Active' : 'Inactive'}
-      </Badge>
-      <span className={styles.meta}>{user.joined}</span>
-      <span className={styles.meta}>{user.lastActive}</span>
-    </li>
-  );
-};
-
-/** Routed admin Settings page: platform user directory with role and status. */
+/** Routed admin Settings page: platform switches, user directory, and security controls. */
 export const AdminSettingsPage = (): ReactElement => {
   const users = useUsers();
+  const setStatus = useSetUserStatus();
+  const [section, setSection] = useState('platform');
   const accounts = useMemo(() => users.data ?? [], [users.data]);
-  const activeCount = useMemo(
-    () => accounts.filter((account) => account.isActive()).length,
-    [accounts],
-  );
+  const busyId = setStatus.isPending ? setStatus.variables.id : null;
+
+  const toggle = (user: UserAccount): void => {
+    setStatus.mutate({ id: user.id, status: user.isActive() ? 'inactive' : 'active' });
+  };
 
   return (
     <section className={styles.screen}>
-      <PageHeader title="Settings" subtitle="Manage platform users and access" />
+      <PageHeader
+        title="Platform Settings"
+        subtitle="Configure platform-wide settings and users"
+      />
 
-      {users.isLoading ? (
-        <div className={styles.center}>
-          <Spinner size="lg" label="Loading users" />
-        </div>
-      ) : null}
-
-      {users.isError ? (
-        <Alert tone="error" title="Could not load users">
-          {users.error.message}
-        </Alert>
-      ) : null}
-
-      {!users.isLoading && !users.isError ? (
-        <>
-          <div className={styles.stats}>
-            <StatCard
-              label="Total users"
-              value={accounts.length}
-              icon={UsersIcon}
-              tone="primary"
-            />
-            <StatCard
-              label="Active"
-              value={activeCount}
-              icon={UserCheck}
-              tone="success"
-            />
-          </div>
-
-          {accounts.length === 0 ? (
-            <EmptyState
-              title="No users yet"
-              description="Invite colleagues to manage their access here."
-            />
-          ) : (
-            <ul className={styles.list}>
-              {accounts.map((account) => (
-                <UserRow key={account.id} user={account} />
-              ))}
-            </ul>
-          )}
-        </>
-      ) : null}
+      <div className={styles.card}>
+        <Tabs
+          value={section}
+          onValueChange={setSection}
+          tabs={[
+            { value: 'platform', label: 'Platform' },
+            { value: 'users', label: `Users (${String(accounts.length)})` },
+            { value: 'security', label: 'Security' },
+          ]}
+        >
+          <TabsPanel value="platform">
+            <SettingsToggles settings={PLATFORM_SETTINGS} />
+          </TabsPanel>
+          <TabsPanel value="users">
+            {users.isLoading ? (
+              <div className={styles.center}>
+                <Spinner size="lg" label="Loading users" />
+              </div>
+            ) : users.isError ? (
+              <Alert tone="error" title="Could not load users">
+                {users.error.message}
+              </Alert>
+            ) : (
+              <UsersTable users={accounts} busyId={busyId} onToggle={toggle} />
+            )}
+          </TabsPanel>
+          <TabsPanel value="security">
+            <SettingsToggles settings={SECURITY_SETTINGS} />
+          </TabsPanel>
+        </Tabs>
+      </div>
     </section>
   );
 };

@@ -1,6 +1,13 @@
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type UseMutationResult,
+  type UseQueryResult,
+} from '@tanstack/react-query';
 import { isErr } from '@core/result';
 import type { UserAccount } from '../domain';
+import type { SetUserStatusInput } from '../application';
 import { useUsersModule } from './use-users-module';
 
 /** Stable query key for the user directory. */
@@ -18,6 +25,28 @@ export const useUsers = (): UseQueryResult<readonly UserAccount[]> => {
         throw result.error;
       }
       return result.value;
+    },
+  });
+};
+
+/** Mutation to activate/deactivate a user; refreshes the directory on success. */
+export const useSetUserStatus = (): UseMutationResult<
+  UserAccount,
+  Error,
+  SetUserStatusInput
+> => {
+  const { setUserStatus } = useUsersModule();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: SetUserStatusInput): Promise<UserAccount> => {
+      const result = await setUserStatus.execute(input);
+      if (isErr(result)) {
+        throw result.error;
+      }
+      return result.value;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: usersQueryKey });
     },
   });
 };

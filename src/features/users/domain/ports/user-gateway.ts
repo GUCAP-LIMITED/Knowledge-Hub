@@ -9,4 +9,10 @@ import type { UserAccount } from '../entities/user-account';
 export interface UserGateway {
   /** Fetch every platform user account. */
   list(): Promise<Result<readonly UserAccount[], UserError>>;
+
+  /** Fetch a single account by id. */
+  getById(id: string): Promise<Result<UserAccount, UserError>>;
+
+  /** Persist an updated account (after a status change) and return it. */
+  save(user: UserAccount): Promise<Result<UserAccount, UserError>>;
 }

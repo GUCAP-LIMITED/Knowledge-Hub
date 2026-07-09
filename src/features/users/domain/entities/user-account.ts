@@ -41,4 +41,17 @@ export class UserAccount {
   public isActive(): boolean {
     return this.status === 'active';
   }
+
+  /** Return a copy of this account with a new status (immutable transition). */
+  public withStatus(status: UserStatus): UserAccount {
+    return new UserAccount({
+      id: this.id,
+      name: this.name,
+      email: this.email,
+      role: this.role,
+      status,
+      joined: this.joined,
+      lastActive: this.lastActive,
+    });
+  }
 }
