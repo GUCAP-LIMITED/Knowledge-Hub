@@ -28,6 +28,27 @@ export const useAllReviews = (): UseQueryResult<readonly Review[]> => {
   });
 };
 
+export const courseReviewsQueryKey = (courseId: string): readonly string[] => [
+  'course-reviews',
+  'course',
+  courseId,
+];
+
+/** Reviews for a single course. */
+export const useCourseReviews = (courseId: string): UseQueryResult<readonly Review[]> => {
+  const { listCourseReviews } = useCourseReviewsModule();
+  return useQuery({
+    queryKey: courseReviewsQueryKey(courseId),
+    queryFn: async (): Promise<readonly Review[]> => {
+      const result = await listCourseReviews.execute(courseId);
+      if (isErr(result)) {
+        throw result.error;
+      }
+      return result.value;
+    },
+  });
+};
+
 const useInvalidateReviews = (): (() => void) => {
   const queryClient = useQueryClient();
   return () => {

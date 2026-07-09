@@ -54,6 +54,8 @@
 
 .cardTitle {
   margin: 0;
+  text-decoration: none;
+  color: inherit;
   font-size: 1.05rem;
   font-weight: 700;
   line-height: 1.3;

@@ -10,6 +10,8 @@ export {
 export {
   CourseReviewsModuleProvider,
   useAllReviews,
+  useCourseReviews,
+  CourseReviewsPanel,
   useSubmitReview,
   useMarkReviewHelpful,
   useDeleteReview,

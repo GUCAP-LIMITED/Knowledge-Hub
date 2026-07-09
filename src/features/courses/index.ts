@@ -10,6 +10,7 @@ export {
 export {
   CoursesModuleProvider,
   useCourses,
+  useCourse,
   useUpdateCourseProgress,
   coursesQueryKey,
 } from './presentation';

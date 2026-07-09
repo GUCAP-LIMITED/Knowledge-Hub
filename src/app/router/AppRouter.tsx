@@ -12,6 +12,9 @@ const DashboardPage = lazy(async () => ({
 const CoursesPage = lazy(async () => ({
   default: (await import('@features/courses/presentation/CoursesPage')).CoursesPage,
 }));
+const CourseDetailPage = lazy(async () => ({
+  default: (await import('@app/pages/CourseDetailPage')).CourseDetailPage,
+}));
 const TutorialsPage = lazy(async () => ({
   default: (await import('@features/tutorials/presentation/TutorialsPage')).TutorialsPage,
 }));
@@ -61,6 +64,7 @@ export const AppRouter = (): ReactElement => {
           <Route element={<AppLayout />}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/courses" element={<CoursesPage />} />
+            <Route path="/courses/:id" element={<CourseDetailPage />} />
             <Route path="/tutorials" element={<TutorialsPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/certificates" element={<CertificatesPage />} />

@@ -3,6 +3,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { AnimatePresence, motion } from 'motion/react';
 import { IconButton } from '@shared/ui/IconButton/IconButton';
 import { fade, popIn } from '@shared/ui/motion/presets';
+import { cn } from '@shared/utils';
 import styles from './Modal.module.css';
 
 export interface ModalProps {
@@ -12,6 +13,7 @@ export interface ModalProps {
   readonly description?: string | undefined;
   readonly children: ReactNode;
   readonly footer?: ReactNode;
+  readonly size?: 'md' | 'lg';
 }
 
 const MotionOverlay = motion.create(Dialog.Overlay);
@@ -29,6 +31,7 @@ export const Modal = ({
   description,
   children,
   footer,
+  size = 'md',
 }: ModalProps): ReactElement => {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -43,7 +46,7 @@ export const Modal = ({
               exit="exit"
             />
             <MotionContent
-              className={styles.content}
+              className={cn(styles.content, size === 'lg' && styles.lg)}
               variants={popIn}
               initial="hidden"
               animate="visible"

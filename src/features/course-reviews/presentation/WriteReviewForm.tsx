@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type UseFormRegister } from 'react-hook-form';
 import { Button } from '@shared/ui';
 import { domainResolver } from '@shared/forms';
 import { Rating, ReviewFeedback } from '../domain';
@@ -13,15 +13,37 @@ interface FormValues {
   feedback: string;
 }
 
+const CourseSelect = ({
+  register,
+}: {
+  readonly register: UseFormRegister<FormValues>;
+}): ReactElement => (
+  <div className={styles.field}>
+    <label className={styles.label} htmlFor="review-course">
+      Course
+    </label>
+    <select id="review-course" className={styles.select} {...register('courseId')}>
+      {REVIEWABLE_COURSES.map((course) => (
+        <option key={course.id} value={course.id}>
+          {course.name}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+
 export interface WriteReviewFormProps {
   readonly isSubmitting: boolean;
   readonly onSubmit: (values: FormValues) => void;
+  /** When set, the review is scoped to this course and the picker is hidden. */
+  readonly lockedCourse?: { readonly id: string; readonly name: string };
 }
 
 /** Rate and review a course. Rating + comment are validated by their domain value objects. */
 export const WriteReviewForm = ({
   isSubmitting,
   onSubmit,
+  lockedCourse,
 }: WriteReviewFormProps): ReactElement => {
   const {
     register,
@@ -35,10 +57,12 @@ export const WriteReviewForm = ({
       rating: (value) => Rating.create(value),
       feedback: (value) => ReviewFeedback.create(value),
     }),
-    defaultValues: { courseId: REVIEWABLE_COURSES[0]?.id ?? '', rating: 0, feedback: '' },
+    defaultValues: {
+      courseId: lockedCourse?.id ?? REVIEWABLE_COURSES[0]?.id ?? '',
+      rating: 0,
+      feedback: '',
+    },
   });
-
-  const rating = watch('rating');
 
   const submit = handleSubmit((values) => {
     onSubmit(values);
@@ -52,23 +76,12 @@ export const WriteReviewForm = ({
         void submit(event);
       }}
     >
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="review-course">
-          Course
-        </label>
-        <select id="review-course" className={styles.select} {...register('courseId')}>
-          {REVIEWABLE_COURSES.map((course) => (
-            <option key={course.id} value={course.id}>
-              {course.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      {lockedCourse === undefined ? <CourseSelect register={register} /> : null}
 
       <div className={styles.field}>
         <span className={styles.label}>Your rating</span>
         <StarRating
-          value={rating}
+          value={watch('rating')}
           onChange={(next) => {
             setValue('rating', next, { shouldValidate: true });
           }}

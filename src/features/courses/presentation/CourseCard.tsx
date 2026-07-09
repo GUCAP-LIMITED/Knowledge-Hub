@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import { Link } from 'react-router-dom';
 import { BookOpen, Clock, Star, Users } from 'lucide-react';
 import { Badge, Button, CategoryBadge, ProgressBar } from '@shared/ui';
 import type { Course } from '../domain';
@@ -28,7 +29,9 @@ export const CourseCard = ({
       <CategoryBadge category={course.category} />
       {course.mandatory ? <Badge tone="secondary">Required</Badge> : null}
     </div>
-    <h2 className={styles.cardTitle}>{course.title}</h2>
+    <Link to={`/courses/${course.id}`} className={styles.cardTitle}>
+      {course.title}
+    </Link>
     <div className={styles.metaRow}>
       <span className={styles.metaItem}>
         <Clock size={14} aria-hidden="true" /> {course.duration}

@@ -25,6 +25,10 @@
   z-index: 51;
 }
 
+.lg {
+  max-width: 760px;
+}
+
 .content:focus-visible {
   outline: none;
 }

@@ -28,6 +28,23 @@ export const useCourses = (): UseQueryResult<readonly Course[]> => {
   });
 };
 
+export const courseQueryKey = (id: string): readonly string[] => ['courses', id];
+
+/** Single-course query for the detail page. */
+export const useCourse = (id: string): UseQueryResult<Course> => {
+  const { getCourse } = useCoursesModule();
+  return useQuery({
+    queryKey: courseQueryKey(id),
+    queryFn: async (): Promise<Course> => {
+      const result = await getCourse.execute(id);
+      if (isErr(result)) {
+        throw result.error;
+      }
+      return result.value;
+    },
+  });
+};
+
 export interface UpdateCourseProgressInput {
   readonly id: string;
   readonly progress: number;
