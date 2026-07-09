@@ -1,41 +1,44 @@
 import { useMemo, useState, type ReactElement } from 'react';
-import { Alert, EmptyState, PageHeader, Spinner, TextField } from '@shared/ui';
-import type { Resource } from '../domain';
-import { useMarkResourceHelpful, useResources } from './use-resources';
-import { ResourceCard } from './ResourceCard';
+import { Alert, PageHeader, Spinner, TextField } from '@shared/ui';
+import { useResources } from './use-resources';
+import { ArticleResults, CategoryCards, PopularArticles } from './ResourcesParts';
+import { groupByCategory, mostViewed } from './resources-categories';
 import styles from './ResourcesPage.module.css';
 
-/** Routed knowledge-base page with search. */
+/** Routed knowledge-base page: category cards + popular articles, or filtered results. */
 export const ResourcesPage = (): ReactElement => {
   const resources = useResources();
-  const markHelpful = useMarkResourceHelpful();
   const [query, setQuery] = useState('');
+  const [category, setCategory] = useState<string | null>(null);
 
-  const handleHelpful = (resource: Resource): void => {
-    markHelpful.mutate({ id: resource.id });
+  const all = useMemo(() => resources.data ?? [], [resources.data]);
+  const categories = useMemo(() => groupByCategory(all), [all]);
+  const popular = useMemo(() => mostViewed(all), [all]);
+
+  const q = query.trim().toLowerCase();
+  const browsing = category === null && q === '';
+  const results = all.filter(
+    (resource) =>
+      (category === null || resource.category === category) &&
+      (q === '' || resource.title.toLowerCase().includes(q)),
+  );
+
+  const back = (): void => {
+    setCategory(null);
+    setQuery('');
   };
-
-  const visible = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return (resources.data ?? []).filter(
-      (resource) =>
-        q === '' ||
-        resource.title.toLowerCase().includes(q) ||
-        resource.category.toLowerCase().includes(q),
-    );
-  }, [resources.data, query]);
 
   return (
     <section className={styles.screen}>
       <PageHeader
-        title="Knowledge Base"
-        subtitle="Guides, policies and references for the team."
+        title="Resources"
+        subtitle="Knowledge base, policies, guides, and FAQs."
       />
 
       <div className={styles.toolbar}>
         <TextField
           label="Search"
-          placeholder="Search resources…"
+          placeholder="Search articles, guides, FAQs…"
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
@@ -55,21 +58,19 @@ export const ResourcesPage = (): ReactElement => {
         </Alert>
       ) : null}
 
-      {!resources.isLoading && !resources.isError && visible.length === 0 ? (
-        <EmptyState title="No resources match" description="Try a different search." />
-      ) : null}
-
-      {visible.length > 0 ? (
-        <div className={styles.grid}>
-          {visible.map((resource) => (
-            <ResourceCard
-              key={resource.id}
-              resource={resource}
-              isBusy={markHelpful.isPending}
-              onHelpful={handleHelpful}
-            />
-          ))}
-        </div>
+      {!resources.isLoading && !resources.isError ? (
+        browsing ? (
+          <>
+            <CategoryCards categories={categories} onSelect={setCategory} />
+            <PopularArticles resources={popular} />
+          </>
+        ) : (
+          <ArticleResults
+            heading={category ?? `Search results for “${query}”`}
+            resources={results}
+            onBack={back}
+          />
+        )
       ) : null}
     </section>
   );
