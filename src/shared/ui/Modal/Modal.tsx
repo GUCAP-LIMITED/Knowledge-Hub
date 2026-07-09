@@ -1,8 +1,6 @@
 import type { ReactElement, ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { AnimatePresence, motion } from 'motion/react';
 import { IconButton } from '@shared/ui/IconButton/IconButton';
-import { fade, popIn } from '@shared/ui/motion/presets';
 import { cn } from '@shared/utils';
 import styles from './Modal.module.css';
 
@@ -16,13 +14,11 @@ export interface ModalProps {
   readonly size?: 'md' | 'lg';
 }
 
-const MotionOverlay = motion.create(Dialog.Overlay);
-const MotionContent = motion.create(Dialog.Content);
-
 /**
- * Accessible modal dialog. Radix owns focus trapping, `Esc`/overlay dismissal and ARIA wiring;
- * Motion animates the enter/exit (reduced-motion aware via the app-level `MotionConfig`). All
- * styling is token-driven CSS modules — no inline styles.
+ * Accessible modal dialog. Radix owns focus trapping, `Esc`/overlay dismissal and ARIA wiring; the
+ * enter transition is a plain CSS animation keyed off Radix's `data-state` (no JS animation library),
+ * so the content is always painted at full opacity even if the animation is skipped. Styling is
+ * token-driven CSS Modules — no inline styles.
  */
 export const Modal = ({
   open,
@@ -35,48 +31,32 @@ export const Modal = ({
 }: ModalProps): ReactElement => {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <AnimatePresence>
-        {open ? (
-          <Dialog.Portal forceMount>
-            <MotionOverlay
-              className={styles.overlay}
-              variants={fade}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            />
-            <MotionContent
-              className={cn(styles.content, size === 'lg' && styles.lg)}
-              variants={popIn}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            >
-              <header className={styles.header}>
-                <div className={styles.heading}>
-                  <Dialog.Title className={styles.title}>{title}</Dialog.Title>
-                  {description !== undefined ? (
-                    <Dialog.Description className={styles.description}>
-                      {description}
-                    </Dialog.Description>
-                  ) : null}
-                </div>
-                <Dialog.Close asChild>
-                  <IconButton label="Close dialog">
-                    <CloseIcon />
-                  </IconButton>
-                </Dialog.Close>
-              </header>
-
-              <div className={styles.body}>{children}</div>
-
-              {footer !== undefined ? (
-                <footer className={styles.footer}>{footer}</footer>
+      <Dialog.Portal>
+        <Dialog.Overlay className={styles.overlay} />
+        <Dialog.Content className={cn(styles.content, size === 'lg' && styles.lg)}>
+          <header className={styles.header}>
+            <div className={styles.heading}>
+              <Dialog.Title className={styles.title}>{title}</Dialog.Title>
+              {description !== undefined ? (
+                <Dialog.Description className={styles.description}>
+                  {description}
+                </Dialog.Description>
               ) : null}
-            </MotionContent>
-          </Dialog.Portal>
-        ) : null}
-      </AnimatePresence>
+            </div>
+            <Dialog.Close asChild>
+              <IconButton label="Close dialog">
+                <CloseIcon />
+              </IconButton>
+            </Dialog.Close>
+          </header>
+
+          <div className={styles.body}>{children}</div>
+
+          {footer !== undefined ? (
+            <footer className={styles.footer}>{footer}</footer>
+          ) : null}
+        </Dialog.Content>
+      </Dialog.Portal>
     </Dialog.Root>
   );
 };
