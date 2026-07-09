@@ -8,10 +8,25 @@
 }
 
 .toolbar {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   gap: 0.75rem;
-  align-items: end;
+  padding: 1.1rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.toolbarSearch {
+  flex: 3 1 220px;
+  min-width: 0;
+}
+
+.toolbarCell {
+  flex: 1 1 140px;
+  min-width: 0;
 }
 
 .center {
@@ -79,10 +94,4 @@
 
 .star {
   color: var(--color-warning);
-}
-
-@media (max-width: 720px) {
-  .toolbar {
-    grid-template-columns: 1fr;
-  }
 }
