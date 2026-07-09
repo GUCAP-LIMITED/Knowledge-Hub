@@ -1,4 +1,5 @@
 import type { ReactElement, ReactNode } from 'react';
+import { FileText } from 'lucide-react';
 import type { Submission } from '../domain';
 import { StatusBadge } from './StatusBadge';
 import styles from './SubmissionRow.module.css';
@@ -9,24 +10,29 @@ export interface SubmissionRowProps {
   readonly children?: ReactNode;
 }
 
-/** A single submission line: title + status + metadata, with an optional action slot. */
+/** A single submission line: file tile + title + status + metadata, with an optional action slot. */
 export const SubmissionRow = ({
   submission,
   children,
 }: SubmissionRowProps): ReactElement => (
   <article className={styles.row}>
-    <div className={styles.info}>
-      <div className={styles.titleLine}>
-        <h3 className={styles.title}>{submission.title}</h3>
-        <StatusBadge status={submission.status} />
+    <div className={styles.lead}>
+      <span className={styles.iconTile}>
+        <FileText size={20} aria-hidden="true" />
+      </span>
+      <div className={styles.info}>
+        <div className={styles.titleLine}>
+          <h3 className={styles.title}>{submission.title}</h3>
+          <StatusBadge status={submission.status} />
+        </div>
+        <p className={styles.meta}>
+          Submitted by {submission.submittedBy} ·{' '}
+          {submission.submittedAt.toLocaleDateString()} · {submission.type}
+        </p>
+        {submission.note !== null ? (
+          <p className={styles.note}>“{submission.note}”</p>
+        ) : null}
       </div>
-      <p className={styles.meta}>
-        {submission.type} · {submission.submittedBy} ·{' '}
-        {submission.submittedAt.toLocaleDateString()}
-      </p>
-      {submission.note !== null ? (
-        <p className={styles.note}>“{submission.note}”</p>
-      ) : null}
     </div>
     {children !== undefined ? <div className={styles.actions}>{children}</div> : null}
   </article>
