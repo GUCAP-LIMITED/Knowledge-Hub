@@ -41,6 +41,15 @@ const ApprovalsPage = lazy(async () => ({
   default: (await import('@features/submissions/presentation/ApprovalsPage'))
     .ApprovalsPage,
 }));
+const MyLearningPage = lazy(async () => ({
+  default: (await import('@app/pages/MyLearningPage')).MyLearningPage,
+}));
+const ProfilePage = lazy(async () => ({
+  default: (await import('@app/pages/ProfilePage')).ProfilePage,
+}));
+const UserSettingsPage = lazy(async () => ({
+  default: (await import('@app/pages/UserSettingsPage')).UserSettingsPage,
+}));
 const ForbiddenPage = lazy(async () => ({
   default: (await import('@app/pages/ForbiddenPage')).ForbiddenPage,
 }));
@@ -69,6 +78,9 @@ export const AppRouter = (): ReactElement => {
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/certificates" element={<CertificatesPage />} />
             <Route path="/reviews" element={<ReviewsPage />} />
+            <Route path="/my-learning" element={<MyLearningPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/user-settings" element={<UserSettingsPage />} />
 
             {/* Content workspace — managers and admins. */}
             <Route element={<ProtectedRoute anyOf={['admin', 'manager']} />}>

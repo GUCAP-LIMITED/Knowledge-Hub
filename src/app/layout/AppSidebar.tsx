@@ -6,6 +6,7 @@ import {
   Lightbulb,
   FolderOpen,
   Award,
+  BookOpen,
   Star,
   FileCheck,
   ClipboardList,
@@ -33,6 +34,7 @@ type NavEntry =
 const NAV: readonly NavEntry[] = [
   { kind: 'section', label: 'Learn' },
   { kind: 'link', to: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { kind: 'link', to: '/my-learning', label: 'My Learning', icon: BookOpen },
   { kind: 'link', to: '/courses', label: 'Courses', icon: PlayCircle },
   { kind: 'link', to: '/tutorials', label: 'Tutorials', icon: Lightbulb },
   { kind: 'link', to: '/resources', label: 'Resources', icon: FolderOpen },

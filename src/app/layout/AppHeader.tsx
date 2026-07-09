@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
-import { LogOut, Moon, Sun } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { LogOut, Moon, Settings, Sun, User } from 'lucide-react';
 import { Avatar, DropdownMenu, IconButton } from '@shared/ui';
 import type { AuthenticatedUser } from '@features/auth';
 import { useTheme } from '@app/theme/use-theme';
@@ -13,6 +14,7 @@ export interface AppHeaderProps {
 /** Top bar: theme toggle + user menu. */
 export const AppHeader = ({ user, onSignOut }: AppHeaderProps): ReactElement => {
   const { theme, toggle } = useTheme();
+  const navigate = useNavigate();
   const name = user?.fullName ?? 'Guest';
   const roleLabel = user?.userType ?? null;
 
@@ -27,6 +29,20 @@ export const AppHeader = ({ user, onSignOut }: AppHeaderProps): ReactElement => 
       <DropdownMenu
         align="end"
         items={[
+          {
+            label: 'Profile',
+            icon: <User size={16} />,
+            onSelect: () => {
+              navigate('/profile');
+            },
+          },
+          {
+            label: 'Settings',
+            icon: <Settings size={16} />,
+            onSelect: () => {
+              navigate('/user-settings');
+            },
+          },
           {
             label: 'Sign out',
             danger: true,
