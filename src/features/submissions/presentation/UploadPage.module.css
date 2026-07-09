@@ -14,6 +14,53 @@
   box-shadow: var(--shadow-xs);
 }
 
+/* Step 2 — multi-slot uploads */
+.slotGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.9rem;
+}
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.slotHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.slotLabel {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.req {
+  color: var(--color-danger);
+}
+.slotAccept {
+  font-size: 0.68rem;
+  color: var(--color-text-subtle);
+}
+.slotZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 1.1rem;
+  text-align: center;
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-muted);
+  cursor: pointer;
+  position: relative;
+}
+.slotHint {
+  font-size: 0.74rem;
+  color: var(--color-text-subtle);
+}
+
 /* Step 1 — type selection */
 .typeGrid {
   display: grid;

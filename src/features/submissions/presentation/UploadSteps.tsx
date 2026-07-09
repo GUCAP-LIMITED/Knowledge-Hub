@@ -1,6 +1,6 @@
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useForm } from 'react-hook-form';
-import { Check, FileText, PlusCircle, UploadCloud } from 'lucide-react';
+import { Check, PlusCircle } from 'lucide-react';
 import { Button, TextField, Textarea } from '@shared/ui';
 import { cn } from '@shared/utils';
 import { domainResolver } from '@shared/forms';
@@ -13,81 +13,6 @@ export interface Details {
   type: string;
   description: string;
 }
-export interface PickedFile {
-  name: string;
-  size: number;
-}
-
-const formatSize = (bytes: number): string =>
-  bytes < 1024 * 1024
-    ? `${(bytes / 1024).toFixed(0)} KB`
-    : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-
-export const FileStep = ({
-  file,
-  onFile,
-}: {
-  readonly file: PickedFile | null;
-  readonly onFile: (file: PickedFile | null) => void;
-}): ReactElement => {
-  const [drag, setDrag] = useState(false);
-  const pick = (list: FileList | null): void => {
-    const first = list?.[0];
-    if (first) {
-      onFile({ name: first.name, size: first.size });
-    }
-  };
-  return (
-    <div>
-      <label
-        className={cn(styles.dropzone, drag && styles.dropzoneActive)}
-        onDragOver={(event) => {
-          event.preventDefault();
-          setDrag(true);
-        }}
-        onDragLeave={() => {
-          setDrag(false);
-        }}
-        onDrop={(event) => {
-          event.preventDefault();
-          setDrag(false);
-          pick(event.dataTransfer.files);
-        }}
-      >
-        <UploadCloud size={34} aria-hidden="true" className={styles.dropIcon} />
-        <span className={styles.dropTitle}>
-          {drag ? 'Release to upload' : 'Drag & drop a file, or browse'}
-        </span>
-        <span className={styles.dropHint}>
-          PDF, DOCX, XLSX, PPTX, MP4 or image · up to 50MB
-        </span>
-        <input
-          type="file"
-          className={styles.fileInput}
-          onChange={(event) => {
-            pick(event.target.files);
-          }}
-        />
-      </label>
-      {file !== null ? (
-        <div className={styles.fileChip}>
-          <FileText size={18} aria-hidden="true" />
-          <span className={styles.fileName}>{file.name}</span>
-          <span className={styles.fileSize}>{formatSize(file.size)}</span>
-          <button
-            type="button"
-            className={styles.fileRemove}
-            onClick={() => {
-              onFile(null);
-            }}
-          >
-            Remove
-          </button>
-        </div>
-      ) : null}
-    </div>
-  );
-};
 
 export const DetailsStep = ({
   defaults,
@@ -132,12 +57,12 @@ export const DetailsStep = ({
 
 export const ReviewSummary = ({
   details,
-  file,
+  fileCount,
   isAdmin,
   sections,
 }: {
   readonly details: Details;
-  readonly file: PickedFile | null;
+  readonly fileCount: number;
   readonly isAdmin: boolean;
   readonly sections: readonly Section[] | null;
 }): ReactElement => {
@@ -150,11 +75,13 @@ export const ReviewSummary = ({
       </div>
       <div>
         <dt>Title</dt>
-        <dd>{details.title}</dd>
+        <dd>{details.title || '—'}</dd>
       </div>
       <div>
-        <dt>File</dt>
-        <dd>{file?.name ?? '—'}</dd>
+        <dt>Files</dt>
+        <dd>
+          {fileCount} file{fileCount === 1 ? '' : 's'}
+        </dd>
       </div>
       {sections !== null ? (
         <div>

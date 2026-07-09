@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import { useAuth } from '@features/auth';
 import { useSubmitContent } from './use-submissions';
-import type { Details, PickedFile } from './UploadSteps';
+import type { Details } from './UploadSteps';
 import {
   type ContentTypeKey,
   type Section,
+  type SlotFiles,
   type StepKey,
+  type UploadSlot,
+  requiredSlotsFilled,
+  slotsFor,
   stepsFor,
+  totalFileCount,
   typeLabel,
 } from './upload-content-types';
 
@@ -18,12 +23,15 @@ export interface UploadFlow {
   readonly steps: readonly StepKey[];
   readonly current: number;
   readonly contentType: ContentTypeKey | null;
-  readonly file: PickedFile | null;
+  readonly slots: readonly UploadSlot[];
+  readonly files: SlotFiles;
+  readonly fileReady: boolean;
+  readonly fileCount: number;
   readonly details: Details;
   readonly sections: readonly Section[];
   readonly submitError: string | undefined;
   readonly isSubmitting: boolean;
-  readonly setFile: (file: PickedFile | null) => void;
+  readonly setFiles: (files: SlotFiles) => void;
   readonly setSections: (sections: readonly Section[]) => void;
   readonly chooseType: (key: ContentTypeKey) => void;
   readonly submitDetails: (details: Details) => void;
@@ -41,7 +49,7 @@ export const useUploadFlow = (): UploadFlow => {
 
   const [contentType, setContentType] = useState<ContentTypeKey | null>(null);
   const [current, setCurrent] = useState(0);
-  const [file, setFile] = useState<PickedFile | null>(null);
+  const [files, setFiles] = useState<SlotFiles>({});
   const [details, setDetails] = useState<Details>(EMPTY_DETAILS);
   const [sections, setSections] = useState<readonly Section[]>([]);
   const [done, setDone] = useState(false);
@@ -50,7 +58,7 @@ export const useUploadFlow = (): UploadFlow => {
     setDone(false);
     setContentType(null);
     setCurrent(0);
-    setFile(null);
+    setFiles({});
     setDetails(EMPTY_DETAILS);
     setSections([]);
   };
@@ -61,12 +69,15 @@ export const useUploadFlow = (): UploadFlow => {
     steps: stepsFor(contentType),
     current,
     contentType,
-    file,
+    slots: slotsFor(contentType),
+    files,
+    fileReady: requiredSlotsFilled(contentType, files),
+    fileCount: totalFileCount(files),
     details,
     sections,
     submitError: submit.isError ? submit.error.message : undefined,
     isSubmitting: submit.isPending,
-    setFile,
+    setFiles,
     setSections,
     chooseType: (key) => {
       setContentType(key);

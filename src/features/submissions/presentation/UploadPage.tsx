@@ -34,8 +34,10 @@ export const UploadPage = (): ReactElement => {
         current={flow.current}
         contentType={flow.contentType}
         onType={flow.chooseType}
-        file={flow.file}
-        onFile={flow.setFile}
+        slots={flow.slots}
+        files={flow.files}
+        onFiles={flow.setFiles}
+        fileCount={flow.fileCount}
         details={flow.details}
         onDetailsSubmit={flow.submitDetails}
         sections={flow.sections}
@@ -46,7 +48,7 @@ export const UploadPage = (): ReactElement => {
           <UploadFooter
             stepKey={flow.steps[flow.current]}
             isFirst={flow.current === 0}
-            fileReady={flow.file !== null}
+            fileReady={flow.fileReady}
             isAdmin={flow.isAdmin}
             isSubmitting={flow.isSubmitting}
             onBack={flow.back}

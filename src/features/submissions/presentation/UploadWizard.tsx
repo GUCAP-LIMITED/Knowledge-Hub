@@ -2,16 +2,17 @@ import type { ReactElement, ReactNode } from 'react';
 import { Check } from 'lucide-react';
 import { Alert } from '@shared/ui';
 import { cn } from '@shared/utils';
-import { type ContentTypeKey, type Section, type StepKey } from './upload-content-types';
-import { UploadTypeStep } from './UploadTypeStep';
-import { UploadCurriculumStep } from './UploadCurriculumStep';
 import {
-  DetailsStep,
-  FileStep,
-  ReviewSummary,
-  type Details,
-  type PickedFile,
-} from './UploadSteps';
+  type ContentTypeKey,
+  type Section,
+  type SlotFiles,
+  type StepKey,
+  type UploadSlot,
+} from './upload-content-types';
+import { UploadTypeStep } from './UploadTypeStep';
+import { UploadFileStep } from './UploadFileStep';
+import { UploadCurriculumStep } from './UploadCurriculumStep';
+import { DetailsStep, ReviewSummary, type Details } from './UploadSteps';
 import styles from './UploadPage.module.css';
 
 const STEP_LABELS: Record<StepKey, string> = {
@@ -50,8 +51,10 @@ export interface UploadWizardProps {
   readonly current: number;
   readonly contentType: ContentTypeKey | null;
   readonly onType: (key: ContentTypeKey) => void;
-  readonly file: PickedFile | null;
-  readonly onFile: (file: PickedFile | null) => void;
+  readonly slots: readonly UploadSlot[];
+  readonly files: SlotFiles;
+  readonly onFiles: (files: SlotFiles) => void;
+  readonly fileCount: number;
   readonly details: Details;
   readonly onDetailsSubmit: (details: Details) => void;
   readonly sections: readonly Section[];
@@ -70,7 +73,13 @@ const StepBody = (props: UploadWizardProps): ReactElement | null => {
     case 'type':
       return <UploadTypeStep selected={props.contentType} onSelect={props.onType} />;
     case 'file':
-      return <FileStep file={props.file} onFile={props.onFile} />;
+      return (
+        <UploadFileStep
+          slots={props.slots}
+          files={props.files}
+          onChange={props.onFiles}
+        />
+      );
     case 'details':
       return <DetailsStep defaults={props.details} onSubmit={props.onDetailsSubmit} />;
     case 'curriculum':
@@ -81,7 +90,7 @@ const StepBody = (props: UploadWizardProps): ReactElement | null => {
       return (
         <ReviewSummary
           details={props.details}
-          file={props.file}
+          fileCount={props.fileCount}
           isAdmin={props.isAdmin}
           sections={props.contentType === 'course' ? props.sections : null}
         />
