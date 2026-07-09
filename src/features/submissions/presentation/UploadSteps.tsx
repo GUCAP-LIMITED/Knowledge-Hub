@@ -1,25 +1,12 @@
-import { useState, type ReactElement, type ReactNode } from 'react';
+import { useState, type ReactElement } from 'react';
 import { useForm } from 'react-hook-form';
 import { Check, FileText, PlusCircle, UploadCloud } from 'lucide-react';
-import { Alert, Button, Select, TextField, Textarea } from '@shared/ui';
+import { Button, TextField, Textarea } from '@shared/ui';
 import { cn } from '@shared/utils';
 import { domainResolver } from '@shared/forms';
 import { SubmissionTitle } from '../domain';
+import type { Section } from './upload-content-types';
 import styles from './UploadPage.module.css';
-
-const TYPES = [
-  'Document',
-  'Video',
-  'Spreadsheet',
-  'Course',
-  'Tutorial',
-  'Resource',
-] as const;
-const STEPS = [
-  { n: 1, label: 'File' },
-  { n: 2, label: 'Details' },
-  { n: 3, label: 'Review' },
-] as const;
 
 export interface Details {
   title: string;
@@ -36,22 +23,7 @@ const formatSize = (bytes: number): string =>
     ? `${(bytes / 1024).toFixed(0)} KB`
     : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
-const Stepper = ({ step }: { readonly step: number }): ReactElement => (
-  <div className={styles.stepper}>
-    {STEPS.map((entry) => (
-      <div key={entry.n} className={styles.step}>
-        <span className={cn(styles.dot, step >= entry.n && styles.dotActive)}>
-          {step > entry.n ? <Check size={14} aria-hidden="true" /> : entry.n}
-        </span>
-        <span className={cn(styles.stepLabel, step >= entry.n && styles.stepLabelActive)}>
-          {entry.label}
-        </span>
-      </div>
-    ))}
-  </div>
-);
-
-const FileStep = ({
+export const FileStep = ({
   file,
   onFile,
 }: {
@@ -117,7 +89,7 @@ const FileStep = ({
   );
 };
 
-const DetailsStep = ({
+export const DetailsStep = ({
   defaults,
   onSubmit,
 }: {
@@ -144,96 +116,62 @@ const DetailsStep = ({
     >
       <TextField
         label="Title"
-        placeholder="e.g. Updated CV Template"
+        placeholder="e.g. Getting Started with UAPP Portal"
         error={errors.title?.message ?? ''}
         {...register('title')}
       />
-      <Select label="Type" {...register('type')}>
-        {TYPES.map((type) => (
-          <option key={type} value={type}>
-            {type}
-          </option>
-        ))}
-      </Select>
       <Textarea
         label="Description"
         rows={4}
-        placeholder="Briefly describe this document…"
+        placeholder="Briefly describe this content…"
         {...register('description')}
       />
     </form>
   );
 };
 
-const ReviewSummary = ({
+export const ReviewSummary = ({
   details,
   file,
   isAdmin,
+  sections,
 }: {
   readonly details: Details;
   readonly file: PickedFile | null;
   readonly isAdmin: boolean;
-}): ReactElement => (
-  <dl className={styles.summary}>
-    <div>
-      <dt>Title</dt>
-      <dd>{details.title}</dd>
-    </div>
-    <div>
-      <dt>Type</dt>
-      <dd>{details.type}</dd>
-    </div>
-    <div>
-      <dt>File</dt>
-      <dd>{file?.name ?? '—'}</dd>
-    </div>
-    <div>
-      <dt>Visibility</dt>
-      <dd>{isAdmin ? 'Published immediately' : 'Submitted for review'}</dd>
-    </div>
-  </dl>
-);
-
-export const UploadFooter = ({
-  step,
-  fileReady,
-  isAdmin,
-  isSubmitting,
-  onBack,
-  onContinue,
-  onSubmit,
-}: {
-  readonly step: number;
-  readonly fileReady: boolean;
-  readonly isAdmin: boolean;
-  readonly isSubmitting: boolean;
-  readonly onBack: () => void;
-  readonly onContinue: () => void;
-  readonly onSubmit: () => void;
-}): ReactElement => (
-  <div className={styles.footer}>
-    {step > 1 ? (
-      <Button variant="ghost" onClick={onBack}>
-        Back
-      </Button>
-    ) : null}
-    {step === 1 ? (
-      <Button disabled={!fileReady} onClick={onContinue}>
-        Continue
-      </Button>
-    ) : null}
-    {step === 2 ? (
-      <Button type="submit" form="upload-details">
-        Continue
-      </Button>
-    ) : null}
-    {step === 3 ? (
-      <Button isLoading={isSubmitting} onClick={onSubmit}>
-        {isAdmin ? 'Publish now' : 'Submit for review'}
-      </Button>
-    ) : null}
-  </div>
-);
+  readonly sections: readonly Section[] | null;
+}): ReactElement => {
+  const lessonCount = (sections ?? []).reduce((n, s) => n + s.lessons.length, 0);
+  return (
+    <dl className={styles.summary}>
+      <div>
+        <dt>Type</dt>
+        <dd>{details.type}</dd>
+      </div>
+      <div>
+        <dt>Title</dt>
+        <dd>{details.title}</dd>
+      </div>
+      <div>
+        <dt>File</dt>
+        <dd>{file?.name ?? '—'}</dd>
+      </div>
+      {sections !== null ? (
+        <div>
+          <dt>Curriculum</dt>
+          <dd>
+            {sections.length} section{sections.length === 1 ? '' : 's'} · {lessonCount}{' '}
+            lesson{lessonCount === 1 ? '' : 's'}
+          </dd>
+        </div>
+      ) : null}
+      <div>
+        <dt>Visibility</dt>
+        <dd>{isAdmin ? 'Published immediately' : 'Submitted for review'}</dd>
+      </div>
+    </dl>
+  );
+};
 
 export const DoneCard = ({
   isAdmin,
@@ -251,7 +189,7 @@ export const DoneCard = ({
     </h2>
     <p className={styles.doneText}>
       {isAdmin
-        ? 'Your document is now visible to all users.'
+        ? 'Your content is now visible to all users.'
         : 'Admins will review your submission and notify you of the decision.'}
     </p>
     <div className={styles.doneActions}>
@@ -259,40 +197,5 @@ export const DoneCard = ({
         <PlusCircle size={16} aria-hidden="true" /> Upload another
       </Button>
     </div>
-  </div>
-);
-
-export const UploadWizard = ({
-  step,
-  file,
-  onFile,
-  details,
-  onDetailsSubmit,
-  isAdmin,
-  submitError,
-  footer,
-}: {
-  readonly step: number;
-  readonly file: PickedFile | null;
-  readonly onFile: (file: PickedFile | null) => void;
-  readonly details: Details;
-  readonly onDetailsSubmit: (details: Details) => void;
-  readonly isAdmin: boolean;
-  readonly submitError?: string | undefined;
-  readonly footer: ReactNode;
-}): ReactElement => (
-  <div className={styles.card}>
-    <Stepper step={step} />
-    {step === 1 ? <FileStep file={file} onFile={onFile} /> : null}
-    {step === 2 ? <DetailsStep defaults={details} onSubmit={onDetailsSubmit} /> : null}
-    {step === 3 ? (
-      <ReviewSummary details={details} file={file} isAdmin={isAdmin} />
-    ) : null}
-    {submitError !== undefined ? (
-      <Alert tone="error" title="Could not submit">
-        {submitError}
-      </Alert>
-    ) : null}
-    {footer}
   </div>
 );

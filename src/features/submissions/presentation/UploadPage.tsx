@@ -1,56 +1,20 @@
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { PageHeader } from '@shared/ui';
-import { useAuth } from '@features/auth';
-import { useSubmitContent } from './use-submissions';
-import {
-  DoneCard,
-  UploadFooter,
-  UploadWizard,
-  type Details,
-  type PickedFile,
-} from './UploadSteps';
+import { DoneCard } from './UploadSteps';
+import { UploadWizard } from './UploadWizard';
+import { UploadFooter } from './UploadFooter';
+import { useUploadFlow } from './use-upload-flow';
 import styles from './UploadPage.module.css';
 
-const EMPTY_DETAILS: Details = { title: '', type: 'Document', description: '' };
-
-/** Upload Document: a 3-step drag-drop create flow that emits a submission. Admin+manager. */
+/** Upload Document: a type-aware create wizard (type → upload → details → curriculum → review). */
 export const UploadPage = (): ReactElement => {
-  const { user } = useAuth();
-  const submit = useSubmitContent();
-  const isAdmin = user?.hasRole('admin') ?? false;
-  const [step, setStep] = useState(1);
-  const [file, setFile] = useState<PickedFile | null>(null);
-  const [details, setDetails] = useState<Details>(EMPTY_DETAILS);
-  const [done, setDone] = useState(false);
+  const flow = useUploadFlow();
 
-  const reset = (): void => {
-    setDone(false);
-    setStep(1);
-    setFile(null);
-    setDetails(EMPTY_DETAILS);
-  };
-
-  const doSubmit = (): void => {
-    submit.mutate(
-      {
-        title: details.title,
-        type: details.type,
-        submittedBy: user?.fullName ?? 'You',
-        publishDirectly: isAdmin,
-      },
-      {
-        onSuccess: () => {
-          setDone(true);
-        },
-      },
-    );
-  };
-
-  if (done) {
+  if (flow.done) {
     return (
       <section className={styles.screen}>
         <PageHeader title="Upload Document" />
-        <DoneCard isAdmin={isAdmin} onReset={reset} />
+        <DoneCard isAdmin={flow.isAdmin} onReset={flow.reset} />
       </section>
     );
   }
@@ -60,35 +24,34 @@ export const UploadPage = (): ReactElement => {
       <PageHeader
         title="Upload Document"
         subtitle={
-          isAdmin
-            ? 'Publish documents directly to the platform.'
-            : 'Submit documents for admin review.'
+          flow.isAdmin
+            ? 'Publish content directly to the platform.'
+            : 'Submit content for admin review.'
         }
       />
       <UploadWizard
-        step={step}
-        file={file}
-        onFile={setFile}
-        details={details}
-        onDetailsSubmit={(next) => {
-          setDetails(next);
-          setStep(3);
-        }}
-        isAdmin={isAdmin}
-        submitError={submit.isError ? submit.error.message : undefined}
+        steps={flow.steps}
+        current={flow.current}
+        contentType={flow.contentType}
+        onType={flow.chooseType}
+        file={flow.file}
+        onFile={flow.setFile}
+        details={flow.details}
+        onDetailsSubmit={flow.submitDetails}
+        sections={flow.sections}
+        onSections={flow.setSections}
+        isAdmin={flow.isAdmin}
+        submitError={flow.submitError}
         footer={
           <UploadFooter
-            step={step}
-            fileReady={file !== null}
-            isAdmin={isAdmin}
-            isSubmitting={submit.isPending}
-            onBack={() => {
-              setStep(step - 1);
-            }}
-            onContinue={() => {
-              setStep(2);
-            }}
-            onSubmit={doSubmit}
+            stepKey={flow.steps[flow.current]}
+            isFirst={flow.current === 0}
+            fileReady={flow.file !== null}
+            isAdmin={flow.isAdmin}
+            isSubmitting={flow.isSubmitting}
+            onBack={flow.back}
+            onContinue={flow.next}
+            onSubmit={flow.publish}
           />
         }
       />
