@@ -37,11 +37,12 @@ export const UploadPage = (): ReactElement => {
         slots={flow.slots}
         files={flow.files}
         onFiles={flow.setFiles}
-        fileCount={flow.fileCount}
         details={flow.details}
         onDetailsSubmit={flow.submitDetails}
         sections={flow.sections}
         onSections={flow.setSections}
+        missing={flow.missing}
+        author={flow.author}
         isAdmin={flow.isAdmin}
         submitError={flow.submitError}
         footer={

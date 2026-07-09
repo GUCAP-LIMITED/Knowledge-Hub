@@ -128,6 +128,149 @@
   color: var(--color-text-subtle);
 }
 
+/* Step 5 — preview & publish */
+.previewStep {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.deviceSwitch {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+.deviceBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.deviceBtnActive {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.previewStage {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-subtle);
+}
+.frame {
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--color-bg);
+}
+.frameDesktop {
+  max-width: 100%;
+}
+.frameTablet {
+  max-width: 640px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+.frameMobile {
+  max-width: 360px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+.deviceNotch {
+  height: 26px;
+  display: grid;
+  place-items: center;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+.deviceNotch::after {
+  content: '';
+  width: 44px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-border-strong);
+}
+
+/* Learner-facing preview card */
+.preview {
+  background-color: var(--color-surface);
+}
+.previewHero {
+  height: 130px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
+}
+.previewCompact .previewHero {
+  height: 100px;
+}
+.previewPlay {
+  color: rgba(255, 255, 255, 0.4);
+}
+.previewBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.1rem 1.25rem 1.4rem;
+}
+.previewTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.previewTag {
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+.previewTitle {
+  margin: 0.15rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+.previewSubtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+.previewMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+.previewMetaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--color-text-subtle);
+}
+.previewDesc {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+.previewAuthor {
+  margin: 0.35rem 0 0;
+  font-size: 0.74rem;
+  color: var(--color-text-subtle);
+}
+
 /* Step 1 — type selection */
 .typeGrid {
   display: grid;

@@ -1,7 +1,7 @@
 import { BookOpen, FolderOpen, Lightbulb, type LucideIcon } from 'lucide-react';
 
 export type ContentTypeKey = 'course' | 'tutorial' | 'resource';
-export type StepKey = 'type' | 'file' | 'details' | 'curriculum' | 'review';
+export type StepKey = 'type' | 'file' | 'details' | 'curriculum' | 'preview';
 export type SlotAccept = 'image' | 'video' | 'doc' | 'any' | 'single-lesson';
 
 /** A named upload target shown as its own card in the upload step. */
@@ -70,7 +70,7 @@ export const UPLOAD_CONTENT_TYPES: readonly UploadContentType[] = [
       'Completion tracking',
       'Certificate eligible',
     ],
-    steps: ['type', 'file', 'details', 'curriculum', 'review'],
+    steps: ['type', 'file', 'details', 'curriculum', 'preview'],
     slots: [
       {
         id: 'thumbnail',
@@ -112,7 +112,7 @@ export const UPLOAD_CONTENT_TYPES: readonly UploadContentType[] = [
       'Great for how-tos',
       'No curriculum needed',
     ],
-    steps: ['type', 'file', 'details', 'review'],
+    steps: ['type', 'file', 'details', 'preview'],
     slots: [
       {
         id: 'primary',
@@ -135,7 +135,7 @@ export const UPLOAD_CONTENT_TYPES: readonly UploadContentType[] = [
       'Instant to share',
       'No review needed',
     ],
-    steps: ['type', 'file', 'details', 'review'],
+    steps: ['type', 'file', 'details', 'preview'],
     slots: [
       {
         id: 'files',

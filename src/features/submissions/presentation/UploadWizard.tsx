@@ -14,7 +14,7 @@ import { UploadTypeStep } from './UploadTypeStep';
 import { UploadFileStep } from './UploadFileStep';
 import { UploadCurriculumStep } from './UploadCurriculumStep';
 import { DetailsStep } from './UploadDetailsStep';
-import { ReviewSummary } from './UploadSteps';
+import { UploadPreviewStep } from './UploadPreviewStep';
 import styles from './UploadPage.module.css';
 
 const STEP_LABELS: Record<StepKey, string> = {
@@ -22,7 +22,7 @@ const STEP_LABELS: Record<StepKey, string> = {
   file: 'Upload',
   details: 'Details',
   curriculum: 'Curriculum',
-  review: 'Review',
+  preview: 'Preview',
 };
 
 const Stepper = ({
@@ -56,11 +56,12 @@ export interface UploadWizardProps {
   readonly slots: readonly UploadSlot[];
   readonly files: SlotFiles;
   readonly onFiles: (files: SlotFiles) => void;
-  readonly fileCount: number;
   readonly details: Details;
   readonly onDetailsSubmit: (details: Details) => void;
   readonly sections: readonly Section[];
   readonly onSections: (sections: readonly Section[]) => void;
+  readonly missing: readonly string[];
+  readonly author: string;
   readonly isAdmin: boolean;
   readonly submitError?: string | undefined;
   readonly footer: ReactNode;
@@ -88,13 +89,13 @@ const StepBody = (props: UploadWizardProps): ReactElement | null => {
       return (
         <UploadCurriculumStep sections={props.sections} onChange={props.onSections} />
       );
-    case 'review':
+    case 'preview':
       return (
-        <ReviewSummary
+        <UploadPreviewStep
           details={props.details}
-          fileCount={props.fileCount}
-          isAdmin={props.isAdmin}
-          sections={props.contentType === 'course' ? props.sections : null}
+          sections={props.contentType === 'course' ? props.sections : []}
+          author={props.author}
+          missing={props.missing}
         />
       );
   }

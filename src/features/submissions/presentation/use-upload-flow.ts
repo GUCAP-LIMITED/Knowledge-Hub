@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@features/auth';
 import { useSubmitContent } from './use-submissions';
-import { type Details, EMPTY_DETAILS } from './upload-details';
+import { type Details, EMPTY_DETAILS, missingRequired } from './upload-details';
 import {
   type ContentTypeKey,
   type Section,
@@ -11,7 +11,6 @@ import {
   requiredSlotsFilled,
   slotsFor,
   stepsFor,
-  totalFileCount,
   typeLabel,
 } from './upload-content-types';
 
@@ -24,9 +23,10 @@ export interface UploadFlow {
   readonly slots: readonly UploadSlot[];
   readonly files: SlotFiles;
   readonly fileReady: boolean;
-  readonly fileCount: number;
   readonly details: Details;
   readonly sections: readonly Section[];
+  readonly missing: readonly string[];
+  readonly author: string;
   readonly submitError: string | undefined;
   readonly isSubmitting: boolean;
   readonly setFiles: (files: SlotFiles) => void;
@@ -70,9 +70,10 @@ export const useUploadFlow = (): UploadFlow => {
     slots: slotsFor(contentType),
     files,
     fileReady: requiredSlotsFilled(contentType, files),
-    fileCount: totalFileCount(files),
     details,
     sections,
+    missing: missingRequired(details),
+    author: user?.fullName ?? 'You',
     submitError: submit.isError ? submit.error.message : undefined,
     isSubmitting: submit.isPending,
     setFiles,

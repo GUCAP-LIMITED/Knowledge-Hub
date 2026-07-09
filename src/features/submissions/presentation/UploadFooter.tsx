@@ -37,7 +37,7 @@ const PrimaryButton = ({
       );
     case 'curriculum':
       return <Button onClick={onContinue}>Continue</Button>;
-    case 'review':
+    case 'preview':
       return (
         <Button isLoading={isSubmitting} onClick={onSubmit}>
           {isAdmin ? 'Publish now' : 'Submit for review'}
