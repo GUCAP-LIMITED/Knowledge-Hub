@@ -54,7 +54,7 @@ const ProfileCard = ({
     <div className={styles.stats}>
       <div>
         <div className={styles.statValue}>{active}</div>
-        <div className={styles.statLabel}>Active</div>
+        <div className={styles.statLabel}>Courses</div>
       </div>
       <div>
         <div className={styles.statValue}>{completed}</div>
