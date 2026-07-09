@@ -164,3 +164,34 @@
     display: none;
   }
 }
+
+.searchTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: auto;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-subtle);
+  font-size: 0.85rem;
+  cursor: pointer;
+  min-width: 200px;
+}
+.searchTrigger:hover {
+  border-color: var(--color-border-strong);
+}
+.searchTrigger span {
+  flex: 1;
+  text-align: left;
+}
+.kbd {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.05rem 0.35rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-subtle);
+}

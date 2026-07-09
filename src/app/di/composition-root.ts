@@ -31,6 +31,7 @@ import {
   createNotificationsModule,
   type NotificationsModule,
 } from '@features/notifications';
+import { createUsersModule, type UsersModule } from '@features/users';
 
 export interface AppComposition {
   readonly logger: Logger;
@@ -45,6 +46,7 @@ export interface AppComposition {
   readonly assignmentsModule: AssignmentsModule;
   readonly contentModule: ContentModule;
   readonly notificationsModule: NotificationsModule;
+  readonly usersModule: UsersModule;
   readonly queryClient: QueryClient;
 }
 
@@ -127,6 +129,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
   const assignmentsModule = createAssignmentsModule({ logger });
   const contentModule = createContentModule({ logger, clock });
   const notificationsModule = createNotificationsModule({ logger });
+  const usersModule = createUsersModule({ logger });
 
   logger.info('Application composition complete');
 
@@ -143,6 +146,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
     assignmentsModule,
     contentModule,
     notificationsModule,
+    usersModule,
     queryClient,
   };
 };

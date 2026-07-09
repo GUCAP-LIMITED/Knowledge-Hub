@@ -23,3 +23,5 @@ export * from './fakes/fake-content-gateway';
 export * from './builders/content-item.builder';
 export * from './fakes/fake-notification-gateway';
 export * from './builders/announcement.builder';
+export * from './fakes/fake-user-gateway';
+export * from './builders/user-account.builder';

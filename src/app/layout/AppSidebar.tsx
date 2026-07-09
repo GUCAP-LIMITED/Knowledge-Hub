@@ -16,6 +16,7 @@ import {
   LayoutGrid,
   Upload,
   type LucideIcon,
+  Settings,
 } from 'lucide-react';
 import { cn } from '@shared/utils';
 import type { AuthenticatedUser } from '@features/auth';
@@ -96,6 +97,7 @@ const NAV: readonly NavEntry[] = [
     anyOf: ['admin'],
   },
   { kind: 'link', to: '/content', label: 'Content', icon: LayoutGrid, anyOf: ['admin'] },
+  { kind: 'link', to: '/settings', label: 'Settings', icon: Settings, anyOf: ['admin'] },
 ];
 
 const NavItem = ({

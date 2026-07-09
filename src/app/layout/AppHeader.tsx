@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Moon, Settings, Sun, User } from 'lucide-react';
+import { LogOut, Moon, Search, Settings, Sun, User } from 'lucide-react';
 import { Avatar, DropdownMenu, IconButton } from '@shared/ui';
 import type { AuthenticatedUser } from '@features/auth';
 import { NotificationsBell } from '@features/notifications';
@@ -10,10 +10,15 @@ import styles from './AppLayout.module.css';
 export interface AppHeaderProps {
   readonly user: AuthenticatedUser | null;
   readonly onSignOut: () => void;
+  readonly onOpenSearch: () => void;
 }
 
 /** Top bar: theme toggle + user menu. */
-export const AppHeader = ({ user, onSignOut }: AppHeaderProps): ReactElement => {
+export const AppHeader = ({
+  user,
+  onSignOut,
+  onOpenSearch,
+}: AppHeaderProps): ReactElement => {
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
   const name = user?.fullName ?? 'Guest';
@@ -21,6 +26,11 @@ export const AppHeader = ({ user, onSignOut }: AppHeaderProps): ReactElement => 
 
   return (
     <header className={styles.header}>
+      <button type="button" className={styles.searchTrigger} onClick={onOpenSearch}>
+        <Search size={15} aria-hidden="true" />
+        <span>Search</span>
+        <kbd className={styles.kbd}>⌘K</kbd>
+      </button>
       <NotificationsBell />
       <IconButton
         label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
