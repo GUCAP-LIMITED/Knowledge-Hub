@@ -7,7 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { isErr } from '@core/result';
 import type { ContentItem } from '../domain';
-import type { CreateContentInput } from '../application';
+import type { CreateContentInput, UpdateContentInput } from '../application';
 import { useContentModule } from './use-content-module';
 
 /** Stable query key for the content library. Mutations invalidate this to refetch. */
@@ -47,6 +47,26 @@ export const useCreateContent = (): UseMutationResult<
   return useMutation({
     mutationFn: async (input: CreateContentInput): Promise<ContentItem> => {
       const result = await createContent.execute(input);
+      if (isErr(result)) {
+        throw result.error;
+      }
+      return result.value;
+    },
+    onSuccess: invalidate,
+  });
+};
+
+/** Mutation to edit a content item's title/type/status; refreshes the library on success. */
+export const useUpdateContent = (): UseMutationResult<
+  ContentItem,
+  Error,
+  UpdateContentInput
+> => {
+  const { updateContent } = useContentModule();
+  const invalidate = useInvalidateContent();
+  return useMutation({
+    mutationFn: async (input: UpdateContentInput): Promise<ContentItem> => {
+      const result = await updateContent.execute(input);
       if (isErr(result)) {
         throw result.error;
       }

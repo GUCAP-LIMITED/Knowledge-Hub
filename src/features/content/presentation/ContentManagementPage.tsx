@@ -1,84 +1,98 @@
 import { useMemo, useState, type ReactElement } from 'react';
-import { Alert, PageHeader, Spinner, Tabs, TabsPanel } from '@shared/ui';
+import { Plus } from 'lucide-react';
+import { Button, PageHeader } from '@shared/ui';
+import { useAuth } from '@features/auth';
+import type { ContentItem } from '../domain';
 import {
   useContent,
   useCreateContent,
   useDeleteContent,
-  usePublishContent,
+  useUpdateContent,
 } from './use-content';
-import { CreateContentForm } from './CreateContentForm';
-import { ContentList } from './ContentList';
+import { ContentFilters } from './ContentFilters';
+import { ContentResults } from './ContentResults';
+import { ContentFormModal, type ContentFormValues } from './ContentFormModal';
 import {
-  CONTENT_TABS,
-  type ContentFilter,
+  type ContentQuery,
+  EMPTY_QUERY,
+  distinctTypes,
   filterContent,
-  toContentFilter,
 } from './content-filter';
 import styles from './ContentManagementPage.module.css';
 
-/** Routed content-management page: author, filter by status, publish and delete. */
+/** Admin content library: search/filter, create, edit, publish-via-status, and delete. */
 export const ContentManagementPage = (): ReactElement => {
+  const { user } = useAuth();
   const content = useContent();
   const create = useCreateContent();
-  const publish = usePublishContent();
+  const update = useUpdateContent();
   const remove = useDeleteContent();
-  const [filter, setFilter] = useState<ContentFilter>('all');
 
-  const items = useMemo(
-    () => filterContent(content.data ?? [], filter),
-    [content.data, filter],
-  );
-  const busyId =
-    (publish.isPending ? publish.variables : undefined) ??
-    (remove.isPending ? remove.variables : undefined) ??
-    null;
+  const [query, setQuery] = useState<ContentQuery>(EMPTY_QUERY);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<ContentItem | null>(null);
+
+  const all = useMemo(() => content.data ?? [], [content.data]);
+  const items = useMemo(() => filterContent(all, query), [all, query]);
+  const types = useMemo(() => distinctTypes(all), [all]);
+  const busyId = remove.isPending ? remove.variables : null;
+
+  const openCreate = (): void => {
+    setEditing(null);
+    setModalOpen(true);
+  };
+  const openEdit = (item: ContentItem): void => {
+    setEditing(item);
+    setModalOpen(true);
+  };
+  const close = (): void => {
+    setModalOpen(false);
+  };
+
+  const submit = (values: ContentFormValues): void => {
+    const options = { onSuccess: close };
+    if (editing !== null) {
+      update.mutate({ id: editing.id, ...values }, options);
+      return;
+    }
+    create.mutate({ ...values, author: user?.fullName ?? 'Unknown' }, options);
+  };
 
   return (
     <section className={styles.screen}>
       <PageHeader
         title="Content Management"
-        subtitle="Create, publish and manage all content"
-      />
+        subtitle="Manage all content across the platform"
+      >
+        <Button onClick={openCreate}>
+          <Plus size={16} aria-hidden="true" /> New content
+        </Button>
+      </PageHeader>
 
-      <CreateContentForm
-        isSubmitting={create.isPending}
-        onSubmit={(values) => {
-          create.mutate({ ...values, author: 'Md Shamim' });
+      <ContentFilters query={query} types={types} onChange={setQuery} />
+
+      <ContentResults
+        items={items}
+        isLoading={content.isLoading}
+        error={content.isError ? content.error : null}
+        busyId={busyId}
+        onEdit={openEdit}
+        onDelete={(id) => {
+          remove.mutate(id);
+        }}
+        onClearFilters={() => {
+          setQuery(EMPTY_QUERY);
         }}
       />
 
-      {content.isError ? (
-        <Alert tone="error" title="Could not load content">
-          {content.error.message}
-        </Alert>
-      ) : null}
-
-      {content.isLoading ? (
-        <div className={styles.center}>
-          <Spinner size="lg" label="Loading content" />
-        </div>
-      ) : (
-        <Tabs
-          tabs={CONTENT_TABS}
-          value={filter}
-          onValueChange={(value) => {
-            setFilter(toContentFilter(value));
-          }}
-        >
-          <TabsPanel value={filter}>
-            <ContentList
-              items={items}
-              busyId={busyId}
-              onPublish={(id) => {
-                publish.mutate(id);
-              }}
-              onDelete={(id) => {
-                remove.mutate(id);
-              }}
-            />
-          </TabsPanel>
-        </Tabs>
-      )}
+      <ContentFormModal
+        key={editing?.id ?? 'new'}
+        open={modalOpen}
+        editing={editing}
+        isSubmitting={create.isPending || update.isPending}
+        onClose={close}
+        onSubmit={submit}
+      />
     </section>
   );
 };

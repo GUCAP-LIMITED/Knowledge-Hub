@@ -51,102 +51,108 @@ export interface Stat {
   readonly hint?: string;
 }
 
+const adminActions = (ctx: DashCtx): readonly QuickAction[] => [
+  {
+    label: 'Review Queue',
+    desc: `${String(ctx.pending)} items waiting`,
+    icon: CheckCircle,
+    tone: 'warning',
+    to: '/approvals',
+  },
+  {
+    label: 'Manage Content',
+    desc: 'Edit and publish',
+    icon: LayoutGrid,
+    tone: 'info',
+    to: '/content',
+  },
+  {
+    label: 'Team Progress',
+    desc: 'View team analytics',
+    icon: BarChart3,
+    tone: 'primary',
+    to: '/team-progress',
+  },
+  {
+    label: 'Course Reviews',
+    desc: 'See all feedback',
+    icon: Star,
+    tone: 'secondary',
+    to: '/course-reviews',
+  },
+];
+
+const managerActions = (ctx: DashCtx, learnTo: string): readonly QuickAction[] => [
+  {
+    label: 'Continue Learning',
+    desc: ctx.continueTitle ?? 'Browse catalog',
+    icon: Play,
+    tone: 'primary',
+    to: learnTo,
+  },
+  {
+    label: 'Upload Document',
+    desc: 'Submit for review',
+    icon: Upload,
+    tone: 'secondary',
+    to: '/upload',
+  },
+  {
+    label: 'My Submissions',
+    desc: 'Track status',
+    icon: FileCheck,
+    tone: 'info',
+    to: '/submissions',
+  },
+  {
+    label: 'Knowledge Base',
+    desc: 'Browse resources',
+    icon: FolderOpen,
+    tone: 'primary',
+    to: '/resources',
+  },
+];
+
+const learnerActions = (ctx: DashCtx, learnTo: string): readonly QuickAction[] => [
+  {
+    label: 'Resume Learning',
+    desc: ctx.continueTitle ?? 'Browse catalog',
+    icon: Play,
+    tone: 'primary',
+    to: learnTo,
+  },
+  {
+    label: 'Browse Courses',
+    desc: `${String(ctx.coursesCount)} available`,
+    icon: PlayCircle,
+    tone: 'secondary',
+    to: '/courses',
+  },
+  {
+    label: 'My Certificates',
+    desc: `${String(ctx.certCount)} earned`,
+    icon: Award,
+    tone: 'warning',
+    to: '/certificates',
+  },
+  {
+    label: 'Resources',
+    desc: 'Help & guides',
+    icon: HelpCircle,
+    tone: 'info',
+    to: '/resources',
+  },
+];
+
 export const buildActions = (role: Role, ctx: DashCtx): readonly QuickAction[] => {
   const learnTo = ctx.continueTitle !== null ? '/my-learning' : '/courses';
   if (role === 'admin') {
-    return [
-      {
-        label: 'Review Queue',
-        desc: `${String(ctx.pending)} items waiting`,
-        icon: CheckCircle,
-        tone: 'warning',
-        to: '/approvals',
-      },
-      {
-        label: 'Manage Content',
-        desc: 'Edit and publish',
-        icon: LayoutGrid,
-        tone: 'info',
-        to: '/content',
-      },
-      {
-        label: 'Team Progress',
-        desc: 'View team analytics',
-        icon: BarChart3,
-        tone: 'primary',
-        to: '/team-progress',
-      },
-      {
-        label: 'Course Reviews',
-        desc: 'See all feedback',
-        icon: Star,
-        tone: 'secondary',
-        to: '/course-reviews',
-      },
-    ];
+    return adminActions(ctx);
   }
   if (role === 'manager') {
-    return [
-      {
-        label: 'Continue Learning',
-        desc: ctx.continueTitle ?? 'Browse catalog',
-        icon: Play,
-        tone: 'primary',
-        to: learnTo,
-      },
-      {
-        label: 'Upload Document',
-        desc: 'Submit for review',
-        icon: Upload,
-        tone: 'secondary',
-        to: '/upload',
-      },
-      {
-        label: 'My Submissions',
-        desc: 'Track status',
-        icon: FileCheck,
-        tone: 'info',
-        to: '/submissions',
-      },
-      {
-        label: 'Knowledge Base',
-        desc: 'Browse resources',
-        icon: FolderOpen,
-        tone: 'primary',
-        to: '/resources',
-      },
-    ];
+    return managerActions(ctx, learnTo);
   }
-  return [
-    {
-      label: 'Resume Learning',
-      desc: ctx.continueTitle ?? 'Browse catalog',
-      icon: Play,
-      tone: 'primary',
-      to: learnTo,
-    },
-    {
-      label: 'Browse Courses',
-      desc: `${String(ctx.coursesCount)} available`,
-      icon: PlayCircle,
-      tone: 'secondary',
-      to: '/courses',
-    },
-    {
-      label: 'My Certificates',
-      desc: `${String(ctx.certCount)} earned`,
-      icon: Award,
-      tone: 'warning',
-      to: '/certificates',
-    },
-    {
-      label: 'Resources',
-      desc: 'Help & guides',
-      icon: HelpCircle,
-      tone: 'info',
-      to: '/resources',
-    },
-  ];
+  return learnerActions(ctx, learnTo);
 };
 
 export const buildStats = (role: Role, ctx: DashCtx): readonly Stat[] => {

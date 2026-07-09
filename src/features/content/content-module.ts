@@ -5,6 +5,7 @@ import {
   DeleteContentUseCase,
   ListContentUseCase,
   PublishContentUseCase,
+  UpdateContentUseCase,
 } from './application';
 import { InMemoryContentGateway } from './infrastructure';
 
@@ -17,6 +18,7 @@ export interface ContentModuleDeps {
 export interface ContentModule {
   readonly listContent: ListContentUseCase;
   readonly createContent: CreateContentUseCase;
+  readonly updateContent: UpdateContentUseCase;
   readonly publishContent: PublishContentUseCase;
   readonly deleteContent: DeleteContentUseCase;
 }
@@ -32,6 +34,7 @@ export const createContentModule = (deps: ContentModuleDeps): ContentModule => {
   return {
     listContent: new ListContentUseCase(shared),
     createContent: new CreateContentUseCase(shared),
+    updateContent: new UpdateContentUseCase(shared),
     publishContent: new PublishContentUseCase(shared),
     deleteContent: new DeleteContentUseCase(shared),
   };

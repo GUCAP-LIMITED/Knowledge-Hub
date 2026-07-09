@@ -53,7 +53,7 @@ export class InMemoryContentGateway implements ContentGateway {
       id,
       title: input.title,
       type: input.type,
-      status: 'draft',
+      status: input.status ?? 'draft',
       author: input.author,
       createdAt: this.clock.now(),
       views: 0,

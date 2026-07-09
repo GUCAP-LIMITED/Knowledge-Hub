@@ -1,12 +1,14 @@
 import type { Result } from '@core/result';
 import type { ContentError } from '../errors/content-errors';
-import type { ContentItem, ContentType } from '../entities/content-item';
+import type { ContentItem, ContentStatus, ContentType } from '../entities/content-item';
 
-/** The data a new content item carries at creation; the gateway assigns id + timestamp + status. */
+/** The data a new content item carries at creation; the gateway assigns id + timestamp. */
 export interface NewContentInput {
   readonly title: string;
   readonly type: ContentType;
   readonly author: string;
+  /** Optional initial lifecycle status; defaults to `draft` when omitted. */
+  readonly status?: ContentStatus;
 }
 
 /**

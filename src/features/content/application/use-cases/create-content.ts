@@ -4,6 +4,7 @@ import {
   type ContentError,
   type ContentGateway,
   type ContentItem,
+  type ContentStatus,
   type ContentType,
   ContentTitle,
 } from '../../domain';
@@ -12,6 +13,7 @@ export interface CreateContentInput {
   readonly title: string;
   readonly type: ContentType;
   readonly author: string;
+  readonly status?: ContentStatus;
 }
 
 export interface CreateContentUseCaseDeps {
@@ -45,6 +47,7 @@ export class CreateContentUseCase {
       title: title.value.value,
       type: input.type,
       author: input.author,
+      ...(input.status === undefined ? {} : { status: input.status }),
     });
     if (isErr(result)) {
       this.logger.warn('Creating content failed', { code: result.error.code });

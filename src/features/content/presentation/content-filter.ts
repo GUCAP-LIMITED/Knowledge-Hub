@@ -1,27 +1,48 @@
-import type { TabDescriptor } from '@shared/ui';
-import type { ContentItem, ContentStatus } from '../domain';
+import type { ContentItem, ContentStatus, ContentType } from '../domain';
 
-/** The status tabs shown on the management page ("all" is a synthetic, non-status value). */
-export type ContentFilter = 'all' | ContentStatus;
+/** Type filter value; "all" is a synthetic pass-through, not a real content type. */
+export type TypeFilter = 'all' | ContentType;
 
-export const CONTENT_TABS: readonly TabDescriptor[] = [
-  { value: 'all', label: 'All' },
-  { value: 'draft', label: 'Draft' },
-  { value: 'review', label: 'In review' },
-  { value: 'published', label: 'Published' },
-];
+/** Status filter value; "all" is a synthetic pass-through, not a real status. */
+export type StatusFilter = 'all' | ContentStatus;
 
-/** Narrow an arbitrary string (from the Tabs callback) to a known filter value. */
-export const toContentFilter = (value: string): ContentFilter => {
-  if (value === 'draft' || value === 'review' || value === 'published') {
-    return value;
-  }
-  return 'all';
+/** The three axes the management page filters by. */
+export interface ContentQuery {
+  readonly search: string;
+  readonly type: TypeFilter;
+  readonly status: StatusFilter;
+}
+
+export const EMPTY_QUERY: ContentQuery = { search: '', type: 'all', status: 'all' };
+
+/** Human labels for each lifecycle status. */
+export const STATUS_LABELS: Record<ContentStatus, string> = {
+  draft: 'Draft',
+  review: 'In review',
+  published: 'Published',
 };
 
-/** Filter a library by status tab; "all" passes everything through. */
+/** The distinct content types present in a library, for the type dropdown. */
+export const distinctTypes = (items: readonly ContentItem[]): readonly ContentType[] => [
+  ...new Set(items.map((item) => item.type)),
+];
+
+const matchesSearch = (item: ContentItem, search: string): boolean => {
+  const q = search.trim().toLowerCase();
+  if (q === '') {
+    return true;
+  }
+  return item.title.toLowerCase().includes(q) || item.author.toLowerCase().includes(q);
+};
+
+/** Apply the search + type + status filters to a library. */
 export const filterContent = (
   items: readonly ContentItem[],
-  filter: ContentFilter,
+  query: ContentQuery,
 ): readonly ContentItem[] =>
-  filter === 'all' ? items : items.filter((item) => item.status === filter);
+  items.filter(
+    (item) =>
+      matchesSearch(item, query.search) &&
+      (query.type === 'all' || item.type === query.type) &&
+      (query.status === 'all' || item.status === query.status),
+  );
