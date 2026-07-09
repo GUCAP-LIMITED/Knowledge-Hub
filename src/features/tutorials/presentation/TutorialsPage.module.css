@@ -9,6 +9,36 @@
 .toolbar {
   max-width: 420px;
 }
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+.pill {
+  padding: 0.45rem 0.9rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pill:hover {
+  background-color: var(--color-border);
+}
+.pillActive {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+.pillActive:hover {
+  background-color: var(--color-primary);
+}
 .center {
   display: grid;
   place-items: center;

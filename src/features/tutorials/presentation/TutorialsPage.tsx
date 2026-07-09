@@ -2,26 +2,37 @@ import { useMemo, useState, type ReactElement } from 'react';
 import { Alert, EmptyState, PageHeader, Spinner, TextField } from '@shared/ui';
 import { useTutorials } from './use-tutorials';
 import { TutorialCard } from './TutorialCard';
+import { CategoryPills } from './CategoryPills';
 import styles from './TutorialsPage.module.css';
 
-/** Routed tutorials-library page with search. */
+/** Routed tutorials-library page with a category filter and search. */
 export const TutorialsPage = (): ReactElement => {
   const tutorials = useTutorials();
   const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('all');
+
+  const categories = useMemo(
+    () => [...new Set((tutorials.data ?? []).map((tutorial) => tutorial.category))],
+    [tutorials.data],
+  );
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
     return (tutorials.data ?? []).filter(
       (tutorial) =>
-        q === '' ||
-        tutorial.title.toLowerCase().includes(q) ||
-        tutorial.category.toLowerCase().includes(q),
+        (category === 'all' || tutorial.category === category) &&
+        (q === '' ||
+          tutorial.title.toLowerCase().includes(q) ||
+          tutorial.category.toLowerCase().includes(q)),
     );
-  }, [tutorials.data, query]);
+  }, [tutorials.data, query, category]);
 
   return (
     <section className={styles.screen}>
-      <PageHeader title="Tutorials" subtitle="Short, task-focused how-to guides." />
+      <PageHeader
+        title="Tutorials"
+        subtitle="Short, focused how-to guides for everyday tasks."
+      />
 
       <div className={styles.toolbar}>
         <TextField
@@ -33,6 +44,13 @@ export const TutorialsPage = (): ReactElement => {
           }}
         />
       </div>
+
+      <CategoryPills
+        categories={categories}
+        active={category}
+        allLabel="All Tutorials"
+        onSelect={setCategory}
+      />
 
       {tutorials.isLoading ? (
         <div className={styles.center}>
