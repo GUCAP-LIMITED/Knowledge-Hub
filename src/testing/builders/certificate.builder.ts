@@ -11,6 +11,8 @@ export const buildCertificate = (overrides: CertificateOverrides = {}): Certific
     userName: overrides.userName ?? 'Simona',
     userRole: overrides.userRole ?? 'Consultant',
     issuedDate: overrides.issuedDate ?? new Date('2026-01-10T00:00:00.000Z'),
+    expiryDate: overrides.expiryDate ?? new Date('2028-01-10T00:00:00.000Z'),
     credentialId: overrides.credentialId ?? 'UAPP-GS-001-2026',
     category: overrides.category ?? 'Onboarding',
+    grade: overrides.grade ?? 'Distinction',
   });

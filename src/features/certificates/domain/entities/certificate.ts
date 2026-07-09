@@ -1,3 +1,11 @@
+/** The grade tiers a certificate can carry. */
+export type CertificateGrade = 'Distinction' | 'Merit' | 'Pass';
+
+/** A certificate is treated as "expiring soon" within this many days of its expiry. */
+export const EXPIRING_SOON_DAYS = 90;
+
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
 export interface CertificateProps {
   readonly id: string;
   readonly courseId: string;
@@ -5,8 +13,10 @@ export interface CertificateProps {
   readonly userName: string;
   readonly userRole: string;
   readonly issuedDate: Date;
+  readonly expiryDate: Date;
   readonly credentialId: string;
   readonly category: string;
+  readonly grade: CertificateGrade;
 }
 
 /**
@@ -22,8 +32,10 @@ export class Certificate {
   public readonly userName: string;
   public readonly userRole: string;
   public readonly issuedDate: Date;
+  public readonly expiryDate: Date;
   public readonly credentialId: string;
   public readonly category: string;
+  public readonly grade: CertificateGrade;
 
   public constructor(props: CertificateProps) {
     this.id = props.id;
@@ -32,8 +44,10 @@ export class Certificate {
     this.userName = props.userName;
     this.userRole = props.userRole;
     this.issuedDate = props.issuedDate;
+    this.expiryDate = props.expiryDate;
     this.credentialId = props.credentialId;
     this.category = props.category;
+    this.grade = props.grade;
   }
 
   /** True when this certificate was issued to the given learner (case-insensitive). */
@@ -44,5 +58,20 @@ export class Certificate {
   /** The calendar year the certificate was issued. */
   public issuedYear(): number {
     return this.issuedDate.getFullYear();
+  }
+
+  /** Whole days from `now` until expiry (negative once expired). Time is injected, never read. */
+  public daysUntilExpiry(now: Date): number {
+    return Math.ceil((this.expiryDate.getTime() - now.getTime()) / MS_PER_DAY);
+  }
+
+  /** True when the certificate expires within {@link EXPIRING_SOON_DAYS}. */
+  public isExpiringSoon(now: Date): boolean {
+    return this.daysUntilExpiry(now) < EXPIRING_SOON_DAYS;
+  }
+
+  /** True when this certificate was awarded at the top grade. */
+  public isDistinction(): boolean {
+    return this.grade === 'Distinction';
   }
 }

@@ -14,8 +14,10 @@ export const CERTIFICATE_SEED: readonly CertificateProps[] = [
     userName: 'Simona',
     userRole: 'Consultant',
     issuedDate: new Date('2026-01-10'),
+    expiryDate: new Date('2026-09-10'),
     credentialId: 'UAPP-GS-001-2026',
     category: 'Onboarding',
+    grade: 'Distinction',
   },
   {
     id: 'CERT-2026-002',
@@ -24,8 +26,10 @@ export const CERTIFICATE_SEED: readonly CertificateProps[] = [
     userName: 'Simona',
     userRole: 'Consultant',
     issuedDate: new Date('2026-02-14'),
+    expiryDate: new Date('2027-02-14'),
     credentialId: 'UAPP-CL-002-2026',
     category: 'Compliance',
+    grade: 'Merit',
   },
   {
     id: 'CERT-2026-003',
@@ -34,8 +38,10 @@ export const CERTIFICATE_SEED: readonly CertificateProps[] = [
     userName: 'Marcus',
     userRole: 'Sales Lead',
     issuedDate: new Date('2026-03-02'),
+    expiryDate: new Date('2028-03-02'),
     credentialId: 'UAPP-AS-003-2026',
     category: 'Sales',
+    grade: 'Distinction',
   },
   {
     id: 'CERT-2026-004',
@@ -44,8 +50,10 @@ export const CERTIFICATE_SEED: readonly CertificateProps[] = [
     userName: 'Priya',
     userRole: 'Team Manager',
     issuedDate: new Date('2026-04-18'),
+    expiryDate: new Date('2027-04-18'),
     credentialId: 'UAPP-LE-004-2026',
     category: 'Leadership',
+    grade: 'Pass',
   },
   {
     id: 'CERT-2026-005',
@@ -54,7 +62,9 @@ export const CERTIFICATE_SEED: readonly CertificateProps[] = [
     userName: 'Daniel',
     userRole: 'Operations Analyst',
     issuedDate: new Date('2026-05-06'),
+    expiryDate: new Date('2028-05-06'),
     credentialId: 'UAPP-OP-005-2026',
     category: 'Operations',
+    grade: 'Merit',
   },
 ];

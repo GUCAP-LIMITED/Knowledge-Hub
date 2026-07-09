@@ -1,15 +1,19 @@
 import type { Logger } from '@core/logger';
+import type { Clock } from '@core/time';
 import { GetCertificateUseCase, ListCertificatesUseCase } from './application';
 import { InMemoryCertificateGateway } from './infrastructure';
 
 export interface CertificatesModuleDeps {
   readonly logger: Logger;
+  readonly clock: Clock;
 }
 
 /** The use cases exposed by the certificates feature, consumed via a context provider. */
 export interface CertificatesModule {
   readonly listCertificates: ListCertificatesUseCase;
   readonly getCertificate: GetCertificateUseCase;
+  /** Clock used by presentation to compute expiry (never `new Date()` directly). */
+  readonly clock: Clock;
 }
 
 /**
@@ -30,5 +34,6 @@ export const createCertificatesModule = (
       certificateGateway,
       logger: deps.logger,
     }),
+    clock: deps.clock,
   };
 };
