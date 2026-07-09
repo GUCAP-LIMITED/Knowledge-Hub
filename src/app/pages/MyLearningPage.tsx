@@ -2,7 +2,6 @@ import { useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { Award, BookOpen, CheckCircle, Clock, PlayCircle } from 'lucide-react';
 import {
-  CategoryBadge,
   EmptyState,
   PageHeader,
   ProgressBar,
@@ -14,6 +13,13 @@ import {
 import { cn } from '@shared/utils';
 import { useCourses, type Course } from '@features/courses';
 import styles from './MyLearningPage.module.css';
+
+const actionLabel = (course: Course): string => {
+  if (course.isCompleted()) {
+    return 'View details';
+  }
+  return course.hasStarted() ? 'Continue' : 'Start';
+};
 
 const TABS = [
   { value: 'in-progress', label: 'In progress' },
@@ -33,10 +39,13 @@ const LearningCard = ({ course }: { readonly course: Course }): ReactElement => 
     </div>
     <div className={styles.cardBody}>
       <h3 className={styles.cardTitle}>{course.title}</h3>
-      <CategoryBadge category={course.category} size="sm" />
+      <span className={styles.meta}>
+        {course.category} • {course.lessons} lessons
+      </span>
       {course.hasStarted() ? (
         <ProgressBar value={course.progress} showLabel tone="auto" />
       ) : null}
+      <span className={styles.cardBtn}>{actionLabel(course)}</span>
     </div>
   </Link>
 );
@@ -93,7 +102,7 @@ export const MyLearningPage = (): ReactElement => {
     <section className={styles.screen}>
       <PageHeader
         title="My Learning"
-        subtitle="Pick up where you left off and track your progress."
+        subtitle="Pick up where you left off, track completed courses, and start something new"
       />
       <div className={styles.stats}>
         <StatCard
