@@ -22,6 +22,14 @@ const CertificatesPage = lazy(async () => ({
   default: (await import('@features/certificates/presentation/CertificatesPage'))
     .CertificatesPage,
 }));
+const ReviewsPage = lazy(async () => ({
+  default: (await import('@features/course-reviews/presentation/ReviewsPage'))
+    .ReviewsPage,
+}));
+const CourseReviewsPage = lazy(async () => ({
+  default: (await import('@features/course-reviews/presentation/CourseReviewsPage'))
+    .CourseReviewsPage,
+}));
 const SubmissionsPage = lazy(async () => ({
   default: (await import('@features/submissions/presentation/SubmissionsPage'))
     .SubmissionsPage,
@@ -56,6 +64,7 @@ export const AppRouter = (): ReactElement => {
             <Route path="/tutorials" element={<TutorialsPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/certificates" element={<CertificatesPage />} />
+            <Route path="/reviews" element={<ReviewsPage />} />
 
             {/* Content workspace — managers and admins. */}
             <Route element={<ProtectedRoute anyOf={['admin', 'manager']} />}>
@@ -65,6 +74,7 @@ export const AppRouter = (): ReactElement => {
             {/* Review queue — admins only. */}
             <Route element={<ProtectedRoute anyOf={['admin']} />}>
               <Route path="/approvals" element={<ApprovalsPage />} />
+              <Route path="/course-reviews" element={<CourseReviewsPage />} />
             </Route>
           </Route>
         </Route>

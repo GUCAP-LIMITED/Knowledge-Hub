@@ -9,13 +9,15 @@ to continue the migration.
 
 - ✅ The full architectural **rails** are in place (strict TypeScript, ESLint layer-boundary
   enforcement, path aliases, Vitest/Playwright, Husky, the `new:feature` generator, docs).
-- ✅ **Five Knowledge Hub features** migrated end-to-end as vertical DDD slices: `courses`,
-  `tutorials`, `resources`, `certificates`, and `submissions` (the review workflow — My Submissions
-  - Approvals, sharing one `Submission` aggregate).
+- ✅ **Six Knowledge Hub features** migrated end-to-end as vertical DDD slices: `courses`,
+  `tutorials`, `resources`, `certificates`, `submissions` (the review workflow — My Submissions +
+  Approvals, one `Submission` aggregate), and `course-reviews` (learner reviews + admin moderation,
+  one `Review` aggregate).
 - ✅ **Auth** adapted to the UAPP demo directory (offline sign-in with real role-gating), and
-  role-gated routes/nav (`/submissions` for admin+manager, `/approvals` for admin).
+  role-gated routes/nav (`/submissions` for admin+manager, `/approvals` + `/course-reviews` for
+  admin).
 - ✅ A KH-branded **app shell** (sidebar + header layout, dashboard) and router.
-- ✅ `npm run validate` is **green** (typecheck + lint + **84 tests**), `npm run build` succeeds,
+- ✅ `npm run validate` is **green** (typecheck + lint + **92 tests**), `npm run build` succeeds,
   `npm run dev` runs.
 - 🔜 The remaining prototype areas are listed below — each is now a mechanical `new:feature` job.
 
@@ -76,6 +78,13 @@ queue with status tabs, approve/reject/flag/publish) — a separate `approvals` 
 import this one's internals, which the boundary rules forbid. Admins publish directly; everyone else
 enters the review queue.
 
+`course-reviews` is the second two-page feature over one aggregate. The `Review` entity uses a
+**deterministic `courseId:userId` id** to encode the "one review per user per course" invariant
+(re-submitting upserts). Two value objects — `Rating` (1–5) and `ReviewFeedback` — guard input, and
+`averageRating()` is a pure domain function ("course rating = mean of its reviews"). `ReviewsPage`
+(all learners) writes/edits via RHF + `domainResolver` with a custom star input and marks reviews
+helpful; `CourseReviewsPage` (admin) moderates with delete.
+
 App shell: `src/app/layout/AppLayout.tsx` (sidebar nav + header), rebranded
 `src/app/pages/DashboardPage.tsx`, `src/app/styles/global.css` design tokens set to the UAPP palette
 (teal `#045D5E` / orange `#FC7300`, Inter, dark-mode aware), router + composition root + providers.
@@ -88,7 +97,6 @@ From the prototype's page inventory, still to migrate:
 - **content-creation** — port the Ant Design authoring wizard (`legacy/prototype/src/create`) to
   RHF + `domainResolver`, CSS Modules, and a `CreateContentUseCase` that emits a submission.
 - **team-progress** & **assignments** — manager/admin dashboards; assignment status derivation.
-- **course-reviews** — ratings/reviews (one per user per course; computed average).
 - **my-learning**, **notifications/announcements**, **profile**, **user-settings**, and
   **settings** (users + permission sets — the base/granular permission model).
 

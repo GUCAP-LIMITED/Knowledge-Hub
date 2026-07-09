@@ -19,6 +19,11 @@ import {
 } from '@features/certificates';
 import { createSubmissionsModule, type SubmissionsModule } from '@features/submissions';
 
+import {
+  createCourseReviewsModule,
+  type CourseReviewsModule,
+} from '@features/course-reviews';
+
 export interface AppComposition {
   readonly logger: Logger;
   readonly authStore: AuthStore;
@@ -27,6 +32,7 @@ export interface AppComposition {
   readonly resourcesModule: ResourcesModule;
   readonly certificatesModule: CertificatesModule;
   readonly submissionsModule: SubmissionsModule;
+  readonly courseReviewsModule: CourseReviewsModule;
   readonly queryClient: QueryClient;
 }
 
@@ -104,6 +110,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
   const resourcesModule = createResourcesModule({ logger });
   const certificatesModule = createCertificatesModule({ logger });
   const submissionsModule = createSubmissionsModule({ logger, clock });
+  const courseReviewsModule = createCourseReviewsModule({ logger, clock });
 
   logger.info('Application composition complete');
 
@@ -115,6 +122,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
     resourcesModule,
     certificatesModule,
     submissionsModule,
+    courseReviewsModule,
     queryClient,
   };
 };

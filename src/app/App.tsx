@@ -8,10 +8,12 @@ import { TutorialsModuleProvider } from '@features/tutorials';
 import { ResourcesModuleProvider } from '@features/resources';
 import { CertificatesModuleProvider } from '@features/certificates';
 import { SubmissionsModuleProvider } from '@features/submissions';
+import { CourseReviewsModuleProvider } from '@features/course-reviews';
 import { TooltipProvider } from '@shared/ui';
 import { AppErrorBoundary } from '@app/AppErrorBoundary';
 import { AppRouter } from '@app/router/AppRouter';
 import { createComposition } from '@app/di/composition-root';
+import { ThemeProvider } from '@app/theme/ThemeProvider';
 
 /**
  * Root component. Builds the dependency graph once, then mounts the provider/router tree. All
@@ -29,32 +31,38 @@ export const App = (): ReactElement => {
 
   return (
     <AppErrorBoundary logger={composition.logger}>
-      <QueryClientProvider client={composition.queryClient}>
-        <MotionConfig reducedMotion="user">
-          <TooltipProvider>
-            <AuthStoreProvider store={composition.authStore}>
-              <CoursesModuleProvider module={composition.coursesModule}>
-                <TutorialsModuleProvider module={composition.tutorialsModule}>
-                  <ResourcesModuleProvider module={composition.resourcesModule}>
-                    <CertificatesModuleProvider module={composition.certificatesModule}>
-                      <SubmissionsModuleProvider module={composition.submissionsModule}>
-                        <BrowserRouter
-                          future={{
-                            v7_startTransition: true,
-                            v7_relativeSplatPath: true,
-                          }}
-                        >
-                          <AppRouter />
-                        </BrowserRouter>
-                      </SubmissionsModuleProvider>
-                    </CertificatesModuleProvider>
-                  </ResourcesModuleProvider>
-                </TutorialsModuleProvider>
-              </CoursesModuleProvider>
-            </AuthStoreProvider>
-          </TooltipProvider>
-        </MotionConfig>
-      </QueryClientProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={composition.queryClient}>
+          <MotionConfig reducedMotion="user">
+            <TooltipProvider>
+              <AuthStoreProvider store={composition.authStore}>
+                <CoursesModuleProvider module={composition.coursesModule}>
+                  <TutorialsModuleProvider module={composition.tutorialsModule}>
+                    <ResourcesModuleProvider module={composition.resourcesModule}>
+                      <CertificatesModuleProvider module={composition.certificatesModule}>
+                        <SubmissionsModuleProvider module={composition.submissionsModule}>
+                          <CourseReviewsModuleProvider
+                            module={composition.courseReviewsModule}
+                          >
+                            <BrowserRouter
+                              future={{
+                                v7_startTransition: true,
+                                v7_relativeSplatPath: true,
+                              }}
+                            >
+                              <AppRouter />
+                            </BrowserRouter>
+                          </CourseReviewsModuleProvider>
+                        </SubmissionsModuleProvider>
+                      </CertificatesModuleProvider>
+                    </ResourcesModuleProvider>
+                  </TutorialsModuleProvider>
+                </CoursesModuleProvider>
+              </AuthStoreProvider>
+            </TooltipProvider>
+          </MotionConfig>
+        </QueryClientProvider>
+      </ThemeProvider>
     </AppErrorBoundary>
   );
 };

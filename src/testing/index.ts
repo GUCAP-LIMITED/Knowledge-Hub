@@ -13,3 +13,5 @@ export * from './fakes/fake-certificate-gateway';
 export * from './builders/certificate.builder';
 export * from './fakes/fake-submission-gateway';
 export * from './builders/submission.builder';
+export * from './fakes/fake-review-gateway';
+export * from './builders/review.builder';

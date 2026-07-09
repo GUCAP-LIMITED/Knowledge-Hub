@@ -18,12 +18,19 @@
   --color-success-soft: #ecfdf5;
 
   --color-warning: #f59e0b;
+  --color-warning-strong: #b45309;
   --color-warning-soft: #fffbeb;
 
+  --color-info: #3b82f6;
+  --color-info-strong: #1d4ed8;
+  --color-info-soft: #eff6ff;
+
   --color-bg: #f1f4f3;
+  --color-bg-subtle: #e5eae9;
   --color-surface: #ffffff;
-  --color-surface-muted: #e9edec;
+  --color-surface-muted: #f8fafc;
   --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
   --color-text: #0f172a;
   --color-text-muted: #475569;
   --color-text-subtle: #64748b;
@@ -32,32 +39,46 @@
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
   --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 10px 25px -10px rgba(15, 23, 42, 0.25);
-  --shadow-lg: 0 24px 50px -12px rgba(15, 23, 42, 0.35);
+  --shadow-md:
+    0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-lg:
+    0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+  --shadow-xl:
+    0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+  --ring: 0 0 0 3px rgba(4, 93, 94, 0.22);
   --color-overlay: rgba(15, 23, 42, 0.45);
 
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-primary: #0a9396;
-    --color-primary-strong: #0a9396;
-    --color-primary-soft: rgba(10, 147, 150, 0.18);
-    --color-secondary-soft: rgba(252, 115, 0, 0.18);
-    --color-bg: #0b1220;
-    --color-surface: #1e293b;
-    --color-surface-muted: #172033;
-    --color-border: #334155;
-    --color-text: #f1f5f9;
-    --color-text-muted: #cbd5e1;
-    --color-text-subtle: #94a3b8;
-    --color-focus: #0a9396;
-    --color-danger-soft: rgba(239, 68, 68, 0.15);
-    --color-success-soft: rgba(16, 185, 129, 0.15);
-    --color-warning-soft: rgba(245, 158, 11, 0.15);
-  }
+/* Manual dark theme (set on <html data-theme="dark"> by the ThemeProvider, which initialises
+   from the user's stored choice or their system preference). */
+[data-theme='dark'] {
+  --color-primary: #0a9396;
+  --color-primary-strong: #0a9396;
+  --color-primary-soft: rgba(10, 147, 150, 0.18);
+  --color-secondary-soft: rgba(252, 115, 0, 0.18);
+  --color-danger-soft: rgba(239, 68, 68, 0.15);
+  --color-success-soft: rgba(16, 185, 129, 0.15);
+  --color-warning-soft: rgba(245, 158, 11, 0.15);
+  --color-info-soft: rgba(59, 130, 246, 0.15);
+  --color-bg: #0b1220;
+  --color-bg-subtle: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-muted: #172033;
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-text: #f1f5f9;
+  --color-text-muted: #cbd5e1;
+  --color-text-subtle: #94a3b8;
+  --color-focus: #0a9396;
+  --ring: 0 0 0 3px rgba(10, 147, 150, 0.3);
+
+  color-scheme: dark;
 }
 
 * {
@@ -89,4 +110,13 @@ body {
   color: var(--color-text);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
