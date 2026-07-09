@@ -4,6 +4,7 @@ import type { UserAccount } from '../domain';
 import { useSetUserStatus, useUsers } from './use-users';
 import { SettingsToggles, type ToggleSetting } from './SettingsToggles';
 import { UsersTable } from './UsersTable';
+import { PermissionsTab } from './PermissionsTab';
 import styles from './AdminSettingsPage.module.css';
 
 const PLATFORM_SETTINGS: readonly ToggleSetting[] = [
@@ -80,6 +81,7 @@ export const AdminSettingsPage = (): ReactElement => {
           tabs={[
             { value: 'platform', label: 'Platform' },
             { value: 'users', label: `Users (${String(accounts.length)})` },
+            { value: 'permissions', label: 'Permissions' },
             { value: 'security', label: 'Security' },
           ]}
         >
@@ -98,6 +100,9 @@ export const AdminSettingsPage = (): ReactElement => {
             ) : (
               <UsersTable users={accounts} busyId={busyId} onToggle={toggle} />
             )}
+          </TabsPanel>
+          <TabsPanel value="permissions">
+            <PermissionsTab />
           </TabsPanel>
           <TabsPanel value="security">
             <SettingsToggles settings={SECURITY_SETTINGS} />

@@ -21,6 +21,153 @@
   padding: 1.25rem 1.5rem 1.5rem;
 }
 
+/* Permissions tab */
+.permWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+.setCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+.setCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.9rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.setCardActive {
+  border-color: var(--color-primary);
+  box-shadow: var(--ring);
+}
+.setCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.setCardLabel {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+.lockBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-subtle);
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+.setCardDesc {
+  font-size: 0.76rem;
+  color: var(--color-text-subtle);
+}
+.setCardCount {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.permBody {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+.moduleList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.4rem;
+}
+.moduleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.6rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  text-align: left;
+}
+.moduleRow:hover {
+  background-color: var(--color-surface-muted);
+}
+.moduleRowActive {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.moduleName {
+  flex: 1;
+  min-width: 0;
+}
+.moduleCount {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-text-subtle);
+}
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.1rem;
+}
+.detailBase {
+  position: relative;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-success-soft);
+  border: 1px solid var(--color-success);
+}
+.requiredBadge {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-success);
+  color: #04241a;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.granularGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.5rem;
+}
+.granularCell {
+  position: relative;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.disabledMask {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--color-surface) 55%, transparent);
+  cursor: not-allowed;
+}
+
 /* Toggle lists (Platform / Security) */
 .toggles {
   display: flex;
