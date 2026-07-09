@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactElement } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@features/auth';
 import { SearchOverlay } from '@app/search/SearchOverlay';
 import { AppSidebar } from './AppSidebar';
@@ -10,7 +10,9 @@ import styles from './AppLayout.module.css';
 export const AppLayout = (): ReactElement => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent): void => {
@@ -25,6 +27,11 @@ export const AppLayout = (): ReactElement => {
     };
   }, []);
 
+  // Dismiss the mobile drawer whenever the route changes.
+  useEffect(() => {
+    setNavOpen(false);
+  }, [location.pathname]);
+
   const handleSignOut = (): void => {
     void logout().then(() => {
       navigate('/login', { replace: true });
@@ -33,13 +40,32 @@ export const AppLayout = (): ReactElement => {
 
   return (
     <div className={styles.shell}>
-      <AppSidebar user={user} />
+      <AppSidebar
+        user={user}
+        open={navOpen}
+        onNavigate={() => {
+          setNavOpen(false);
+        }}
+      />
+      {navOpen ? (
+        <button
+          type="button"
+          className={styles.backdrop}
+          aria-label="Close menu"
+          onClick={() => {
+            setNavOpen(false);
+          }}
+        />
+      ) : null}
       <div className={styles.main}>
         <AppHeader
           user={user}
           onSignOut={handleSignOut}
           onOpenSearch={() => {
             setSearchOpen(true);
+          }}
+          onOpenNav={() => {
+            setNavOpen(true);
           }}
         />
         <main className={styles.content}>

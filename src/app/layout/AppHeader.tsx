@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Moon, Search, Settings, Sun, User } from 'lucide-react';
+import { LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 import { Avatar, DropdownMenu, IconButton } from '@shared/ui';
 import type { AuthenticatedUser } from '@features/auth';
 import { NotificationsBell } from '@features/notifications';
@@ -11,13 +11,15 @@ export interface AppHeaderProps {
   readonly user: AuthenticatedUser | null;
   readonly onSignOut: () => void;
   readonly onOpenSearch: () => void;
+  readonly onOpenNav: () => void;
 }
 
-/** Top bar: theme toggle + user menu. */
+/** Top bar: mobile menu button + search + theme toggle + user menu. */
 export const AppHeader = ({
   user,
   onSignOut,
   onOpenSearch,
+  onOpenNav,
 }: AppHeaderProps): ReactElement => {
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
@@ -26,6 +28,9 @@ export const AppHeader = ({
 
   return (
     <header className={styles.header}>
+      <IconButton label="Open menu" className={styles.menuBtn} onClick={onOpenNav}>
+        <Menu size={18} />
+      </IconButton>
       <button type="button" className={styles.searchTrigger} onClick={onOpenSearch}>
         <Search size={15} aria-hidden="true" />
         <span>Search</span>
