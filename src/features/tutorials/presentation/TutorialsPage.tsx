@@ -1,21 +1,38 @@
-import type { ReactElement } from 'react';
-import { Alert, Spinner } from '@shared/ui';
+import { useMemo, useState, type ReactElement } from 'react';
+import { Alert, EmptyState, PageHeader, Spinner, TextField } from '@shared/ui';
 import { useTutorials } from './use-tutorials';
 import { TutorialCard } from './TutorialCard';
 import styles from './TutorialsPage.module.css';
 
-/** Routed tutorials-library page. Reads server state via TanStack Query; no business logic here. */
+/** Routed tutorials-library page with search. */
 export const TutorialsPage = (): ReactElement => {
   const tutorials = useTutorials();
+  const [query, setQuery] = useState('');
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return (tutorials.data ?? []).filter(
+      (tutorial) =>
+        q === '' ||
+        tutorial.title.toLowerCase().includes(q) ||
+        tutorial.category.toLowerCase().includes(q),
+    );
+  }, [tutorials.data, query]);
 
   return (
     <section className={styles.screen}>
-      <header className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Tutorials</h1>
-          <p className={styles.subtitle}>Short, task-focused how-to guides.</p>
-        </div>
-      </header>
+      <PageHeader title="Tutorials" subtitle="Short, task-focused how-to guides." />
+
+      <div className={styles.toolbar}>
+        <TextField
+          label="Search"
+          placeholder="Search tutorials…"
+          value={query}
+          onChange={(event) => {
+            setQuery(event.target.value);
+          }}
+        />
+      </div>
 
       {tutorials.isLoading ? (
         <div className={styles.center}>
@@ -29,13 +46,13 @@ export const TutorialsPage = (): ReactElement => {
         </Alert>
       ) : null}
 
-      {tutorials.data?.length === 0 ? (
-        <p className={styles.empty}>No tutorials yet.</p>
+      {!tutorials.isLoading && !tutorials.isError && visible.length === 0 ? (
+        <EmptyState title="No tutorials match" description="Try a different search." />
       ) : null}
 
-      {tutorials.data !== undefined && tutorials.data.length > 0 ? (
+      {visible.length > 0 ? (
         <div className={styles.grid}>
-          {tutorials.data.map((tutorial) => (
+          {visible.map((tutorial) => (
             <TutorialCard key={tutorial.id} tutorial={tutorial} />
           ))}
         </div>

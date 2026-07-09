@@ -1,41 +1,38 @@
 import type { ReactElement } from 'react';
-import { cn } from '@shared/utils';
-import type { Tutorial } from '../domain';
+import { Clock, Eye, PlayCircle } from 'lucide-react';
+import { Badge, Button, CategoryBadge, type BadgeTone } from '@shared/ui';
+import type { Difficulty, Tutorial } from '../domain';
 import styles from './TutorialsPage.module.css';
+
+const difficultyTone = (difficulty: Difficulty): BadgeTone => {
+  if (difficulty === 'Advanced') {
+    return 'danger';
+  }
+  return difficulty === 'Intermediate' ? 'warning' : 'success';
+};
 
 export interface TutorialCardProps {
   readonly tutorial: Tutorial;
 }
 
-const difficultyClass = (tutorial: Tutorial): string | undefined => {
-  if (tutorial.difficulty === 'Advanced') {
-    return styles.badgeAdvanced;
-  }
-  if (tutorial.difficulty === 'Intermediate') {
-    return styles.badgeIntermediate;
-  }
-  return styles.badgeBeginner;
-};
-
-/** Library card for a single tutorial. Presentational — business questions come from the entity. */
+/** Library card for a single tutorial. */
 export const TutorialCard = ({ tutorial }: TutorialCardProps): ReactElement => (
   <article className={styles.card}>
     <div className={styles.cardTop}>
-      <span className={styles.category}>{tutorial.category}</span>
-      <span className={cn(styles.badge, difficultyClass(tutorial))}>
-        {tutorial.difficulty}
-      </span>
+      <CategoryBadge category={tutorial.category} />
+      <Badge tone={difficultyTone(tutorial.difficulty)}>{tutorial.difficulty}</Badge>
     </div>
     <h2 className={styles.cardTitle}>{tutorial.title}</h2>
-    <dl className={styles.meta}>
-      <div>
-        <dt>Duration</dt>
-        <dd>{tutorial.duration}</dd>
-      </div>
-      <div>
-        <dt>Views</dt>
-        <dd>{tutorial.views.toLocaleString()}</dd>
-      </div>
-    </dl>
+    <div className={styles.metaRow}>
+      <span className={styles.metaItem}>
+        <Clock size={14} aria-hidden="true" /> {tutorial.duration}
+      </span>
+      <span className={styles.metaItem}>
+        <Eye size={14} aria-hidden="true" /> {tutorial.views.toLocaleString()} views
+      </span>
+    </div>
+    <Button size="sm">
+      <PlayCircle size={14} aria-hidden="true" /> Watch
+    </Button>
   </article>
 );

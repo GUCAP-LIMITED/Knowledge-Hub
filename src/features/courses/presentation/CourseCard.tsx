@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
-import { Button } from '@shared/ui';
-import { cn } from '@shared/utils';
+import { BookOpen, Clock, Star, Users } from 'lucide-react';
+import { Badge, Button, CategoryBadge, ProgressBar } from '@shared/ui';
 import type { Course } from '../domain';
 import styles from './CoursesPage.module.css';
 
@@ -25,40 +25,26 @@ export const CourseCard = ({
 }: CourseCardProps): ReactElement => (
   <article className={styles.card}>
     <div className={styles.cardTop}>
-      <span className={styles.category}>{course.category}</span>
-      {course.mandatory ? <span className={styles.mandatory}>Required</span> : null}
+      <CategoryBadge category={course.category} />
+      {course.mandatory ? <Badge tone="secondary">Required</Badge> : null}
     </div>
     <h2 className={styles.cardTitle}>{course.title}</h2>
-    <dl className={styles.meta}>
-      <div>
-        <dt>Duration</dt>
-        <dd>{course.duration}</dd>
-      </div>
-      <div>
-        <dt>Lessons</dt>
-        <dd>{course.lessons}</dd>
-      </div>
-      <div>
-        <dt>Rating</dt>
-        <dd>{course.rating.toFixed(1)}</dd>
-      </div>
-      <div>
-        <dt>Enrolled</dt>
-        <dd>{course.enrolled}</dd>
-      </div>
-    </dl>
-    <div className={styles.progressRow}>
-      <div className={styles.progressTrack}>
-        <div
-          className={cn(
-            styles.progressFill,
-            course.isCompleted() && styles.progressComplete,
-          )}
-          style={{ width: `${String(course.progress)}%` }}
-        />
-      </div>
-      <span className={styles.progressLabel}>{course.progress}%</span>
+    <div className={styles.metaRow}>
+      <span className={styles.metaItem}>
+        <Clock size={14} aria-hidden="true" /> {course.duration}
+      </span>
+      <span className={styles.metaItem}>
+        <BookOpen size={14} aria-hidden="true" /> {course.lessons} lessons
+      </span>
+      <span className={styles.metaItem}>
+        <Star size={14} aria-hidden="true" className={styles.star} />{' '}
+        {course.rating.toFixed(1)}
+      </span>
+      <span className={styles.metaItem}>
+        <Users size={14} aria-hidden="true" /> {course.enrolled}
+      </span>
     </div>
+    <ProgressBar value={course.progress} showLabel tone="auto" />
     <Button
       size="sm"
       variant={course.isCompleted() ? 'ghost' : 'primary'}

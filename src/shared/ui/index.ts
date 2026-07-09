@@ -6,6 +6,7 @@ export * from './Textarea/Textarea';
 export * from './Select/Select';
 export * from './IconButton/IconButton';
 export * from './Badge/Badge';
+export * from './CategoryBadge/CategoryBadge';
 export * from './Avatar/Avatar';
 export * from './ProgressBar/ProgressBar';
 export * from './Skeleton/Skeleton';

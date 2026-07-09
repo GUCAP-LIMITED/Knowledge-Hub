@@ -1,21 +1,20 @@
 import type { ReactElement } from 'react';
-import { Alert, Spinner } from '@shared/ui';
+import { Alert, EmptyState, PageHeader, Spinner } from '@shared/ui';
 import { useCertificates } from './use-certificates';
 import { CertificateCard } from './CertificateCard';
 import styles from './CertificatesPage.module.css';
 
-/** Routed certificates page. Reads server state via TanStack Query; no business logic here. */
+/** Routed certificates page. */
 export const CertificatesPage = (): ReactElement => {
   const certificates = useCertificates();
+  const list = certificates.data ?? [];
 
   return (
     <section className={styles.screen}>
-      <header className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Certificates</h1>
-          <p className={styles.subtitle}>Your earned credentials of completion.</p>
-        </div>
-      </header>
+      <PageHeader
+        title="Certificates"
+        subtitle="Your earned credentials of completion."
+      />
 
       {certificates.isLoading ? (
         <div className={styles.center}>
@@ -29,13 +28,16 @@ export const CertificatesPage = (): ReactElement => {
         </Alert>
       ) : null}
 
-      {certificates.data?.length === 0 ? (
-        <p className={styles.empty}>No certificates yet.</p>
+      {!certificates.isLoading && !certificates.isError && list.length === 0 ? (
+        <EmptyState
+          title="No certificates yet"
+          description="Complete a course to earn your first credential."
+        />
       ) : null}
 
-      {certificates.data !== undefined && certificates.data.length > 0 ? (
+      {list.length > 0 ? (
         <div className={styles.grid}>
-          {certificates.data.map((certificate) => (
+          {list.map((certificate) => (
             <CertificateCard key={certificate.id} certificate={certificate} />
           ))}
         </div>

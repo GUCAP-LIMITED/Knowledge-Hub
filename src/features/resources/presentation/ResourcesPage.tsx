@@ -1,27 +1,47 @@
-import type { ReactElement } from 'react';
-import { Alert, Spinner } from '@shared/ui';
+import { useMemo, useState, type ReactElement } from 'react';
+import { Alert, EmptyState, PageHeader, Spinner, TextField } from '@shared/ui';
 import type { Resource } from '../domain';
-import { useResources, useMarkResourceHelpful } from './use-resources';
+import { useMarkResourceHelpful, useResources } from './use-resources';
 import { ResourceCard } from './ResourceCard';
 import styles from './ResourcesPage.module.css';
 
-/** Routed knowledge-base page. Reads server state via TanStack Query; no business logic here. */
+/** Routed knowledge-base page with search. */
 export const ResourcesPage = (): ReactElement => {
   const resources = useResources();
   const markHelpful = useMarkResourceHelpful();
+  const [query, setQuery] = useState('');
 
   const handleHelpful = (resource: Resource): void => {
     markHelpful.mutate({ id: resource.id });
   };
 
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return (resources.data ?? []).filter(
+      (resource) =>
+        q === '' ||
+        resource.title.toLowerCase().includes(q) ||
+        resource.category.toLowerCase().includes(q),
+    );
+  }, [resources.data, query]);
+
   return (
     <section className={styles.screen}>
-      <header className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Knowledge Base</h1>
-          <p className={styles.subtitle}>Guides, policies and references for the team.</p>
-        </div>
-      </header>
+      <PageHeader
+        title="Knowledge Base"
+        subtitle="Guides, policies and references for the team."
+      />
+
+      <div className={styles.toolbar}>
+        <TextField
+          label="Search"
+          placeholder="Search resources…"
+          value={query}
+          onChange={(event) => {
+            setQuery(event.target.value);
+          }}
+        />
+      </div>
 
       {resources.isLoading ? (
         <div className={styles.center}>
@@ -35,13 +55,13 @@ export const ResourcesPage = (): ReactElement => {
         </Alert>
       ) : null}
 
-      {resources.data?.length === 0 ? (
-        <p className={styles.empty}>No resources yet.</p>
+      {!resources.isLoading && !resources.isError && visible.length === 0 ? (
+        <EmptyState title="No resources match" description="Try a different search." />
       ) : null}
 
-      {resources.data !== undefined && resources.data.length > 0 ? (
+      {visible.length > 0 ? (
         <div className={styles.grid}>
-          {resources.data.map((resource) => (
+          {visible.map((resource) => (
             <ResourceCard
               key={resource.id}
               resource={resource}

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
-import { Button } from '@shared/ui';
-import { cn } from '@shared/utils';
+import { Eye, FileText, ThumbsUp } from 'lucide-react';
+import { Badge, Button, CategoryBadge } from '@shared/ui';
 import type { Resource } from '../domain';
 import styles from './ResourcesPage.module.css';
 
@@ -10,7 +10,7 @@ export interface ResourceCardProps {
   readonly onHelpful: (resource: Resource) => void;
 }
 
-/** Knowledge-base card for a single resource. Presentational — business questions come from the entity. */
+/** Knowledge-base card for a single resource. */
 export const ResourceCard = ({
   resource,
   isBusy,
@@ -18,31 +18,32 @@ export const ResourceCard = ({
 }: ResourceCardProps): ReactElement => (
   <article className={styles.card}>
     <div className={styles.cardTop}>
-      <span className={styles.type}>{resource.type}</span>
-      {resource.isPopular() ? <span className={styles.popular}>Popular</span> : null}
+      <Badge tone="info" icon={FileText}>
+        {resource.type}
+      </Badge>
+      {resource.isPopular() ? <Badge tone="secondary">Popular</Badge> : null}
     </div>
     <h2 className={styles.cardTitle}>{resource.title}</h2>
-    <span className={styles.category}>{resource.category}</span>
-    <dl className={styles.meta}>
-      <div>
-        <dt>Views</dt>
-        <dd>{resource.views}</dd>
-      </div>
-      <div>
-        <dt>Helpful</dt>
-        <dd>{resource.helpful}</dd>
-      </div>
-    </dl>
+    <div>
+      <CategoryBadge category={resource.category} size="sm" />
+    </div>
+    <div className={styles.metaRow}>
+      <span className={styles.metaItem}>
+        <Eye size={14} aria-hidden="true" /> {resource.views.toLocaleString()} views
+      </span>
+      <span className={styles.metaItem}>
+        Updated {resource.updated.toLocaleDateString()}
+      </span>
+    </div>
     <Button
       size="sm"
-      variant="primary"
-      className={cn(styles.helpfulButton)}
+      variant="ghost"
       isLoading={isBusy}
       onClick={() => {
         onHelpful(resource);
       }}
     >
-      Helpful ({resource.helpful})
+      <ThumbsUp size={14} aria-hidden="true" /> Helpful ({resource.helpful})
     </Button>
   </article>
 );
