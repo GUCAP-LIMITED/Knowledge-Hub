@@ -92,7 +92,7 @@ const NAV: readonly NavEntry[] = [
   {
     kind: 'link',
     to: '/course-reviews',
-    label: 'Review Moderation',
+    label: 'Course Reviews',
     icon: MessageSquare,
     anyOf: ['admin'],
   },
