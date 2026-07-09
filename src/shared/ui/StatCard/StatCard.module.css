@@ -37,6 +37,19 @@
   font-size: 0.78rem;
   color: var(--color-text-subtle);
 }
+.trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.trendUp {
+  color: var(--color-success-strong);
+}
+.trendDown {
+  color: var(--color-danger-strong);
+}
 .primary {
   background-color: var(--color-primary-soft);
   color: var(--color-primary);

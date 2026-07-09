@@ -49,6 +49,7 @@ export interface Stat {
   readonly icon: LucideIcon;
   readonly tone: StatTone;
   readonly hint?: string;
+  readonly trend?: number;
 }
 
 const adminActions = (ctx: DashCtx): readonly QuickAction[] => [
@@ -158,7 +159,13 @@ export const buildActions = (role: Role, ctx: DashCtx): readonly QuickAction[] =
 export const buildStats = (role: Role, ctx: DashCtx): readonly Stat[] => {
   if (role === 'admin') {
     return [
-      { label: 'Total Users', value: ctx.usersCount, icon: Users, tone: 'primary' },
+      {
+        label: 'Total Users',
+        value: ctx.usersCount,
+        icon: Users,
+        tone: 'primary',
+        trend: 8,
+      },
       {
         label: 'Active Courses',
         value: ctx.coursesCount,
@@ -166,7 +173,7 @@ export const buildStats = (role: Role, ctx: DashCtx): readonly Stat[] => {
         tone: 'success',
       },
       { label: 'Pending Reviews', value: ctx.pending, icon: FileCheck, tone: 'warning' },
-      { label: 'Views (7d)', value: '1,240', icon: Eye, tone: 'info' },
+      { label: 'Views (7d)', value: '1,240', icon: Eye, tone: 'info', trend: 12 },
     ];
   }
   if (role === 'manager') {

@@ -60,6 +60,7 @@ export const StatsGrid = ({
         icon={stat.icon}
         tone={stat.tone}
         {...(stat.hint !== undefined ? { hint: stat.hint } : {})}
+        {...(stat.trend !== undefined ? { trend: stat.trend } : {})}
       />
     ))}
   </div>
