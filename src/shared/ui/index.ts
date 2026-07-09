@@ -15,6 +15,8 @@ export * from './StatCard/StatCard';
 export * from './PageHeader/PageHeader';
 export * from './Toggle/Toggle';
 export * from './Modal/Modal';
+export * from './MediaViewer/MediaViewer';
+export * from './MediaViewer/media-asset';
 export * from './DropdownMenu/DropdownMenu';
 export * from './Tooltip/Tooltip';
 export * from './Tabs/Tabs';

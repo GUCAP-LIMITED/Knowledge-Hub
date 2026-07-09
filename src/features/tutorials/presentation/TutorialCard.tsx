@@ -13,10 +13,11 @@ const difficultyTone = (difficulty: Difficulty): BadgeTone => {
 
 export interface TutorialCardProps {
   readonly tutorial: Tutorial;
+  readonly onWatch: (tutorial: Tutorial) => void;
 }
 
 /** Library card for a single tutorial. */
-export const TutorialCard = ({ tutorial }: TutorialCardProps): ReactElement => (
+export const TutorialCard = ({ tutorial, onWatch }: TutorialCardProps): ReactElement => (
   <article className={styles.card}>
     <div className={styles.cardTop}>
       <CategoryBadge category={tutorial.category} />
@@ -31,7 +32,12 @@ export const TutorialCard = ({ tutorial }: TutorialCardProps): ReactElement => (
         <Eye size={14} aria-hidden="true" /> {tutorial.views.toLocaleString()} views
       </span>
     </div>
-    <Button size="sm">
+    <Button
+      size="sm"
+      onClick={() => {
+        onWatch(tutorial);
+      }}
+    >
       <PlayCircle size={14} aria-hidden="true" /> Watch
     </Button>
   </article>

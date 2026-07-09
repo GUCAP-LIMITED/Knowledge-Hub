@@ -9,11 +9,13 @@ import styles from './ResourcesPage.module.css';
 const ArticleRow = ({
   title,
   meta,
+  onOpen,
 }: {
   readonly title: string;
   readonly meta: string;
+  readonly onOpen: () => void;
 }): ReactElement => (
-  <button type="button" className={styles.articleRow}>
+  <button type="button" className={styles.articleRow} onClick={onOpen}>
     <FileText size={18} aria-hidden="true" className={styles.articleIcon} />
     <span className={styles.articleBody}>
       <span className={styles.articleTitle}>{title}</span>
@@ -64,8 +66,10 @@ export const CategoryCards = ({
 /** "Popular articles" card — the five most-viewed resources. */
 export const PopularArticles = ({
   resources,
+  onOpen,
 }: {
   readonly resources: readonly Resource[];
+  readonly onOpen: (resource: Resource) => void;
 }): ReactElement => (
   <div className={styles.panel}>
     <h2 className={styles.panelHeading}>Popular articles</h2>
@@ -75,6 +79,9 @@ export const PopularArticles = ({
           key={resource.id}
           title={resource.title}
           meta={`${resource.category} • Updated ${resource.updated.toLocaleDateString('en-GB')} • ${resource.views.toLocaleString()} views`}
+          onOpen={() => {
+            onOpen(resource);
+          }}
         />
       ))}
     </div>
@@ -85,6 +92,7 @@ export interface ArticleResultsProps {
   readonly heading: string;
   readonly resources: readonly Resource[];
   readonly onBack: () => void;
+  readonly onOpen: (resource: Resource) => void;
 }
 
 /** Filtered article results (a chosen category or a search), with a back link. */
@@ -92,6 +100,7 @@ export const ArticleResults = ({
   heading,
   resources,
   onBack,
+  onOpen,
 }: ArticleResultsProps): ReactElement => (
   <div className={styles.panel}>
     <button type="button" className={styles.backLink} onClick={onBack}>
@@ -110,6 +119,9 @@ export const ArticleResults = ({
             key={resource.id}
             title={resource.title}
             meta={`${String(resource.helpful)}% found this helpful • Updated ${resource.updated.toLocaleDateString('en-GB')}`}
+            onOpen={() => {
+              onOpen(resource);
+            }}
           />
         ))}
       </div>

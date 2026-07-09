@@ -176,11 +176,25 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.6rem 0;
+  width: 100%;
+  padding: 0.6rem 0.4rem;
+  border: none;
   border-bottom: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.lesson:hover {
+  background-color: var(--color-surface-muted);
 }
 .lesson:last-child {
   border-bottom: none;
+}
+.lessonPlay {
+  margin-left: auto;
+  color: var(--color-primary);
+  flex-shrink: 0;
 }
 .lessonNum {
   display: grid;

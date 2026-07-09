@@ -1,11 +1,10 @@
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
   Award,
   BookOpen,
   Calendar,
-  Check,
   CheckCircle,
   Clock,
   Hash,
@@ -13,45 +12,12 @@ import {
   Star,
   Users,
 } from 'lucide-react';
-import { Alert, Badge, Skeleton } from '@shared/ui';
+import { Alert, Skeleton } from '@shared/ui';
 import { cn } from '@shared/utils';
 import { useCourse, useUpdateCourseProgress, type Course } from '@features/courses';
 import { CourseReviewsPanel } from '@features/course-reviews';
+import { CurriculumCard, LessonPlayer, type Lesson } from './CourseCurriculum';
 import styles from './CourseDetailPage.module.css';
-
-interface Lesson {
-  readonly id: number;
-  readonly title: string;
-  readonly duration: string;
-  readonly completed: boolean;
-  readonly current: boolean;
-}
-
-const LESSON_TITLES = [
-  'Welcome and overview',
-  'Setting up your environment',
-  'Core concepts',
-  'Hands-on walkthrough',
-  'Common pitfalls and how to avoid them',
-  'Real-world scenarios',
-  'Practice exercises',
-  'Assessment',
-  'Advanced topics',
-  'Capstone',
-  'Final review',
-  'Wrap-up & resources',
-];
-
-const buildCurriculum = (course: Course): readonly Lesson[] => {
-  const done = Math.floor((course.progress / 100) * course.lessons);
-  return Array.from({ length: course.lessons }, (_, index) => ({
-    id: index + 1,
-    title: LESSON_TITLES[index % LESSON_TITLES.length] ?? `Lesson ${String(index + 1)}`,
-    duration: `${String(8 + ((index * 7) % 14))} min`,
-    completed: index < done,
-    current: index === done && course.progress > 0 && course.progress < 100,
-  }));
-};
 
 const nextProgress = (course: Course): number =>
   course.hasStarted() ? Math.min(100, course.progress + 10) : 5;
@@ -126,54 +92,6 @@ const CourseHero = ({
   </div>
 );
 
-const CurriculumCard = ({ course }: { readonly course: Course }): ReactElement => {
-  const lessons = buildCurriculum(course);
-  const done = lessons.filter((lesson) => lesson.completed).length;
-  return (
-    <section className={styles.card}>
-      <div className={styles.cardHead}>
-        <h2 className={styles.cardTitle}>Curriculum</h2>
-        <span className={styles.cardHint}>
-          {done} of {lessons.length} complete
-        </span>
-      </div>
-      <div>
-        {lessons.map((lesson) => (
-          <div key={lesson.id} className={styles.lesson}>
-            <span
-              className={cn(
-                styles.lessonNum,
-                lesson.completed && styles.lessonDone,
-                lesson.current && styles.lessonCurrent,
-              )}
-            >
-              {lesson.completed ? <Check size={14} aria-hidden="true" /> : lesson.id}
-            </span>
-            <div className={styles.lessonBody}>
-              <div
-                className={cn(
-                  styles.lessonTitle,
-                  lesson.current && styles.lessonTitleCurrent,
-                )}
-              >
-                Lesson {lesson.id} · {lesson.title}
-              </div>
-              <div className={styles.lessonMeta}>
-                <Clock size={11} aria-hidden="true" /> {lesson.duration}
-                {lesson.current ? (
-                  <Badge tone="primary" size="sm">
-                    Current
-                  </Badge>
-                ) : null}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-};
-
 const DetailsSidebar = ({ course }: { readonly course: Course }): ReactElement => {
   const rows = [
     { label: 'Category', value: course.category, icon: Hash },
@@ -209,6 +127,7 @@ export const CourseDetailPage = (): ReactElement => {
   const id = params.id ?? '';
   const course = useCourse(id);
   const updateProgress = useUpdateCourseProgress();
+  const [playing, setPlaying] = useState<Lesson | null>(null);
 
   const backLink = (
     <Link to="/courses" className={styles.back}>
@@ -263,7 +182,7 @@ export const CourseDetailPage = (): ReactElement => {
               ))}
             </div>
           </section>
-          <CurriculumCard course={data} />
+          <CurriculumCard course={data} onPlay={setPlaying} />
           <section className={styles.card}>
             <h2 className={styles.cardTitle}>Reviews</h2>
             <CourseReviewsPanel courseId={data.id} courseName={data.title} />
@@ -271,6 +190,14 @@ export const CourseDetailPage = (): ReactElement => {
         </div>
         <DetailsSidebar course={data} />
       </div>
+
+      <LessonPlayer
+        lesson={playing}
+        courseTitle={data.title}
+        onClose={() => {
+          setPlaying(null);
+        }}
+      />
     </section>
   );
 };

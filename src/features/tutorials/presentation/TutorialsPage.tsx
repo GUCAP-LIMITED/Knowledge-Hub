@@ -1,15 +1,26 @@
 import { useMemo, useState, type ReactElement } from 'react';
-import { Alert, EmptyState, PageHeader, Spinner, TextField } from '@shared/ui';
+import {
+  Alert,
+  EmptyState,
+  MediaViewer,
+  Modal,
+  PageHeader,
+  Spinner,
+  TextField,
+  demoAsset,
+} from '@shared/ui';
+import type { Tutorial } from '../domain';
 import { useTutorials } from './use-tutorials';
 import { TutorialCard } from './TutorialCard';
 import { CategoryPills } from './CategoryPills';
 import styles from './TutorialsPage.module.css';
 
-/** Routed tutorials-library page with a category filter and search. */
+/** Routed tutorials-library page with a category filter, search, and a video player. */
 export const TutorialsPage = (): ReactElement => {
   const tutorials = useTutorials();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
+  const [watching, setWatching] = useState<Tutorial | null>(null);
 
   const categories = useMemo(
     () => [...new Set((tutorials.data ?? []).map((tutorial) => tutorial.category))],
@@ -71,10 +82,26 @@ export const TutorialsPage = (): ReactElement => {
       {visible.length > 0 ? (
         <div className={styles.grid}>
           {visible.map((tutorial) => (
-            <TutorialCard key={tutorial.id} tutorial={tutorial} />
+            <TutorialCard key={tutorial.id} tutorial={tutorial} onWatch={setWatching} />
           ))}
         </div>
       ) : null}
+
+      <Modal
+        open={watching !== null}
+        onOpenChange={(next) => {
+          if (!next) {
+            setWatching(null);
+          }
+        }}
+        title={watching?.title ?? 'Tutorial'}
+        description={watching ? `${watching.category} · ${watching.duration}` : undefined}
+        size="lg"
+      >
+        {watching !== null ? (
+          <MediaViewer asset={demoAsset('video', watching.title)} />
+        ) : null}
+      </Modal>
     </section>
   );
 };
