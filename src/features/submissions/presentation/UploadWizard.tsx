@@ -9,10 +9,12 @@ import {
   type StepKey,
   type UploadSlot,
 } from './upload-content-types';
+import type { Details } from './upload-details';
 import { UploadTypeStep } from './UploadTypeStep';
 import { UploadFileStep } from './UploadFileStep';
 import { UploadCurriculumStep } from './UploadCurriculumStep';
-import { DetailsStep, ReviewSummary, type Details } from './UploadSteps';
+import { DetailsStep } from './UploadDetailsStep';
+import { ReviewSummary } from './UploadSteps';
 import styles from './UploadPage.module.css';
 
 const STEP_LABELS: Record<StepKey, string> = {

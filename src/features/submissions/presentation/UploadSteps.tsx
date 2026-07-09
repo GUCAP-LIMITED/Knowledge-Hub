@@ -1,59 +1,10 @@
 import type { ReactElement } from 'react';
-import { useForm } from 'react-hook-form';
 import { Check, PlusCircle } from 'lucide-react';
-import { Button, TextField, Textarea } from '@shared/ui';
+import { Button } from '@shared/ui';
 import { cn } from '@shared/utils';
-import { domainResolver } from '@shared/forms';
-import { SubmissionTitle } from '../domain';
 import type { Section } from './upload-content-types';
+import type { Details } from './upload-details';
 import styles from './UploadPage.module.css';
-
-export interface Details {
-  title: string;
-  type: string;
-  description: string;
-}
-
-export const DetailsStep = ({
-  defaults,
-  onSubmit,
-}: {
-  readonly defaults: Details;
-  readonly onSubmit: (details: Details) => void;
-}): ReactElement => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<Details>({
-    resolver: domainResolver<Details>({
-      title: (value) => SubmissionTitle.create(value),
-    }),
-    defaultValues: defaults,
-  });
-  return (
-    <form
-      id="upload-details"
-      onSubmit={(event) => {
-        void handleSubmit(onSubmit)(event);
-      }}
-      className={styles.form}
-    >
-      <TextField
-        label="Title"
-        placeholder="e.g. Getting Started with UAPP Portal"
-        error={errors.title?.message ?? ''}
-        {...register('title')}
-      />
-      <Textarea
-        label="Description"
-        rows={4}
-        placeholder="Briefly describe this content…"
-        {...register('description')}
-      />
-    </form>
-  );
-};
 
 export const ReviewSummary = ({
   details,

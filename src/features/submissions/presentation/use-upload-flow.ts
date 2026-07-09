@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@features/auth';
 import { useSubmitContent } from './use-submissions';
-import type { Details } from './UploadSteps';
+import { type Details, EMPTY_DETAILS } from './upload-details';
 import {
   type ContentTypeKey,
   type Section,
@@ -14,8 +14,6 @@ import {
   totalFileCount,
   typeLabel,
 } from './upload-content-types';
-
-const EMPTY_DETAILS: Details = { title: '', type: '', description: '' };
 
 export interface UploadFlow {
   readonly isAdmin: boolean;

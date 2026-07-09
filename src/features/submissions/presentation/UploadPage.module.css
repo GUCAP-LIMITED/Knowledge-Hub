@@ -14,6 +14,73 @@
   box-shadow: var(--shadow-xs);
 }
 
+/* Step 3 — sectioned details form */
+.detailForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.detailSection {
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+.detailSectionHead {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+.detailSectionIcon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.detailSectionTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+.visList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.visOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+.visOption:has(input:checked) {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+}
+.visTitle {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+.visDesc {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--color-text-subtle);
+}
+
 /* Step 2 — multi-slot uploads */
 .slotGrid {
   display: grid;
