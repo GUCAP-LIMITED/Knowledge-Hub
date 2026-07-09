@@ -62,6 +62,9 @@ const ContentManagementPage = lazy(async () => ({
   default: (await import('@features/content/presentation/ContentManagementPage'))
     .ContentManagementPage,
 }));
+const UploadPage = lazy(async () => ({
+  default: (await import('@features/submissions/presentation/UploadPage')).UploadPage,
+}));
 const ForbiddenPage = lazy(async () => ({
   default: (await import('@app/pages/ForbiddenPage')).ForbiddenPage,
 }));
@@ -96,13 +99,14 @@ export const AppRouter = (): ReactElement => {
 
             {/* Content workspace — managers and admins. */}
             <Route element={<ProtectedRoute anyOf={['admin', 'manager']} />}>
+              <Route path="/upload" element={<UploadPage />} />
               <Route path="/submissions" element={<SubmissionsPage />} />
-              <Route path="/team-progress" element={<TeamProgressPage />} />
-              <Route path="/assign" element={<AssignTrainingPage />} />
             </Route>
 
             {/* Review queue — admins only. */}
             <Route element={<ProtectedRoute anyOf={['admin']} />}>
+              <Route path="/team-progress" element={<TeamProgressPage />} />
+              <Route path="/assign" element={<AssignTrainingPage />} />
               <Route path="/approvals" element={<ApprovalsPage />} />
               <Route path="/course-reviews" element={<CourseReviewsPage />} />
               <Route path="/content" element={<ContentManagementPage />} />

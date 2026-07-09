@@ -14,6 +14,7 @@ import {
   BarChart3,
   CalendarCheck,
   LayoutGrid,
+  Upload,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@shared/utils';
@@ -37,7 +38,13 @@ type NavEntry =
 const NAV: readonly NavEntry[] = [
   { kind: 'section', label: 'Learn' },
   { kind: 'link', to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { kind: 'link', to: '/my-learning', label: 'My Learning', icon: BookOpen },
+  {
+    kind: 'link',
+    to: '/my-learning',
+    label: 'My Learning',
+    icon: BookOpen,
+    anyOf: ['manager', 'consultant'],
+  },
   { kind: 'link', to: '/courses', label: 'Courses', icon: PlayCircle },
   { kind: 'link', to: '/tutorials', label: 'Tutorials', icon: Lightbulb },
   { kind: 'link', to: '/resources', label: 'Resources', icon: FolderOpen },
@@ -46,25 +53,32 @@ const NAV: readonly NavEntry[] = [
   { kind: 'section', label: 'Workspace', anyOf: ['admin', 'manager'] },
   {
     kind: 'link',
+    to: '/upload',
+    label: 'Upload Document',
+    icon: Upload,
+    anyOf: ['admin', 'manager'],
+  },
+  {
+    kind: 'link',
     to: '/submissions',
     label: 'My Submissions',
     icon: FileCheck,
     anyOf: ['admin', 'manager'],
   },
-  { kind: 'section', label: 'Team', anyOf: ['admin', 'manager'] },
+  { kind: 'section', label: 'Team', anyOf: ['admin'] },
   {
     kind: 'link',
     to: '/team-progress',
     label: 'Team Progress',
     icon: BarChart3,
-    anyOf: ['admin', 'manager'],
+    anyOf: ['admin'],
   },
   {
     kind: 'link',
     to: '/assign',
     label: 'Assign Training',
     icon: CalendarCheck,
-    anyOf: ['admin', 'manager'],
+    anyOf: ['admin'],
   },
   { kind: 'section', label: 'Administration', anyOf: ['admin'] },
   {

@@ -1,11 +1,12 @@
 import type { ReactElement } from 'react';
 import type { UseQueryResult } from '@tanstack/react-query';
-import { Alert, Spinner } from '@shared/ui';
+import { Link } from 'react-router-dom';
+import { Upload } from 'lucide-react';
+import { Alert, PageHeader, Spinner } from '@shared/ui';
 import { useAuth } from '@features/auth';
 import type { Submission } from '../domain';
-import { SubmitContentForm } from './SubmitContentForm';
 import { SubmissionRow } from './SubmissionRow';
-import { useMySubmissions, useSubmitContent } from './use-submissions';
+import { useMySubmissions } from './use-submissions';
 import styles from './SubmissionsPage.module.css';
 
 const MySubmissionsList = ({
@@ -29,7 +30,11 @@ const MySubmissionsList = ({
   }
   const data = query.data ?? [];
   if (data.length === 0) {
-    return <p className={styles.empty}>No submissions yet — create one above.</p>;
+    return (
+      <p className={styles.empty}>
+        No submissions yet — upload a document to get started.
+      </p>
+    );
   }
   return (
     <div className={styles.list}>
@@ -40,42 +45,21 @@ const MySubmissionsList = ({
   );
 };
 
-/** "My submissions": create content and track its review status. Manager/admin only. */
+/** "My Submissions": track the review status of everything you've uploaded. */
 export const SubmissionsPage = (): ReactElement => {
   const { user } = useAuth();
-  const name = user?.fullName ?? '';
-  const isAdmin = user?.hasRole('admin') ?? false;
-  const mine = useMySubmissions(name);
-  const submit = useSubmitContent();
-
-  const handleSubmit = (values: { title: string; type: string }): void => {
-    submit.mutate({
-      title: values.title,
-      type: values.type,
-      submittedBy: name,
-      publishDirectly: isAdmin,
-    });
-  };
+  const mine = useMySubmissions(user?.fullName ?? '');
 
   return (
     <section className={styles.screen}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>My Submissions</h1>
-        <p className={styles.subtitle}>Upload content and track its review status.</p>
-      </header>
-
-      <SubmitContentForm
-        isSubmitting={submit.isPending}
-        submitLabel={isAdmin ? 'Publish now' : 'Submit for review'}
-        onSubmit={handleSubmit}
-      />
-
-      {submit.isError ? (
-        <Alert tone="error" title="Could not submit">
-          {submit.error.message}
-        </Alert>
-      ) : null}
-
+      <PageHeader
+        title="My Submissions"
+        subtitle="Track the review status of your uploads."
+      >
+        <Link to="/upload" className={styles.uploadCta}>
+          <Upload size={15} aria-hidden="true" /> Upload document
+        </Link>
+      </PageHeader>
       <MySubmissionsList query={mine} />
     </section>
   );
