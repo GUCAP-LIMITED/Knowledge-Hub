@@ -22,6 +22,22 @@ const buildPerms = (
   return result;
 };
 
+/** An all-disabled permission state — the starting point for a new custom access level. */
+export const emptyPerms = (): PermState => buildPerms([]);
+
+let customSequence = 0;
+
+/** Build a fresh custom permission set with a given display name (all permissions off). */
+export const createPermissionSet = (name: string): PermissionSet => {
+  customSequence += 1;
+  return {
+    id: `custom-${String(customSequence)}`,
+    label: name.trim() === '' ? 'New access level' : name.trim(),
+    desc: 'Custom access level',
+    perms: emptyPerms(),
+  };
+};
+
 const ALL = PERMISSION_MODULES.map((m) => m.id);
 const MANAGER = [
   'courses',
