@@ -40,6 +40,7 @@ export class InMemoryAssignmentGateway implements AssignmentGateway {
       assignee: input.assignee,
       dueDate: input.dueDate,
       status: input.status,
+      progress: 0,
     });
     this.assignments.set(id, assignment);
     return Promise.resolve(ok(assignment));

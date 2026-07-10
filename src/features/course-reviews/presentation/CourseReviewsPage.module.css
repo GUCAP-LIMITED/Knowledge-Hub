@@ -100,10 +100,43 @@
 }
 
 /* Recent reviews */
+.recentHead {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.recentHead .cardHeading {
+  margin: 0;
+}
+.recentCount {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.4rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.reviewScroll {
+  max-height: 460px;
+  overflow-y: auto;
+  margin-top: 1rem;
+  padding-right: 0.25rem;
+}
 .reviewList {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+}
+.reviewRight {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
 }
 
 .reviewItem {

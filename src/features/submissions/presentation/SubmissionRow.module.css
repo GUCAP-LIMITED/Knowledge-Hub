@@ -1,19 +1,66 @@
 .row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 1.1rem;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.row:hover {
+  border-color: var(--color-border-strong, var(--color-border));
+  box-shadow: var(--shadow-xs);
+}
+.rowSelected {
+  border-color: var(--color-primary);
+  box-shadow: var(--ring);
 }
 
 .lead {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.85rem;
   min-width: 0;
+}
+
+.check {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex-shrink: 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.metaChips {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.chip {
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+.waiting {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--color-warning-strong);
+}
+.metaDate {
+  font-size: 0.78rem;
+  color: var(--color-text-subtle);
 }
 
 .iconTile {

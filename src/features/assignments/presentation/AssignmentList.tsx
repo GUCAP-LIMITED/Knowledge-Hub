@@ -1,8 +1,14 @@
-import type { ReactElement } from 'react';
-import { ClipboardList } from 'lucide-react';
+import { useMemo, useState, type ReactElement } from 'react';
+import { ClipboardList, SearchX } from 'lucide-react';
 import { Alert, Button, EmptyState } from '@shared/ui';
 import type { Assignment } from '../domain';
 import { AssignmentCard } from './AssignmentCard';
+import { AssignmentToolbar } from './AssignmentToolbar';
+import {
+  type AssignmentFilter,
+  assignmentTabCounts,
+  filterAssignments,
+} from './assignment-filters';
 import styles from './AssignTrainingPage.module.css';
 
 export interface AssignmentListProps {
@@ -14,7 +20,7 @@ export interface AssignmentListProps {
   readonly onDelete: (id: string) => void;
 }
 
-/** The error / empty / card-grid body of the Assign Training page. */
+/** The error / empty / toolbar + card-grid body of the Assign Training page. */
 export const AssignmentList = ({
   list,
   error,
@@ -23,6 +29,15 @@ export const AssignmentList = ({
   onView,
   onDelete,
 }: AssignmentListProps): ReactElement => {
+  const [tab, setTab] = useState<AssignmentFilter>('all');
+  const [query, setQuery] = useState('');
+  const now = useMemo(() => new Date(), []);
+  const counts = useMemo(() => assignmentTabCounts(list, now), [list, now]);
+  const filtered = useMemo(
+    () => filterAssignments(list, tab, query, now),
+    [list, tab, query, now],
+  );
+
   if (error !== null) {
     return (
       <Alert tone="error" title="Could not load assignments">
@@ -35,7 +50,7 @@ export const AssignmentList = ({
     return (
       <EmptyState
         icon={ClipboardList}
-        title="No active assignments"
+        title="No assignments yet"
         description="Create one to keep your team's learning on track."
         action={<Button onClick={onNew}>New assignment</Button>}
       />
@@ -43,16 +58,33 @@ export const AssignmentList = ({
   }
 
   return (
-    <div className={styles.grid}>
-      {list.map((assignment) => (
-        <AssignmentCard
-          key={assignment.id}
-          assignment={assignment}
-          deleting={deleting}
-          onView={onView}
-          onDelete={onDelete}
+    <div className={styles.body}>
+      <AssignmentToolbar
+        query={query}
+        tab={tab}
+        counts={counts}
+        onQuery={setQuery}
+        onTab={setTab}
+      />
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={SearchX}
+          title="No matching assignments"
+          description="Try another search or switch status tab."
         />
-      ))}
+      ) : (
+        <div className={styles.grid}>
+          {filtered.map((assignment) => (
+            <AssignmentCard
+              key={assignment.id}
+              assignment={assignment}
+              deleting={deleting}
+              onView={onView}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

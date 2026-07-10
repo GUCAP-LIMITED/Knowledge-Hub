@@ -8,6 +8,7 @@ const DEFAULT_ASSIGNMENT: AssignmentProps = {
   assignee: 'All Consultants',
   dueDate: new Date('2024-01-31T00:00:00.000Z'),
   status: 'active',
+  progress: 0,
 };
 
 /** Construct a valid {@link Assignment} for tests, overriding only what matters per case. */

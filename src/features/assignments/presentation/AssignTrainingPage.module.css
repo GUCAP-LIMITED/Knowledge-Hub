@@ -11,25 +11,93 @@
   place-items: center;
   min-height: 40vh;
 }
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Toolbar: search + status pill tabs */
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+.tab:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+.tabActive {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+.tabCount {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.35rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.tabActive .tabCount {
+  background-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
 }
 .card {
   display: flex;
   flex-direction: column;
+  gap: 0.9rem;
   padding: 1.25rem;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xs);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 .cardTop {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.9rem;
 }
 .iconTile {
   display: grid;
@@ -41,15 +109,36 @@
   color: var(--color-primary);
 }
 .cardTitle {
-  margin: 0 0 0.9rem;
+  margin: 0;
   font-size: 1rem;
   font-weight: 700;
+  line-height: 1.35;
 }
 .rows {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   font-size: 0.85rem;
+}
+.overdue {
+  color: var(--color-danger-strong);
+}
+.progressWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.progressHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-subtle);
+}
+.progressPct {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
 }
 .row {
   display: flex;
@@ -67,7 +156,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 1rem;
+  margin-top: auto;
 }
 .form {
   display: flex;

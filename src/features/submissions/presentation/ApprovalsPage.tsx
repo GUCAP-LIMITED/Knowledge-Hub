@@ -1,16 +1,20 @@
-import { useState, type ReactElement, type ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { Eye } from 'lucide-react';
-import { Alert, Button, PageHeader, Spinner, Tabs, TabsPanel } from '@shared/ui';
+import {
+  Alert,
+  Button,
+  EmptyState,
+  PageHeader,
+  Spinner,
+  Tabs,
+  TabsPanel,
+} from '@shared/ui';
 import type { Submission, SubmissionStatus } from '../domain';
 import { SubmissionRow } from './SubmissionRow';
+import { ApprovalsToolbar } from './ApprovalsToolbar';
+import { BulkActionBar } from './BulkActionBar';
 import { ReviewSubmissionModal } from './ReviewSubmissionModal';
-import {
-  useApproveSubmission,
-  useFlagSubmission,
-  usePublishSubmission,
-  useRejectSubmission,
-  useSubmissions,
-} from './use-submissions';
+import { useApprovalQueue } from './use-approval-queue';
 import styles from './ApprovalsPage.module.css';
 
 const TABS: readonly { readonly value: SubmissionStatus; readonly label: string }[] = [
@@ -20,6 +24,12 @@ const TABS: readonly { readonly value: SubmissionStatus; readonly label: string 
   { value: 'published', label: 'Published' },
   { value: 'rejected', label: 'Rejected' },
 ];
+
+interface Selection {
+  readonly ids: readonly string[];
+  readonly selectable: boolean;
+  readonly onToggle: (id: string) => void;
+}
 
 const SubmissionActions = ({
   submission,
@@ -63,18 +73,28 @@ const SubmissionActions = ({
 
 const QueueList = ({
   submissions,
+  selection,
   renderActions,
 }: {
   readonly submissions: readonly Submission[];
+  readonly selection: Selection;
   readonly renderActions: (submission: Submission) => ReactNode;
 }): ReactElement => {
   if (submissions.length === 0) {
-    return <p className={styles.empty}>Nothing in this queue.</p>;
+    return (
+      <EmptyState title="Nothing here" description="No submissions match this view." />
+    );
   }
   return (
     <div className={styles.list}>
       {submissions.map((submission) => (
-        <SubmissionRow key={submission.id} submission={submission}>
+        <SubmissionRow
+          key={submission.id}
+          submission={submission}
+          showStatus={false}
+          selected={selection.ids.includes(submission.id)}
+          {...(selection.selectable ? { onToggleSelect: selection.onToggle } : {})}
+        >
           {renderActions(submission)}
         </SubmissionRow>
       ))}
@@ -86,11 +106,13 @@ const ApprovalTabs = ({
   data,
   activeTab,
   onTabChange,
+  selection,
   renderActions,
 }: {
   readonly data: readonly Submission[];
   readonly activeTab: string;
   readonly onTabChange: (value: string) => void;
+  readonly selection: Selection;
   readonly renderActions: (submission: Submission) => ReactNode;
 }): ReactElement => {
   const tabs = TABS.map((tab) => ({
@@ -103,6 +125,7 @@ const ApprovalTabs = ({
         <TabsPanel key={tab.value} value={tab.value}>
           <QueueList
             submissions={data.filter((s) => s.status === tab.value)}
+            selection={selection}
             renderActions={renderActions}
           />
         </TabsPanel>
@@ -111,48 +134,29 @@ const ApprovalTabs = ({
   );
 };
 
-/** Reviewer approval queue with a rich review modal (preview + decision + timeline). Admin only. */
+/** Reviewer approval queue: filter, tabs, bulk approve, and a rich review modal. Admin only. */
 export const ApprovalsPage = (): ReactElement => {
-  const submissions = useSubmissions();
-  const approve = useApproveSubmission();
-  const reject = useRejectSubmission();
-  const flag = useFlagSubmission();
-  const publish = usePublishSubmission();
-  const [activeTab, setActiveTab] = useState<string>('pending');
-  const [reviewId, setReviewId] = useState<string | null>(null);
-
-  const busy =
-    approve.isPending || reject.isPending || flag.isPending || publish.isPending;
-  const data = submissions.data ?? [];
-  const reviewing = data.find((submission) => submission.id === reviewId) ?? null;
-  const closeReview = (): void => {
-    setReviewId(null);
-  };
-
+  const q = useApprovalQueue();
   const renderActions = (submission: Submission): ReactNode => (
     <SubmissionActions
       submission={submission}
-      busy={busy}
-      onReview={(target) => {
-        setReviewId(target.id);
-      }}
-      onPublish={(id) => {
-        publish.mutate(id);
-      }}
+      busy={q.busy}
+      onReview={q.openReview}
+      onPublish={q.publish}
     />
   );
 
-  if (submissions.isLoading) {
+  if (q.isLoading) {
     return (
       <div className={styles.center}>
         <Spinner size="lg" label="Loading approval queue" />
       </div>
     );
   }
-  if (submissions.isError) {
+  if (q.error !== null) {
     return (
       <Alert tone="error" title="Could not load the queue">
-        {submissions.error.message}
+        {q.error.message}
       </Alert>
     );
   }
@@ -163,28 +167,38 @@ export const ApprovalsPage = (): ReactElement => {
         title="Approval Queue"
         subtitle="Review submissions and decide what gets published."
       />
+      <ApprovalsToolbar
+        query={q.query}
+        type={q.type}
+        types={q.types}
+        onQuery={q.setQuery}
+        onType={q.setType}
+      />
+      <BulkActionBar
+        count={q.selectedInTab.length}
+        busy={q.busy}
+        onApprove={q.approveSelected}
+        onClear={q.clearSelected}
+      />
       <ApprovalTabs
-        data={data}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
+        data={q.data}
+        activeTab={q.activeTab}
+        onTabChange={q.switchTab}
+        selection={{
+          ids: q.selected,
+          selectable: q.selectable,
+          onToggle: q.toggleSelect,
+        }}
         renderActions={renderActions}
       />
       <ReviewSubmissionModal
-        submission={reviewing}
-        isBusy={busy}
-        rejectError={reject.error?.message}
-        onClose={closeReview}
-        onApprove={(id, note) => {
-          approve.mutate(note.length > 0 ? { id, note } : { id }, {
-            onSuccess: closeReview,
-          });
-        }}
-        onReject={(id, reason) => {
-          reject.mutate({ id, reason }, { onSuccess: closeReview });
-        }}
-        onFlag={(id) => {
-          flag.mutate(id);
-        }}
+        submission={q.reviewing}
+        isBusy={q.busy}
+        rejectError={q.rejectError}
+        onClose={q.closeReview}
+        onApprove={q.approveReviewed}
+        onReject={q.rejectReviewed}
+        onFlag={q.flag}
       />
     </section>
   );

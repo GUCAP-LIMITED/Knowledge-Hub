@@ -1,4 +1,9 @@
-import type { ButtonHTMLAttributes, ReactElement, ReactNode } from 'react';
+import {
+  forwardRef,
+  type ButtonHTMLAttributes,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 import { cn } from '@shared/utils';
 import styles from './IconButton.module.css';
 
@@ -13,18 +18,16 @@ export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>
 
 /**
  * Square, icon-only button primitive. Forces an accessible `label` so screen readers always have a
- * name, and reuses the token palette for hover/focus states.
+ * name, and reuses the token palette for hover/focus states. Forwards its ref so it can act as a
+ * Radix `asChild` trigger (dropdown / tooltip).
  */
-export const IconButton = ({
-  label,
-  variant = 'ghost',
-  type = 'button',
-  className,
-  children,
-  ...rest
-}: IconButtonProps): ReactElement => {
-  return (
+export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
+  (
+    { label, variant = 'ghost', type = 'button', className, children, ...rest },
+    ref,
+  ): ReactElement => (
     <button
+      ref={ref}
       type={type}
       aria-label={label}
       title={label}
@@ -33,5 +36,7 @@ export const IconButton = ({
     >
       {children}
     </button>
-  );
-};
+  ),
+);
+
+IconButton.displayName = 'IconButton';
