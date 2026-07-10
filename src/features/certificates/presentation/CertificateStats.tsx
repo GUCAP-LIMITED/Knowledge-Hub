@@ -7,12 +7,14 @@ import styles from './CertificatesPage.module.css';
 export interface CertificateStatsProps {
   readonly certificates: readonly Certificate[];
   readonly now: Date;
+  readonly isAdmin?: boolean;
 }
 
-/** Learner summary tiles: earned, distinctions, expiring soon, categories. */
+/** Summary tiles: total earned/issued, distinctions, expiring soon, categories. */
 export const CertificateStats = ({
   certificates,
   now,
+  isAdmin = false,
 }: CertificateStatsProps): ReactElement => {
   const distinctions = certificates.filter((cert) => cert.isDistinction()).length;
   const expiring = certificates.filter((cert) => cert.isExpiringSoon(now)).length;
@@ -21,7 +23,7 @@ export const CertificateStats = ({
   return (
     <div className={styles.stats}>
       <StatCard
-        label="Total Earned"
+        label={isAdmin ? 'Total Issued' : 'Total Earned'}
         value={certificates.length}
         icon={Award}
         tone="secondary"

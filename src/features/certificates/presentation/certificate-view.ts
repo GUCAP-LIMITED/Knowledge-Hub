@@ -1,13 +1,13 @@
 import type { Certificate, CertificateGrade } from '../domain';
 
-export type GradeTone = 'warning' | 'info' | 'success';
+export type GradeTone = 'warning' | 'primary' | 'success';
 
-/** Accent tone for a grade badge. */
+/** Accent tone for a grade badge (brand-aligned: gold / teal / green — no bright blue). */
 export const gradeTone = (grade: CertificateGrade): GradeTone => {
   if (grade === 'Distinction') {
     return 'warning';
   }
-  return grade === 'Merit' ? 'info' : 'success';
+  return grade === 'Merit' ? 'primary' : 'success';
 };
 
 const formatDate = (date: Date): string => date.toLocaleDateString('en-GB');

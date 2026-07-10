@@ -34,16 +34,17 @@ export const CertificateModal = ({
   const template = useCertificateTemplate(user?.roleNames ?? [], 'course');
   const daysLeft = certificate?.daysUntilExpiry(now) ?? 0;
   const expiringSoon = certificate?.isExpiringSoon(now) ?? false;
-  const heroStyle: CSSProperties = {
-    borderColor: template.accentColor,
-    color: template.accentColor,
-    backgroundImage:
-      template.backgroundImage !== undefined
-        ? `linear-gradient(rgba(255,255,255,0.86), rgba(255,255,255,0.86)), url(${template.backgroundImage})`
-        : undefined,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-  };
+  // A light background image (if the template has one) reads with the accent colour; otherwise the
+  // hero uses the teal gradient from CSS, where text must stay white to remain legible.
+  const heroStyle: CSSProperties =
+    template.backgroundImage !== undefined
+      ? {
+          color: template.accentColor,
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url(${template.backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }
+      : { color: '#fff' };
   return (
     <Modal
       open={certificate !== null}

@@ -46,6 +46,10 @@
 .pill:hover {
   background-color: var(--color-border);
 }
+.pill:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
 .pillActive,
 .pillActive:hover {
   background-color: var(--color-primary);
@@ -86,15 +90,15 @@
 }
 .grade_warning {
   background-color: var(--color-warning);
-  color: #3a2500;
+  color: var(--color-on-warning);
 }
-.grade_info {
-  background-color: var(--color-info);
-  color: #fff;
+.grade_primary {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
 }
 .grade_success {
   background-color: var(--color-success);
-  color: #04241a;
+  color: var(--color-on-success);
 }
 .certKicker {
   display: block;

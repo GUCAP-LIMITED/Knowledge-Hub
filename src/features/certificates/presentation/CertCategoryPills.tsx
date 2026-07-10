@@ -20,9 +20,15 @@ export const CertCategoryPills = ({
     certificates.filter((cert) => cert.category === name).length;
 
   return (
-    <div className={styles.pills}>
+    <div
+      className={styles.pills}
+      role="tablist"
+      aria-label="Filter certificates by category"
+    >
       <button
         type="button"
+        role="tab"
+        aria-selected={active === 'all'}
         className={cn(styles.pill, active === 'all' && styles.pillActive)}
         onClick={() => {
           onSelect('all');
@@ -34,6 +40,8 @@ export const CertCategoryPills = ({
         <button
           key={name}
           type="button"
+          role="tab"
+          aria-selected={active === name}
           className={cn(styles.pill, active === name && styles.pillActive)}
           onClick={() => {
             onSelect(name);

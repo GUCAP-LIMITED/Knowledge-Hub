@@ -47,7 +47,7 @@ export const CertificatesPage = (): ReactElement => {
         subtitle={certSubtitle(isAdmin, mine.length)}
       />
 
-      {isAdmin ? null : <CertificateStats certificates={mine} now={now} />}
+      <CertificateStats certificates={mine} now={now} isAdmin={isAdmin} />
 
       <CertCategoryPills certificates={mine} active={category} onSelect={setCategory} />
 
