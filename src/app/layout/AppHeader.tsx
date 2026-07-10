@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
+import { LogOut, Menu, Moon, PanelLeft, Search, Settings, Sun, User } from 'lucide-react';
 import { Avatar, DropdownMenu, IconButton } from '@shared/ui';
 import type { AuthenticatedUser } from '@features/auth';
 import { NotificationsBell } from '@features/notifications';
@@ -9,17 +9,21 @@ import styles from './AppLayout.module.css';
 
 export interface AppHeaderProps {
   readonly user: AuthenticatedUser | null;
+  readonly collapsed: boolean;
   readonly onSignOut: () => void;
   readonly onOpenSearch: () => void;
   readonly onOpenNav: () => void;
+  readonly onToggleSidebar: () => void;
 }
 
-/** Top bar: mobile menu button + search + theme toggle + user menu. */
+/** Top bar: sidebar toggles + search + theme toggle + user menu. */
 export const AppHeader = ({
   user,
+  collapsed,
   onSignOut,
   onOpenSearch,
   onOpenNav,
+  onToggleSidebar,
 }: AppHeaderProps): ReactElement => {
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
@@ -30,6 +34,13 @@ export const AppHeader = ({
     <header className={styles.header}>
       <IconButton label="Open menu" className={styles.menuBtn} onClick={onOpenNav}>
         <Menu size={18} />
+      </IconButton>
+      <IconButton
+        label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        className={styles.collapseBtn}
+        onClick={onToggleSidebar}
+      >
+        <PanelLeft size={18} />
       </IconButton>
       <button type="button" className={styles.searchTrigger} onClick={onOpenSearch}>
         <Search size={15} aria-hidden="true" />

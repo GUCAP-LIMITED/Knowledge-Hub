@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { cn } from '@shared/utils';
 import { useAuth } from '@features/auth';
 import { SearchOverlay } from '@app/search/SearchOverlay';
 import { AppSidebar } from './AppSidebar';
@@ -13,6 +14,7 @@ export const AppLayout = (): ReactElement => {
   const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent): void => {
@@ -39,7 +41,7 @@ export const AppLayout = (): ReactElement => {
   };
 
   return (
-    <div className={styles.shell}>
+    <div className={cn(styles.shell, collapsed && styles.shellCollapsed)}>
       <AppSidebar
         user={user}
         open={navOpen}
@@ -60,12 +62,16 @@ export const AppLayout = (): ReactElement => {
       <div className={styles.main}>
         <AppHeader
           user={user}
+          collapsed={collapsed}
           onSignOut={handleSignOut}
           onOpenSearch={() => {
             setSearchOpen(true);
           }}
           onOpenNav={() => {
             setNavOpen(true);
+          }}
+          onToggleSidebar={() => {
+            setCollapsed((value) => !value);
           }}
         />
         <main className={styles.content}>

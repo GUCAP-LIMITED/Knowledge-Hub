@@ -2,6 +2,12 @@
   display: grid;
   grid-template-columns: 252px 1fr;
   min-height: 100vh;
+  transition: grid-template-columns 0.2s ease;
+}
+
+/* Desktop: collapse the fixed sidebar to reclaim its column. */
+.shellCollapsed {
+  grid-template-columns: 0 1fr;
 }
 
 .sidebar {
@@ -11,6 +17,15 @@
   padding: 1.25rem 0.85rem;
   background-color: var(--color-surface);
   border-right: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.shellCollapsed .sidebar {
+  padding-left: 0;
+  padding-right: 0;
+  border-right-color: transparent;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .brand {
@@ -186,6 +201,12 @@
   margin-right: 0.25rem;
 }
 
+/* Desktop-only sidebar collapse toggle. Hidden on mobile, where the drawer button rules. */
+.collapseBtn {
+  display: inline-flex;
+  margin-right: 0.25rem;
+}
+
 /* Full-screen dim behind the mobile drawer. */
 .backdrop {
   position: fixed;
@@ -234,6 +255,15 @@
   .menuBtn {
     display: inline-flex;
     margin-right: auto;
+  }
+
+  /* On mobile the sidebar is a drawer; desktop collapse doesn't apply. */
+  .collapseBtn {
+    display: none;
+  }
+
+  .shellCollapsed {
+    grid-template-columns: 1fr;
   }
 
   .header {
