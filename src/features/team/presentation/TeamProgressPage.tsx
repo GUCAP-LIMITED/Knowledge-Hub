@@ -4,7 +4,6 @@ import {
   Alert,
   Avatar,
   Badge,
-  Button,
   EmptyState,
   PageHeader,
   ProgressBar,
@@ -16,7 +15,7 @@ import type { TeamMember } from '../domain';
 import { useTeamMembers } from './use-team';
 import styles from './TeamProgressPage.module.css';
 
-const HEADERS = ['Member', 'Role', 'Progress', 'Courses', 'Last Active', ''] as const;
+const HEADERS = ['Member', 'Role', 'Progress', 'Courses', 'Last Active'] as const;
 
 const MemberRow = ({ member }: { readonly member: TeamMember }): ReactElement => (
   <tr className={styles.row}>
@@ -42,11 +41,6 @@ const MemberRow = ({ member }: { readonly member: TeamMember }): ReactElement =>
       {member.completed}/{member.total}
     </td>
     <td className={cn(styles.cell, styles.muted)}>{member.lastActive}</td>
-    <td className={styles.cell}>
-      <Button size="sm" variant="ghost">
-        View
-      </Button>
-    </td>
   </tr>
 );
 
@@ -108,11 +102,8 @@ export const TeamProgressPage = (): ReactElement => {
           <table className={styles.table}>
             <thead>
               <tr>
-                {HEADERS.map((header, index) => (
-                  <th
-                    key={header === '' ? `col-${String(index)}` : header}
-                    className={styles.th}
-                  >
+                {HEADERS.map((header) => (
+                  <th key={header} className={styles.th}>
                     {header}
                   </th>
                 ))}

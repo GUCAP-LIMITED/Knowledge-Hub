@@ -1,11 +1,11 @@
 import type { ReactElement } from 'react';
-import { Eye, FileText } from 'lucide-react';
-import { Badge, Button } from '@shared/ui';
+import { FileText } from 'lucide-react';
+import { Badge } from '@shared/ui';
 import type { Submission } from '../domain';
 import { StatusBadge } from './StatusBadge';
 import styles from './SubmissionsPage.module.css';
 
-const HEADERS: readonly string[] = ['Document', 'Type', 'Date', 'Status', 'Actions'];
+const HEADERS: readonly string[] = ['Document', 'Type', 'Date', 'Status'];
 
 const Row = ({ submission }: { readonly submission: Submission }): ReactElement => (
   <tr className={styles.tr}>
@@ -23,11 +23,6 @@ const Row = ({ submission }: { readonly submission: Submission }): ReactElement 
     </td>
     <td className={styles.cell}>
       <StatusBadge status={submission.status} />
-    </td>
-    <td className={styles.cellRight}>
-      <Button size="sm" variant="ghost">
-        <Eye size={15} aria-hidden="true" /> View
-      </Button>
     </td>
   </tr>
 );

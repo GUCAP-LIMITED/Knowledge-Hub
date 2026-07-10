@@ -1,0 +1,12 @@
+.body {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+}
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  width: 100%;
+}

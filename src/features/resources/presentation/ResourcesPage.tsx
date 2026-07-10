@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactElement } from 'react';
-import { PageHeader, TextField } from '@shared/ui';
+import { PageHeader, TextField, useDeleteConfirm } from '@shared/ui';
 import { useAuth } from '@features/auth';
 import type { Resource } from '../domain';
 import { useDeleteResource, useResources, useUpdateResource } from './use-resources';
@@ -23,6 +23,7 @@ export const ResourcesPage = (): ReactElement => {
   const [quizzing, setQuizzing] = useState<Resource | null>(null);
 
   const all = useMemo(() => resources.data ?? [], [resources.data]);
+  const del = useDeleteConfirm(all, 'resource', remove.mutate, remove.isPending);
   const categories = useMemo(() => groupByCategory(all), [all]);
   const popular = useMemo(() => mostViewed(all), [all]);
 
@@ -38,9 +39,7 @@ export const ResourcesPage = (): ReactElement => {
     isAdmin,
     onOpen: setActive,
     onEdit: setEditing,
-    onDelete: (id) => {
-      remove.mutate(id);
-    },
+    onDelete: del.request,
     onQuiz: setQuizzing,
   };
 
@@ -94,6 +93,8 @@ export const ResourcesPage = (): ReactElement => {
           setQuizzing(null);
         }}
       />
+
+      {del.dialog}
     </section>
   );
 };

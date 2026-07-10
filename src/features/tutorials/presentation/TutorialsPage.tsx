@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactElement } from 'react';
-import { PageHeader } from '@shared/ui';
+import { PageHeader, useDeleteConfirm } from '@shared/ui';
 import { useAuth } from '@features/auth';
 import { useContentTypes } from '@features/content-types';
 import type { Tutorial } from '../domain';
@@ -25,6 +25,14 @@ export const TutorialsPage = (): ReactElement => {
   const [editing, setEditing] = useState<Tutorial | null>(null);
   const [quizzing, setQuizzing] = useState<Tutorial | null>(null);
   const categories = useContentTypes('tutorial');
+  const del = useDeleteConfirm(
+    tutorials.data ?? [],
+    'tutorial',
+    (id) => {
+      remove.mutate(id);
+    },
+    remove.isPending,
+  );
 
   const visible = useMemo(
     () => filterAndSortTutorials(tutorials.data ?? [], query, category, sort),
@@ -62,9 +70,7 @@ export const TutorialsPage = (): ReactElement => {
         removingId={remove.isPending ? remove.variables : null}
         onWatch={setWatching}
         onEdit={setEditing}
-        onDelete={(id) => {
-          remove.mutate(id);
-        }}
+        onDelete={del.request}
         onQuiz={setQuizzing}
       />
 
@@ -84,6 +90,8 @@ export const TutorialsPage = (): ReactElement => {
           setQuizzing(null);
         }}
       />
+
+      {del.dialog}
     </section>
   );
 };

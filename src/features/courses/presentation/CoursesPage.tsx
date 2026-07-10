@@ -4,6 +4,7 @@ import {
   type EditDraft,
   type EditFieldConfig,
   PageHeader,
+  useDeleteConfirm,
 } from '@shared/ui';
 import { useAuth } from '@features/auth';
 import { useContentTypes } from '@features/content-types';
@@ -121,6 +122,31 @@ const sortCourses = (courses: readonly Course[], sort: CourseSort): readonly Cou
   return copy.sort((a, b) => b.addedDate.getTime() - a.addedDate.getTime());
 };
 
+interface CourseFilters {
+  readonly query: string;
+  readonly category: string;
+  readonly status: CourseStatusFilter;
+  readonly type: CourseTypeFilter;
+  readonly sort: CourseSort;
+}
+
+const selectCourses = (
+  courses: readonly Course[],
+  f: CourseFilters,
+): readonly Course[] => {
+  const q = f.query.trim().toLowerCase();
+  const filtered = courses.filter(
+    (course) =>
+      (f.category === 'all' || course.category === f.category) &&
+      matchesStatus(course, f.status) &&
+      matchesType(course, f.type) &&
+      (q === '' ||
+        course.title.toLowerCase().includes(q) ||
+        course.category.toLowerCase().includes(q)),
+  );
+  return sortCourses(filtered, f.sort);
+};
+
 /** Routed course-catalog page with search, category/status/type filters and sort. */
 export const CoursesPage = (): ReactElement => {
   const { user } = useAuth();
@@ -136,20 +162,17 @@ export const CoursesPage = (): ReactElement => {
   const [sort, setSort] = useState<CourseSort>('popular');
   const [editing, setEditing] = useState<Course | null>(null);
   const courseTypes = useContentTypes('course');
+  const del = useDeleteConfirm(
+    courses.data ?? [],
+    'course',
+    remove.mutate,
+    remove.isPending,
+  );
 
-  const visible = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const filtered = (courses.data ?? []).filter(
-      (course) =>
-        (category === 'all' || course.category === category) &&
-        matchesStatus(course, status) &&
-        matchesType(course, type) &&
-        (q === '' ||
-          course.title.toLowerCase().includes(q) ||
-          course.category.toLowerCase().includes(q)),
-    );
-    return sortCourses(filtered, sort);
-  }, [courses.data, query, category, status, type, sort]);
+  const visible = useMemo(
+    () => selectCourses(courses.data ?? [], { query, category, status, type, sort }),
+    [courses.data, query, category, status, type, sort],
+  );
 
   const handleAdvance = (course: Course): void => {
     updateProgress.mutate({ id: course.id, progress: nextProgress(course) });
@@ -181,9 +204,7 @@ export const CoursesPage = (): ReactElement => {
         removingId={remove.isPending ? remove.variables : null}
         onAdvance={handleAdvance}
         onEdit={setEditing}
-        onDelete={(id) => {
-          remove.mutate(id);
-        }}
+        onDelete={del.request}
       />
 
       <DetailsEditModal
@@ -202,6 +223,7 @@ export const CoursesPage = (): ReactElement => {
           });
         }}
       />
+      {del.dialog}
     </section>
   );
 };

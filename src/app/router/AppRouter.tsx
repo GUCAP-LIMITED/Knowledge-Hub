@@ -91,7 +91,6 @@ export const AppRouter = (): ReactElement => {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/verify" element={<VerifyPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/forbidden" element={<ForbiddenPage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
@@ -124,10 +123,12 @@ export const AppRouter = (): ReactElement => {
               />
               <Route path="/settings/:section" element={<AdminSettingsPage />} />
             </Route>
+
+            {/* 403 / 404 render inside the shell so the user keeps their navigation. */}
+            <Route path="/forbidden" element={<ForbiddenPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Route>
-
-        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>
   );
