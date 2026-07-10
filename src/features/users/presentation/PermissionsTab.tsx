@@ -23,9 +23,6 @@ export const PermissionsTab = (): ReactElement => {
   }
 
   const toggle = (permId: string, value: boolean): void => {
-    if (activeSet.locked === true) {
-      return;
-    }
     setSets((prev) =>
       prev.map((set) =>
         set.id === activeSetId
@@ -53,7 +50,6 @@ export const PermissionsTab = (): ReactElement => {
         <PermissionDetail
           module={activeModule}
           state={activeSet.perms[activeModuleId] ?? {}}
-          locked={activeSet.locked === true}
           onToggle={toggle}
         />
       </div>

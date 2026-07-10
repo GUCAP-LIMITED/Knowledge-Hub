@@ -6,7 +6,6 @@ import styles from './AdminSettingsPage.module.css';
 export interface PermissionDetailProps {
   readonly module: PermissionModule;
   readonly state: Record<string, boolean>;
-  readonly locked: boolean;
   readonly onToggle: (permId: string, value: boolean) => void;
 }
 
@@ -14,7 +13,6 @@ export interface PermissionDetailProps {
 export const PermissionDetail = ({
   module,
   state,
-  locked,
   onToggle,
 }: PermissionDetailProps): ReactElement => {
   const baseOn = state[module.base.id] === true;
@@ -42,7 +40,7 @@ export const PermissionDetail = ({
                 onToggle(permission.id, value);
               }}
             />
-            {locked || !baseOn ? <div className={styles.disabledMask} /> : null}
+            {baseOn ? null : <div className={styles.disabledMask} />}
           </div>
         ))}
       </div>

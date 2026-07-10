@@ -9,53 +9,56 @@ import styles from './AdminSettingsPage.module.css';
 
 const PLATFORM_SETTINGS: readonly ToggleSetting[] = [
   {
-    key: 'catalog',
-    label: 'Enable Public Catalog',
-    description: 'Show course catalog to logged-in users by default',
+    key: 'public-signup',
+    label: 'Public sign-up',
+    description: 'Let new people create an account without an invite',
     defaultOn: true,
   },
   {
+    key: 'public-catalog',
+    label: 'Public course catalog',
+    description: 'Show courses, tutorials & resources to signed-out visitors',
+    defaultOn: false,
+  },
+  {
     key: 'approval',
-    label: 'Require Admin Approval',
-    description: 'New content must be approved before publishing',
+    label: 'Require review before publishing',
+    description: 'Uploads enter the approval queue instead of going live',
     defaultOn: true,
   },
   {
     key: 'self-enrol',
-    label: 'Allow Self-Enrolment',
-    description: 'Let users enrol in optional courses on their own',
-    defaultOn: false,
+    label: 'Allow self-enrolment',
+    description: 'Let learners enrol in optional courses on their own',
+    defaultOn: true,
+  },
+  {
+    key: 'auto-certificates',
+    label: 'Auto-issue certificates',
+    description: 'Award a certificate automatically when a course is completed',
+    defaultOn: true,
+  },
+  {
+    key: 'ratings',
+    label: 'Course ratings & reviews',
+    description: 'Let learners rate courses and leave written feedback',
+    defaultOn: true,
+  },
+  {
+    key: 'reminders',
+    label: 'Mandatory-training reminders',
+    description: 'Email learners who have not finished required courses',
+    defaultOn: true,
   },
   {
     key: 'email',
-    label: 'Email Notifications',
-    description: 'Send platform updates by email',
+    label: 'Email notifications',
+    description: 'Send platform updates and announcements by email',
     defaultOn: true,
   },
 ];
 
-const SECURITY_SETTINGS: readonly ToggleSetting[] = [
-  {
-    key: '2fa',
-    label: 'Two-Factor Auth Required',
-    description: 'Force 2FA for all admin accounts',
-    defaultOn: true,
-  },
-  {
-    key: 'audit',
-    label: 'Audit Logging',
-    description: 'Log all admin actions for compliance',
-    defaultOn: true,
-  },
-  {
-    key: 'ip',
-    label: 'IP Restrictions',
-    description: 'Restrict access to known office IP ranges',
-    defaultOn: false,
-  },
-];
-
-/** Routed admin Settings page: platform switches, user directory, and security controls. */
+/** Routed admin Settings page: platform switches, user directory, and permissions. */
 export const AdminSettingsPage = (): ReactElement => {
   const users = useUsers();
   const setStatus = useSetUserStatus();
@@ -82,7 +85,6 @@ export const AdminSettingsPage = (): ReactElement => {
             { value: 'platform', label: 'Platform' },
             { value: 'users', label: `Users (${String(accounts.length)})` },
             { value: 'permissions', label: 'Permissions' },
-            { value: 'security', label: 'Security' },
           ]}
         >
           <TabsPanel value="platform">
@@ -103,9 +105,6 @@ export const AdminSettingsPage = (): ReactElement => {
           </TabsPanel>
           <TabsPanel value="permissions">
             <PermissionsTab />
-          </TabsPanel>
-          <TabsPanel value="security">
-            <SettingsToggles settings={SECURITY_SETTINGS} />
           </TabsPanel>
         </Tabs>
       </div>

@@ -36,13 +36,12 @@ const MANAGER = [
 ];
 const CONSULTANT = ['courses', 'mylearning', 'tutorials', 'resources', 'certificates'];
 
-/** The three seeded permission sets (Full is the locked system default). */
+/** The three seeded, editable permission sets. */
 export const INITIAL_PERMISSION_SETS: readonly PermissionSet[] = [
   {
     id: 'full',
     label: 'Full Access',
     desc: 'Complete access to all Knowledge Hub features',
-    locked: true,
     perms: buildPerms(ALL),
   },
   {

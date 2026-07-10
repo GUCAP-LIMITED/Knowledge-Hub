@@ -6,39 +6,14 @@ import {
   ClipboardList,
   FileCheck,
   FolderOpen,
-  LayoutGrid,
   Lightbulb,
   PlayCircle,
   Settings,
   Upload,
-  type LucideIcon,
 } from 'lucide-react';
+import type { Permission, PermissionModule } from './permission-types';
 
-export interface Permission {
-  readonly id: string;
-  readonly label: string;
-  readonly desc: string;
-  readonly requires?: readonly string[];
-}
-
-export interface PermissionModule {
-  readonly id: string;
-  readonly label: string;
-  readonly icon: LucideIcon;
-  readonly base: Permission;
-  readonly granular: readonly Permission[];
-}
-
-/** moduleId → permissionId → enabled. */
-export type PermState = Record<string, Record<string, boolean>>;
-
-export interface PermissionSet {
-  readonly id: string;
-  readonly label: string;
-  readonly desc: string;
-  readonly locked?: boolean;
-  readonly perms: PermState;
-}
+export * from './permission-types';
 
 const view = (desc: string): Permission => ({ id: 'view', label: 'View', desc });
 
@@ -74,6 +49,18 @@ export const PERMISSION_MODULES: readonly PermissionModule[] = [
         desc: 'Use advanced search, filters and sort',
         requires: ['view'],
       },
+      {
+        id: 'edit',
+        label: 'Edit',
+        desc: 'Edit courses title & category',
+        requires: ['view'],
+      },
+      {
+        id: 'delete',
+        label: 'Delete',
+        desc: 'Remove courses from the catalog',
+        requires: ['view'],
+      },
     ],
   },
   {
@@ -102,6 +89,18 @@ export const PERMISSION_MODULES: readonly PermissionModule[] = [
         desc: 'Start and complete tutorials',
         requires: ['view'],
       },
+      {
+        id: 'edit',
+        label: 'Edit',
+        desc: 'Edit tutorials title & category',
+        requires: ['view'],
+      },
+      {
+        id: 'delete',
+        label: 'Delete',
+        desc: 'Remove tutorials from the catalog',
+        requires: ['view'],
+      },
     ],
   },
   {
@@ -120,6 +119,18 @@ export const PERMISSION_MODULES: readonly PermissionModule[] = [
         id: 'download',
         label: 'Download',
         desc: 'Download documents and files',
+        requires: ['view'],
+      },
+      {
+        id: 'edit',
+        label: 'Edit',
+        desc: 'Edit resources title & category',
+        requires: ['view'],
+      },
+      {
+        id: 'delete',
+        label: 'Delete',
+        desc: 'Remove resources from the catalog',
         requires: ['view'],
       },
     ],
@@ -200,33 +211,6 @@ export const PERMISSION_MODULES: readonly PermissionModule[] = [
         id: 'flag',
         label: 'Flag for review',
         desc: 'Move submission to under-review status',
-        requires: ['view'],
-      },
-    ],
-  },
-  {
-    id: 'content',
-    label: 'Content Management',
-    icon: LayoutGrid,
-    base: view('Browse all platform content'),
-    granular: [
-      {
-        id: 'create',
-        label: 'Create',
-        desc: 'Add new courses, articles and tutorials',
-        requires: ['view'],
-      },
-      { id: 'edit', label: 'Edit', desc: 'Modify existing content', requires: ['view'] },
-      {
-        id: 'delete',
-        label: 'Delete',
-        desc: 'Permanently remove content',
-        requires: ['view'],
-      },
-      {
-        id: 'publish',
-        label: 'Publish / Unpublish',
-        desc: 'Control content live visibility',
         requires: ['view'],
       },
     ],

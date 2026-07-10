@@ -58,17 +58,6 @@
   font-size: 0.9rem;
   color: var(--color-text);
 }
-.lockBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-  padding: 0.1rem 0.45rem;
-  border-radius: var(--radius-full);
-  background-color: var(--color-bg-subtle);
-  color: var(--color-text-subtle);
-  font-size: 0.65rem;
-  font-weight: 700;
-}
 .setCardDesc {
   font-size: 0.76rem;
   color: var(--color-text-subtle);

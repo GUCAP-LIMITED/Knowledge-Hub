@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react';
-import { Lock } from 'lucide-react';
 import { cn } from '@shared/utils';
 import { type PermissionSet, countEnabled } from './permission-modules';
 import styles from './AdminSettingsPage.module.css';
@@ -10,7 +9,7 @@ export interface PermissionSetCardsProps {
   readonly onSelect: (id: string) => void;
 }
 
-/** Selectable cards for each permission set (Full Access is locked). */
+/** Selectable cards for each editable permission set. */
 export const PermissionSetCards = ({
   sets,
   activeId,
@@ -28,11 +27,6 @@ export const PermissionSetCards = ({
       >
         <span className={styles.setCardHead}>
           <span className={styles.setCardLabel}>{set.label}</span>
-          {set.locked === true ? (
-            <span className={styles.lockBadge}>
-              <Lock size={11} aria-hidden="true" /> Locked
-            </span>
-          ) : null}
         </span>
         <span className={styles.setCardDesc}>{set.desc}</span>
         <span className={styles.setCardCount}>
