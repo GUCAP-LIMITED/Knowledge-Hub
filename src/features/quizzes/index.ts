@@ -11,6 +11,7 @@ export {
   QuizzesModuleProvider,
   QuizManagerModal,
   useQuizzes,
+  useQuizPassed,
   quizzesQueryKey,
 } from './presentation';
 export { Quiz, QuizResult, type QuizContentKind } from './domain';

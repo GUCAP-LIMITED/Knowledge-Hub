@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Button, Modal } from '@shared/ui';
 import type { Quiz, QuizContentKind, QuizProps, QuizResult } from '../domain';
 import { useDeleteQuiz, useQuizzes, useSaveQuiz, useSubmitQuiz } from './use-quizzes';
+import { useQuizProgressStore } from './use-quiz-progress';
 import { QuizManagerBody, type QuizMode } from './QuizManagerBody';
 
 export interface QuizManagerModalProps {
@@ -11,8 +12,16 @@ export interface QuizManagerModalProps {
   readonly contentKind: QuizContentKind;
   readonly contentTitle: string;
   readonly isAdmin: boolean;
+  /** True when passing unlocks a certificate (course only, and only once it is completed). */
+  readonly certificateReady?: boolean;
   readonly onClose: () => void;
 }
+
+const BackToQuizzes = ({ onClick }: { readonly onClick: () => void }): ReactElement => (
+  <Button variant="ghost" size="sm" onClick={onClick}>
+    <ArrowLeft size={14} aria-hidden /> Back to quizzes
+  </Button>
+);
 
 /** The single place to manage a content's quizzes: list, take, and (admin) author multiple. */
 export const QuizManagerModal = (props: QuizManagerModalProps): ReactElement => {
@@ -21,6 +30,7 @@ export const QuizManagerModal = (props: QuizManagerModalProps): ReactElement => 
   const save = useSaveQuiz();
   const del = useDeleteQuiz();
   const submit = useSubmitQuiz();
+  const markPassed = useQuizProgressStore((state) => state.markPassed);
   const [mode, setMode] = useState<QuizMode>('list');
   const [active, setActive] = useState<Quiz | null>(null);
   const [result, setResult] = useState<QuizResult | null>(null);
@@ -30,6 +40,13 @@ export const QuizManagerModal = (props: QuizManagerModalProps): ReactElement => 
     setMode('list');
     setActive(null);
     setResult(null);
+  };
+
+  const handleResult = (graded: QuizResult): void => {
+    setResult(graded);
+    if (graded.passed) {
+      markPassed(contentId);
+    }
   };
 
   return (
@@ -43,11 +60,7 @@ export const QuizManagerModal = (props: QuizManagerModalProps): ReactElement => 
       title={`Quizzes · ${contentTitle}`}
       size="lg"
     >
-      {mode !== 'list' ? (
-        <Button variant="ghost" size="sm" onClick={toList}>
-          <ArrowLeft size={14} aria-hidden /> Back to quizzes
-        </Button>
-      ) : null}
+      {mode !== 'list' ? <BackToQuizzes onClick={toList} /> : null}
 
       <QuizManagerBody
         quizzes={quizzes}
@@ -58,6 +71,7 @@ export const QuizManagerModal = (props: QuizManagerModalProps): ReactElement => 
         isAdmin={isAdmin}
         contentId={contentId}
         contentKind={contentKind}
+        certificateReady={props.certificateReady === true}
         isSaving={save.isPending}
         saveError={save.isError ? save.error.message : null}
         deletingId={del.isPending ? del.variables.quizId : null}
@@ -86,7 +100,7 @@ export const QuizManagerModal = (props: QuizManagerModalProps): ReactElement => 
           setResult(null);
           setAttempt((n) => n + 1);
         }}
-        onResult={setResult}
+        onResult={handleResult}
       />
     </Modal>
   );

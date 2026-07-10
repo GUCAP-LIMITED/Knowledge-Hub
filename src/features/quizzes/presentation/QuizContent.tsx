@@ -8,6 +8,7 @@ export interface QuizContentProps {
   readonly result: QuizResult | null;
   readonly attempt: number;
   readonly isSubmitting: boolean;
+  readonly certificateReady: boolean;
   readonly rewatchLabel: string;
   readonly onSubmit: (answers: QuizAnswers) => void;
   readonly onRetake: () => void;
@@ -20,6 +21,7 @@ export const QuizContent = ({
   result,
   attempt,
   isSubmitting,
+  certificateReady,
   rewatchLabel,
   onSubmit,
   onRetake,
@@ -28,6 +30,7 @@ export const QuizContent = ({
   result !== null ? (
     <QuizResultView
       result={result}
+      certificateReady={certificateReady}
       rewatchLabel={rewatchLabel}
       onRewatch={onRewatch}
       onRetake={onRetake}

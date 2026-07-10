@@ -107,6 +107,14 @@
 .heroActions {
   margin-top: 1.25rem;
 }
+.heroHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.85);
+}
 .heroPrimary,
 .heroSecondary {
   display: inline-flex;

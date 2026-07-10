@@ -18,6 +18,8 @@ export interface QuizManagerBodyProps {
   readonly isAdmin: boolean;
   readonly contentId: string;
   readonly contentKind: QuizContentKind;
+  /** True when passing unlocks a certificate (completed course only). */
+  readonly certificateReady: boolean;
   readonly isSaving: boolean;
   /** Message when the last save attempt failed (e.g. gateway error), else null. */
   readonly saveError: string | null;
@@ -72,6 +74,7 @@ export const QuizManagerBody = (props: QuizManagerBodyProps): ReactElement => {
         result={props.result}
         attempt={props.attempt}
         isSubmitting={props.submit.isPending}
+        certificateReady={props.certificateReady}
         rewatchLabel="Back to quizzes"
         onRewatch={props.onList}
         onRetake={props.onRetake}

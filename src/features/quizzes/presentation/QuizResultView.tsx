@@ -8,6 +8,8 @@ import styles from './QuizSection.module.css';
 
 export interface QuizResultViewProps {
   readonly result: QuizResult;
+  /** True when passing unlocks a certificate (completed course only). */
+  readonly certificateReady: boolean;
   /** Retake the quiz from scratch. */
   readonly onRetake: () => void;
   /** Re-watch / revisit the underlying content. */
@@ -15,9 +17,29 @@ export interface QuizResultViewProps {
   readonly rewatchLabel: string;
 }
 
+const PassActions = ({
+  certificateReady,
+  rewatchLabel,
+  onRewatch,
+}: {
+  readonly certificateReady: boolean;
+  readonly rewatchLabel: string;
+  readonly onRewatch: () => void;
+}): ReactElement =>
+  certificateReady ? (
+    <Link to="/certificates" className={styles.certLink}>
+      <Award size={16} aria-hidden /> View certificate
+    </Link>
+  ) : (
+    <Button variant="secondary" onClick={onRewatch}>
+      {rewatchLabel}
+    </Button>
+  );
+
 /** Pass/fail outcome screen with the follow-up actions each path unlocks. */
 export const QuizResultView = ({
   result,
+  certificateReady,
   onRetake,
   onRewatch,
   rewatchLabel,
@@ -41,12 +63,14 @@ export const QuizResultView = ({
     </p>
     <div className={styles.resultActions}>
       {result.passed ? (
-        <Link to="/certificates" className={styles.certLink}>
-          <Award size={16} aria-hidden /> View certificate
-        </Link>
+        <PassActions
+          certificateReady={certificateReady}
+          rewatchLabel={rewatchLabel}
+          onRewatch={onRewatch}
+        />
       ) : (
         <>
-          <Button variant="accent" onClick={onRetake}>
+          <Button variant="danger" onClick={onRetake}>
             <RotateCcw size={16} aria-hidden /> Retake quiz
           </Button>
           <Button variant="secondary" onClick={onRewatch}>
