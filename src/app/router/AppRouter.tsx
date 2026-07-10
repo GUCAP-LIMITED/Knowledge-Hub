@@ -1,5 +1,5 @@
 import { Suspense, lazy, type ReactElement } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { LoginPage, ProtectedRoute } from '@features/auth';
 import { AppLayout } from '@app/layout/AppLayout';
 import { Spinner } from '@shared/ui';
@@ -109,7 +109,11 @@ export const AppRouter = (): ReactElement => {
               <Route path="/assign" element={<AssignTrainingPage />} />
               <Route path="/approvals" element={<ApprovalsPage />} />
               <Route path="/course-reviews" element={<CourseReviewsPage />} />
-              <Route path="/settings" element={<AdminSettingsPage />} />
+              <Route
+                path="/settings"
+                element={<Navigate to="/settings/platform" replace />}
+              />
+              <Route path="/settings/:section" element={<AdminSettingsPage />} />
             </Route>
           </Route>
         </Route>

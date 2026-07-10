@@ -9,3 +9,7 @@ export {
 } from './users-module';
 export { UsersModuleProvider, useUsers, usersQueryKey } from './presentation';
 export { UserAccount, type UserAccountProps } from './domain';
+export {
+  SETTINGS_SECTIONS,
+  type SettingsSectionKey,
+} from './presentation/settings-sections';

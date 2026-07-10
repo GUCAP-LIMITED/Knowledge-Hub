@@ -87,6 +87,42 @@
   color: var(--color-primary);
 }
 
+.navGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.subNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin: 0.1rem 0 0.2rem 1.55rem;
+  padding-left: 0.6rem;
+  border-left: 1px solid var(--color-border);
+}
+
+.subLink {
+  padding: 0.4rem 0.65rem;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.83rem;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.subLink:hover {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.subLinkActive {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
 .main {
   display: flex;
   flex-direction: column;

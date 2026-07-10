@@ -19,7 +19,13 @@ import {
 } from 'lucide-react';
 import { cn } from '@shared/utils';
 import type { AuthenticatedUser } from '@features/auth';
+import { SETTINGS_SECTIONS } from '@features/users';
 import styles from './AppLayout.module.css';
+
+interface SubLink {
+  readonly to: string;
+  readonly label: string;
+}
 
 type NavEntry =
   | {
@@ -33,7 +39,13 @@ type NavEntry =
       readonly label: string;
       readonly icon: LucideIcon;
       readonly anyOf?: readonly string[];
+      readonly children?: readonly SubLink[];
     };
+
+const SETTINGS_CHILDREN: readonly SubLink[] = SETTINGS_SECTIONS.map((section) => ({
+  to: `/settings/${section.key}`,
+  label: section.label,
+}));
 
 const NAV: readonly NavEntry[] = [
   { kind: 'section', label: 'Learn' },
@@ -95,7 +107,14 @@ const NAV: readonly NavEntry[] = [
     icon: MessageSquare,
     anyOf: ['admin'],
   },
-  { kind: 'link', to: '/settings', label: 'Settings', icon: Settings, anyOf: ['admin'] },
+  {
+    kind: 'link',
+    to: '/settings/platform',
+    label: 'Settings',
+    icon: Settings,
+    anyOf: ['admin'],
+    children: SETTINGS_CHILDREN,
+  },
 ];
 
 const NavItem = ({
@@ -119,6 +138,69 @@ const NavItem = ({
     {label}
   </NavLink>
 );
+
+const NavGroup = ({
+  to,
+  label,
+  icon: Icon,
+  items,
+  onNavigate,
+}: {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  items: readonly SubLink[];
+  onNavigate: () => void;
+}): ReactElement => (
+  <div className={styles.navGroup}>
+    <NavItem to={to} label={label} icon={Icon} onNavigate={onNavigate} />
+    <div className={styles.subNav}>
+      {items.map((child) => (
+        <NavLink
+          key={child.to}
+          to={child.to}
+          onClick={onNavigate}
+          className={({ isActive }) =>
+            cn(styles.subLink, isActive && styles.subLinkActive)
+          }
+        >
+          {child.label}
+        </NavLink>
+      ))}
+    </div>
+  </div>
+);
+
+const renderEntry = (entry: NavEntry, onNavigate: () => void): ReactElement => {
+  if (entry.kind === 'section') {
+    return (
+      <div key={`section-${entry.label}`} className={styles.section}>
+        {entry.label}
+      </div>
+    );
+  }
+  if (entry.children !== undefined) {
+    return (
+      <NavGroup
+        key={entry.to}
+        to={entry.to}
+        label={entry.label}
+        icon={entry.icon}
+        items={entry.children}
+        onNavigate={onNavigate}
+      />
+    );
+  }
+  return (
+    <NavItem
+      key={entry.to}
+      to={entry.to}
+      label={entry.label}
+      icon={entry.icon}
+      onNavigate={onNavigate}
+    />
+  );
+};
 
 export interface AppSidebarProps {
   readonly user: AuthenticatedUser | null;
@@ -144,19 +226,7 @@ export const AppSidebar = ({ user, open, onNavigate }: AppSidebarProps): ReactEl
       </div>
       <nav className={styles.nav}>
         {NAV.filter((entry) => visible(entry.anyOf)).map((entry) =>
-          entry.kind === 'section' ? (
-            <div key={`section-${entry.label}`} className={styles.section}>
-              {entry.label}
-            </div>
-          ) : (
-            <NavItem
-              key={entry.to}
-              to={entry.to}
-              label={entry.label}
-              icon={entry.icon}
-              onNavigate={onNavigate}
-            />
-          ),
+          renderEntry(entry, onNavigate),
         )}
       </nav>
     </aside>
