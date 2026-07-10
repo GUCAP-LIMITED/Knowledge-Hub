@@ -61,7 +61,7 @@ describe('<LoginPage />', () => {
     await user.type(screen.getByLabelText('Email'), 'user@example.com');
     await user.clear(screen.getByLabelText('Password'));
     await user.type(screen.getByLabelText('Password'), 'wrong-password');
-    await user.click(screen.getByRole('button', { name: 'Sign in' }));
+    await user.click(screen.getByRole('button', { name: 'Log in' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       /invalid or have expired/i,
@@ -78,6 +78,6 @@ describe('<LoginPage />', () => {
     await user.clear(screen.getByLabelText('Email'));
     await user.clear(screen.getByLabelText('Password'));
 
-    expect(screen.getByRole('button', { name: 'Sign in' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Log in' })).toBeDisabled();
   });
 });

@@ -1,6 +1,12 @@
 import { Suspense, lazy, type ReactElement } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { LoginPage, ProtectedRoute } from '@features/auth';
+import {
+  ForgotPasswordPage,
+  LoginPage,
+  ProtectedRoute,
+  SignupPage,
+  VerifyPage,
+} from '@features/auth';
 import { AppLayout } from '@app/layout/AppLayout';
 import { Spinner } from '@shared/ui';
 
@@ -82,6 +88,9 @@ export const AppRouter = (): ReactElement => {
     <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/verify" element={<VerifyPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/forbidden" element={<ForbiddenPage />} />
 
         <Route element={<ProtectedRoute />}>

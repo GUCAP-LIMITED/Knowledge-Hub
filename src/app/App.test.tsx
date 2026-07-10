@@ -9,7 +9,7 @@ describe('<App /> smoke test', () => {
     // Reaching the login button proves the composition root, providers, router and auth-restore
     // all initialised without throwing (a config/env crash here would white-screen the app).
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Log in' })).toBeInTheDocument();
     });
   });
 });
