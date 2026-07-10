@@ -20,6 +20,7 @@ export const ResourcesPage = (): ReactElement => {
   const [category, setCategory] = useState<string | null>(null);
   const [active, setActive] = useState<Resource | null>(null);
   const [editing, setEditing] = useState<Resource | null>(null);
+  const [quizzing, setQuizzing] = useState<Resource | null>(null);
 
   const all = useMemo(() => resources.data ?? [], [resources.data]);
   const categories = useMemo(() => groupByCategory(all), [all]);
@@ -40,6 +41,7 @@ export const ResourcesPage = (): ReactElement => {
     onDelete: (id) => {
       remove.mutate(id);
     },
+    onQuiz: setQuizzing,
   };
 
   return (
@@ -79,12 +81,17 @@ export const ResourcesPage = (): ReactElement => {
       <ResourcesModals
         active={active}
         editing={editing}
+        quizzing={quizzing}
+        isAdmin={isAdmin}
         update={update}
         onCloseView={() => {
           setActive(null);
         }}
         onCloseEdit={() => {
           setEditing(null);
+        }}
+        onCloseQuiz={() => {
+          setQuizzing(null);
         }}
       />
     </section>

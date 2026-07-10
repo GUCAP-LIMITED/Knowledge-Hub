@@ -19,6 +19,7 @@ export const TutorialsPage = (): ReactElement => {
   const [category, setCategory] = useState('all');
   const [watching, setWatching] = useState<Tutorial | null>(null);
   const [editing, setEditing] = useState<Tutorial | null>(null);
+  const [quizzing, setQuizzing] = useState<Tutorial | null>(null);
 
   const categories = useMemo(
     () => [...new Set((tutorials.data ?? []).map((tutorial) => tutorial.category))],
@@ -72,17 +73,23 @@ export const TutorialsPage = (): ReactElement => {
         onDelete={(id) => {
           remove.mutate(id);
         }}
+        onQuiz={setQuizzing}
       />
 
       <TutorialsModals
         watching={watching}
         editing={editing}
+        quizzing={quizzing}
+        isAdmin={isAdmin}
         update={update}
         onCloseWatch={() => {
           setWatching(null);
         }}
         onCloseEdit={() => {
           setEditing(null);
+        }}
+        onCloseQuiz={() => {
+          setQuizzing(null);
         }}
       />
     </section>

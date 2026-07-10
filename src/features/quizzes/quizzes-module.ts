@@ -1,5 +1,10 @@
 import type { Logger } from '@core/logger';
-import { GetQuizUseCase, SaveQuizUseCase, SubmitQuizUseCase } from './application';
+import {
+  DeleteQuizUseCase,
+  ListQuizzesUseCase,
+  SaveQuizUseCase,
+  SubmitQuizUseCase,
+} from './application';
 import { InMemoryQuizGateway } from './infrastructure';
 
 export interface QuizzesModuleDeps {
@@ -8,9 +13,10 @@ export interface QuizzesModuleDeps {
 
 /** The use cases exposed by the quizzes feature, consumed via a context provider. */
 export interface QuizzesModule {
-  readonly getQuiz: GetQuizUseCase;
+  readonly listQuizzes: ListQuizzesUseCase;
   readonly submitQuiz: SubmitQuizUseCase;
   readonly saveQuiz: SaveQuizUseCase;
+  readonly deleteQuiz: DeleteQuizUseCase;
 }
 
 /**
@@ -20,8 +26,9 @@ export interface QuizzesModule {
 export const createQuizzesModule = (deps: QuizzesModuleDeps): QuizzesModule => {
   const quizGateway = new InMemoryQuizGateway({ logger: deps.logger });
   return {
-    getQuiz: new GetQuizUseCase({ quizGateway, logger: deps.logger }),
+    listQuizzes: new ListQuizzesUseCase({ quizGateway, logger: deps.logger }),
     submitQuiz: new SubmitQuizUseCase({ quizGateway, logger: deps.logger }),
     saveQuiz: new SaveQuizUseCase({ quizGateway, logger: deps.logger }),
+    deleteQuiz: new DeleteQuizUseCase({ quizGateway, logger: deps.logger }),
   };
 };

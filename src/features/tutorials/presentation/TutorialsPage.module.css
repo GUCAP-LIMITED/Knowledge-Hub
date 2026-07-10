@@ -105,3 +105,8 @@
   font-weight: 600;
   color: var(--color-text-subtle);
 }
+.cardActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}

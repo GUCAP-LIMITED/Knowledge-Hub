@@ -9,8 +9,8 @@ export {
 } from './quizzes-module';
 export {
   QuizzesModuleProvider,
-  QuizSection,
-  useQuiz,
-  quizQueryKey,
+  QuizManagerModal,
+  useQuizzes,
+  quizzesQueryKey,
 } from './presentation';
 export { Quiz, QuizResult, type QuizContentKind } from './domain';

@@ -13,6 +13,7 @@ export interface TutorialsResultsProps {
   readonly onWatch: (tutorial: Tutorial) => void;
   readonly onEdit: (tutorial: Tutorial) => void;
   readonly onDelete: (id: string) => void;
+  readonly onQuiz: (tutorial: Tutorial) => void;
 }
 
 /** Loading / error / empty / grid states for the tutorials library. */
@@ -25,6 +26,7 @@ export const TutorialsResults = ({
   onWatch,
   onEdit,
   onDelete,
+  onQuiz,
 }: TutorialsResultsProps): ReactElement => {
   if (isLoading) {
     return (
@@ -56,6 +58,7 @@ export const TutorialsResults = ({
           onWatch={onWatch}
           onEdit={onEdit}
           onDelete={onDelete}
+          onQuiz={onQuiz}
         />
       ))}
     </div>

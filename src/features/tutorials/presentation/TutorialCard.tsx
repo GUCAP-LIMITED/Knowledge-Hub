@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { Clock, Eye, Pencil, PlayCircle, Trash2 } from 'lucide-react';
+import { ClipboardList, Clock, Eye, Pencil, PlayCircle, Trash2 } from 'lucide-react';
 import { Badge, Button, CategoryBadge, IconButton, type BadgeTone } from '@shared/ui';
 import type { Difficulty, Tutorial } from '../domain';
 import styles from './TutorialsPage.module.css';
@@ -18,6 +18,7 @@ export interface TutorialCardProps {
   readonly onWatch: (tutorial: Tutorial) => void;
   readonly onEdit: (tutorial: Tutorial) => void;
   readonly onDelete: (id: string) => void;
+  readonly onQuiz: (tutorial: Tutorial) => void;
 }
 
 /** Library card for a single tutorial. */
@@ -28,6 +29,7 @@ export const TutorialCard = ({
   onWatch,
   onEdit,
   onDelete,
+  onQuiz,
 }: TutorialCardProps): ReactElement => (
   <article className={styles.card}>
     <div className={styles.cardTop}>
@@ -67,13 +69,24 @@ export const TutorialCard = ({
         <Eye size={14} aria-hidden="true" /> {tutorial.views.toLocaleString()} views
       </span>
     </div>
-    <Button
-      size="sm"
-      onClick={() => {
-        onWatch(tutorial);
-      }}
-    >
-      <PlayCircle size={14} aria-hidden="true" /> Watch
-    </Button>
+    <div className={styles.cardActions}>
+      <Button
+        size="sm"
+        onClick={() => {
+          onWatch(tutorial);
+        }}
+      >
+        <PlayCircle size={14} aria-hidden="true" /> Watch
+      </Button>
+      <Button
+        size="sm"
+        variant="secondary"
+        onClick={() => {
+          onQuiz(tutorial);
+        }}
+      >
+        <ClipboardList size={14} aria-hidden="true" /> {isAdmin ? 'Quizzes' : 'Quiz'}
+      </Button>
+    </div>
   </article>
 );

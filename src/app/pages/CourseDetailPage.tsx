@@ -6,17 +6,18 @@ import {
   BookOpen,
   Calendar,
   CheckCircle,
+  ClipboardList,
   Clock,
   Hash,
   Play,
   Star,
   Users,
 } from 'lucide-react';
-import { Alert, Skeleton } from '@shared/ui';
+import { Alert, Button, Skeleton } from '@shared/ui';
 import { cn } from '@shared/utils';
 import { useCourse, useUpdateCourseProgress, type Course } from '@features/courses';
 import { useAuth } from '@features/auth';
-import { QuizSection } from '@features/quizzes';
+import { QuizManagerModal } from '@features/quizzes';
 import { CourseReviewsPanel } from '@features/course-reviews';
 import { CurriculumCard, LessonPlayer, type Lesson } from './CourseCurriculum';
 import styles from './CourseDetailPage.module.css';
@@ -129,12 +130,14 @@ const CourseMain = ({
   isBusy,
   onAdvance,
   onPlay,
+  onOpenQuiz,
 }: {
   readonly course: Course;
   readonly isAdmin: boolean;
   readonly isBusy: boolean;
   readonly onAdvance: () => void;
   readonly onPlay: (lesson: Lesson) => void;
+  readonly onOpenQuiz: () => void;
 }): ReactElement => (
   <div className={styles.main}>
     <CourseHero course={course} isBusy={isBusy} onAdvance={onAdvance} />
@@ -151,13 +154,20 @@ const CourseMain = ({
     </section>
     <CurriculumCard course={course} onPlay={onPlay} />
     <section className={styles.card}>
-      <QuizSection
-        contentId={course.id}
-        contentKind="course"
-        isAdmin={isAdmin}
-        rewatchLabel="Re-watch course"
-        onRewatch={onAdvance}
-      />
+      <div className={styles.quizRow}>
+        <div>
+          <h2 className={styles.cardTitle}>Quizzes</h2>
+          <p className={styles.quizHint}>
+            {isAdmin
+              ? 'Add one or more quizzes learners must pass to earn their certificate.'
+              : 'Test your knowledge — pass to unlock your certificate.'}
+          </p>
+        </div>
+        <Button variant="accent" onClick={onOpenQuiz}>
+          <ClipboardList size={16} aria-hidden="true" />{' '}
+          {isAdmin ? 'Manage quizzes' : 'Take a quiz'}
+        </Button>
+      </div>
     </section>
     <section className={styles.card}>
       <h2 className={styles.cardTitle}>Reviews</h2>
@@ -175,6 +185,7 @@ export const CourseDetailPage = (): ReactElement => {
   const { user } = useAuth();
   const isAdmin = user?.hasAnyRole(['admin']) ?? false;
   const [playing, setPlaying] = useState<Lesson | null>(null);
+  const [quizOpen, setQuizOpen] = useState(false);
 
   const backLink = (
     <Link to="/courses" className={styles.back}>
@@ -214,9 +225,25 @@ export const CourseDetailPage = (): ReactElement => {
             updateProgress.mutate({ id: data.id, progress: nextProgress(data) });
           }}
           onPlay={setPlaying}
+          onOpenQuiz={() => {
+            setQuizOpen(true);
+          }}
         />
         <DetailsSidebar course={data} />
       </div>
+
+      {quizOpen ? (
+        <QuizManagerModal
+          open={quizOpen}
+          contentId={data.id}
+          contentKind="course"
+          contentTitle={data.title}
+          isAdmin={isAdmin}
+          onClose={() => {
+            setQuizOpen(false);
+          }}
+        />
+      ) : null}
 
       <LessonPlayer
         lesson={playing}

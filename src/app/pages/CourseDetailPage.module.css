@@ -150,6 +150,22 @@
   font-size: 1.1rem;
   font-weight: 700;
 }
+.quizRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.quizRow .cardTitle {
+  margin: 0 0 0.25rem;
+}
+.quizHint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-subtle);
+  max-width: 32rem;
+}
 .cardHint {
   font-size: 0.78rem;
   color: var(--color-text-subtle);

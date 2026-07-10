@@ -1,5 +1,12 @@
 import type { ReactElement } from 'react';
-import { ChevronLeft, ChevronRight, FileText, Pencil, Trash2 } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  FileText,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import { EmptyState, IconButton } from '@shared/ui';
 import { cn } from '@shared/utils';
 import type { Resource } from '../domain';
@@ -11,6 +18,7 @@ export interface ArticleActions {
   readonly onOpen: (resource: Resource) => void;
   readonly onEdit: (resource: Resource) => void;
   readonly onDelete: (id: string) => void;
+  readonly onQuiz: (resource: Resource) => void;
 }
 
 const ArticleRow = ({
@@ -37,27 +45,37 @@ const ArticleRow = ({
       </span>
       <ChevronRight size={16} aria-hidden="true" className={styles.chevron} />
     </button>
-    {actions.isAdmin ? (
-      <div className={styles.articleAdmin}>
-        <IconButton
-          label="Edit resource"
-          onClick={() => {
-            actions.onEdit(resource);
-          }}
-        >
-          <Pencil size={15} />
-        </IconButton>
-        <IconButton
-          label="Delete resource"
-          variant="danger"
-          onClick={() => {
-            actions.onDelete(resource.id);
-          }}
-        >
-          <Trash2 size={15} />
-        </IconButton>
-      </div>
-    ) : null}
+    <div className={styles.articleAdmin}>
+      <IconButton
+        label="Resource quizzes"
+        onClick={() => {
+          actions.onQuiz(resource);
+        }}
+      >
+        <ClipboardList size={15} />
+      </IconButton>
+      {actions.isAdmin ? (
+        <>
+          <IconButton
+            label="Edit resource"
+            onClick={() => {
+              actions.onEdit(resource);
+            }}
+          >
+            <Pencil size={15} />
+          </IconButton>
+          <IconButton
+            label="Delete resource"
+            variant="danger"
+            onClick={() => {
+              actions.onDelete(resource.id);
+            }}
+          >
+            <Trash2 size={15} />
+          </IconButton>
+        </>
+      ) : null}
+    </div>
   </div>
 );
 

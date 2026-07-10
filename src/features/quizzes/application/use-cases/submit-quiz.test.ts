@@ -16,13 +16,13 @@ const quiz = new Quiz({
 describe('SubmitQuizUseCase', () => {
   it('grades against the found quiz', async () => {
     const gateway = new FakeQuizGateway();
-    gateway.findResult = ok(quiz);
+    gateway.getByIdResult = ok(quiz);
     const useCase = new SubmitQuizUseCase({
       quizGateway: gateway,
       logger: silentLogger(),
     });
 
-    const result = await useCase.execute('course-1', { a: 1 });
+    const result = await useCase.execute('quiz-1', { a: 1 });
 
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -30,9 +30,9 @@ describe('SubmitQuizUseCase', () => {
     }
   });
 
-  it('errors when no quiz exists for the content', async () => {
+  it('errors when the quiz does not exist', async () => {
     const gateway = new FakeQuizGateway();
-    gateway.findResult = ok(null);
+    gateway.getByIdResult = ok(null);
     const useCase = new SubmitQuizUseCase({
       quizGateway: gateway,
       logger: silentLogger(),

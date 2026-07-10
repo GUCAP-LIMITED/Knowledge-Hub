@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import type { UseMutationResult } from '@tanstack/react-query';
 import { DetailsEditModal, MediaViewer, Modal, demoAsset } from '@shared/ui';
+import { QuizManagerModal } from '@features/quizzes';
 import type { Resource } from '../domain';
 import type { UpdateResourceInput } from '../application';
 
@@ -11,18 +12,24 @@ const kindFor = (resource: Resource): 'pdf' | 'doc' =>
 export interface ResourcesModalsProps {
   readonly active: Resource | null;
   readonly editing: Resource | null;
+  readonly quizzing: Resource | null;
+  readonly isAdmin: boolean;
   readonly update: UseMutationResult<Resource, Error, UpdateResourceInput>;
   readonly onCloseView: () => void;
   readonly onCloseEdit: () => void;
+  readonly onCloseQuiz: () => void;
 }
 
-/** The resource viewer (PDF/doc) + the admin edit modal. */
+/** The resource viewer (PDF/doc) + the admin edit modal + the quiz manager. */
 export const ResourcesModals = ({
   active,
   editing,
+  quizzing,
+  isAdmin,
   update,
   onCloseView,
   onCloseEdit,
+  onCloseQuiz,
 }: ResourcesModalsProps): ReactElement => (
   <>
     <Modal
@@ -50,5 +57,16 @@ export const ResourcesModals = ({
         update.mutate({ id, ...draft }, { onSuccess: onCloseEdit });
       }}
     />
+
+    {quizzing !== null ? (
+      <QuizManagerModal
+        open
+        contentId={quizzing.id}
+        contentKind="resource"
+        contentTitle={quizzing.title}
+        isAdmin={isAdmin}
+        onClose={onCloseQuiz}
+      />
+    ) : null}
   </>
 );

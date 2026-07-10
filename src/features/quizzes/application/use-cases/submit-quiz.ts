@@ -13,7 +13,7 @@ export interface SubmitQuizUseCaseDeps {
   readonly logger: Logger;
 }
 
-/** Grade a learner's answers for a content's quiz and return the pass/fail result. */
+/** Grade a learner's answers for one quiz and return the pass/fail result. */
 export class SubmitQuizUseCase {
   private readonly quizGateway: QuizGateway;
   private readonly logger: Logger;
@@ -24,16 +24,16 @@ export class SubmitQuizUseCase {
   }
 
   public async execute(
-    contentId: string,
+    quizId: string,
     answers: QuizAnswers,
   ): Promise<Result<QuizResult, QuizError>> {
-    const found = await this.quizGateway.findByContent(contentId);
+    const found = await this.quizGateway.getById(quizId);
     if (!found.ok) {
       return found;
     }
     if (found.value === null) {
-      this.logger.warn('No quiz to grade', { contentId });
-      return err(new QuizNotFoundError(contentId));
+      this.logger.warn('No quiz to grade', { quizId });
+      return err(new QuizNotFoundError(quizId));
     }
     return ok(found.value.grade(answers));
   }

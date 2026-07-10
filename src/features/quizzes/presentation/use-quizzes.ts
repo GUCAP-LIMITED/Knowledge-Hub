@@ -10,19 +10,19 @@ import type { Quiz, QuizAnswers, QuizResult } from '../domain';
 import type { SaveQuizInput } from '../application';
 import { useQuizzesModule } from './use-quizzes-module';
 
-/** Query key for a content's quiz. Mutations invalidate this to refetch. */
-export const quizQueryKey = (contentId: string): readonly string[] => [
+/** Query key for a content's quizzes. Mutations invalidate this to refetch. */
+export const quizzesQueryKey = (contentId: string): readonly string[] => [
   'quizzes',
   contentId,
 ];
 
-/** Fetch the quiz attached to a piece of content (null when none exists). */
-export const useQuiz = (contentId: string): UseQueryResult<Quiz | null> => {
-  const { getQuiz } = useQuizzesModule();
+/** Fetch every quiz attached to a piece of content. */
+export const useQuizzes = (contentId: string): UseQueryResult<readonly Quiz[]> => {
+  const { listQuizzes } = useQuizzesModule();
   return useQuery({
-    queryKey: quizQueryKey(contentId),
-    queryFn: async (): Promise<Quiz | null> => {
-      const result = await getQuiz.execute(contentId);
+    queryKey: quizzesQueryKey(contentId),
+    queryFn: async (): Promise<readonly Quiz[]> => {
+      const result = await listQuizzes.execute(contentId);
       if (isErr(result)) {
         throw result.error;
       }
@@ -32,11 +32,11 @@ export const useQuiz = (contentId: string): UseQueryResult<Quiz | null> => {
 };
 
 export interface SubmitQuizInput {
-  readonly contentId: string;
+  readonly quizId: string;
   readonly answers: QuizAnswers;
 }
 
-/** Grade a learner's answers and return the pass/fail result. */
+/** Grade a learner's answers for one quiz and return the pass/fail result. */
 export const useSubmitQuiz = (): UseMutationResult<
   QuizResult,
   Error,
@@ -44,8 +44,8 @@ export const useSubmitQuiz = (): UseMutationResult<
 > => {
   const { submitQuiz } = useQuizzesModule();
   return useMutation({
-    mutationFn: async ({ contentId, answers }: SubmitQuizInput): Promise<QuizResult> => {
-      const result = await submitQuiz.execute(contentId, answers);
+    mutationFn: async ({ quizId, answers }: SubmitQuizInput): Promise<QuizResult> => {
+      const result = await submitQuiz.execute(quizId, answers);
       if (isErr(result)) {
         throw result.error;
       }
@@ -54,7 +54,7 @@ export const useSubmitQuiz = (): UseMutationResult<
   });
 };
 
-/** Create or replace a quiz (admin authoring); refreshes the content's quiz on success. */
+/** Create or replace a quiz; refreshes the content's quizzes on success. */
 export const useSaveQuiz = (): UseMutationResult<Quiz, Error, SaveQuizInput> => {
   const { saveQuiz } = useQuizzesModule();
   const queryClient = useQueryClient();
@@ -67,7 +67,29 @@ export const useSaveQuiz = (): UseMutationResult<Quiz, Error, SaveQuizInput> => 
       return result.value;
     },
     onSuccess: (quiz) => {
-      void queryClient.invalidateQueries({ queryKey: quizQueryKey(quiz.contentId) });
+      void queryClient.invalidateQueries({ queryKey: quizzesQueryKey(quiz.contentId) });
+    },
+  });
+};
+
+export interface DeleteQuizInput {
+  readonly quizId: string;
+  readonly contentId: string;
+}
+
+/** Delete a quiz; refreshes the content's quizzes on success. */
+export const useDeleteQuiz = (): UseMutationResult<void, Error, DeleteQuizInput> => {
+  const { deleteQuiz } = useQuizzesModule();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ quizId }: DeleteQuizInput): Promise<void> => {
+      const result = await deleteQuiz.execute(quizId);
+      if (isErr(result)) {
+        throw result.error;
+      }
+    },
+    onSuccess: (_data, { contentId }) => {
+      void queryClient.invalidateQueries({ queryKey: quizzesQueryKey(contentId) });
     },
   });
 };
