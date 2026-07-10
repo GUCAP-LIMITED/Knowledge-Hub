@@ -65,6 +65,7 @@ export const UploadPage = (): ReactElement => {
             stepKey={stepKey}
             isFirst={flow.current === 0}
             fileReady={flow.fileReady}
+            canPublish={flow.missing.length === 0}
             isAdmin={flow.isAdmin}
             isSubmitting={flow.isSubmitting}
             selectedTypeLabel={

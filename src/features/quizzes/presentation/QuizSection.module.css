@@ -83,8 +83,18 @@
 
 .buildFoot {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
   gap: 0.6rem;
+}
+.buildActions {
+  display: flex;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+.buildHint {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
 }
 
 /* --- Learner runner --- */

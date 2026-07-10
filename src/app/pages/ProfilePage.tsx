@@ -1,5 +1,6 @@
 import { useState, type ReactElement } from 'react';
 import {
+  Alert,
   Avatar,
   Badge,
   Button,
@@ -43,8 +44,9 @@ const ProfileCard = ({
 }: {
   readonly profile: ProfileData;
   readonly user: AuthenticatedUser | null;
-  readonly active: number;
-  readonly completed: number;
+  /** null while the course data is loading or errored — rendered as an em dash. */
+  readonly active: number | null;
+  readonly completed: number | null;
 }): ReactElement => (
   <div className={styles.summary}>
     <Avatar name={profile.name} size={88} />
@@ -53,15 +55,15 @@ const ProfileCard = ({
     <p className={styles.bio}>{profile.bio}</p>
     <div className={styles.stats}>
       <div>
-        <div className={styles.statValue}>{active}</div>
+        <div className={styles.statValue}>{active ?? '—'}</div>
         <div className={styles.statLabel}>Courses</div>
       </div>
       <div>
-        <div className={styles.statValue}>{completed}</div>
+        <div className={styles.statValue}>{completed ?? '—'}</div>
         <div className={styles.statLabel}>Done</div>
       </div>
       <div>
-        <div className={styles.statValue}>{completed}</div>
+        <div className={styles.statValue}>{completed ?? '—'}</div>
         <div className={styles.statLabel}>Certs</div>
       </div>
     </div>
@@ -130,9 +132,10 @@ export const ProfilePage = (): ReactElement => {
   const [edit, setEdit] = useState(false);
   const [draft, setDraft] = useState(profile);
 
+  const ready = !courses.isLoading && !courses.isError;
   const list = courses.data ?? [];
-  const completed = list.filter((course) => course.isCompleted()).length;
-  const active = list.filter((course) => course.hasStarted()).length;
+  const completed = ready ? list.filter((course) => course.isCompleted()).length : null;
+  const active = ready ? list.filter((course) => course.hasStarted()).length : null;
 
   return (
     <section className={styles.screen}>
@@ -167,6 +170,11 @@ export const ProfilePage = (): ReactElement => {
           </Button>
         )}
       </PageHeader>
+      {courses.isError ? (
+        <Alert tone="error" title="Could not load your learning stats">
+          {courses.error.message}
+        </Alert>
+      ) : null}
       <div className={styles.layout}>
         <ProfileCard
           profile={profile}

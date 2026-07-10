@@ -8,6 +8,8 @@ export interface UploadFooterProps {
   readonly stepKey: StepKey | undefined;
   readonly isFirst: boolean;
   readonly fileReady: boolean;
+  /** False when required details (description, category) are still missing on the preview step. */
+  readonly canPublish: boolean;
   readonly isAdmin: boolean;
   readonly isSubmitting: boolean;
   readonly selectedTypeLabel: string | null;
@@ -19,6 +21,7 @@ export interface UploadFooterProps {
 const PrimaryButton = ({
   stepKey,
   fileReady,
+  canPublish,
   isAdmin,
   isSubmitting,
   onContinue,
@@ -41,7 +44,7 @@ const PrimaryButton = ({
       return <Button onClick={onContinue}>Continue</Button>;
     case 'preview':
       return (
-        <Button isLoading={isSubmitting} onClick={onSubmit}>
+        <Button disabled={!canPublish} isLoading={isSubmitting} onClick={onSubmit}>
           {isAdmin ? 'Publish now' : 'Submit for review'}
         </Button>
       );

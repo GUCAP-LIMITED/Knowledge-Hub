@@ -6,6 +6,7 @@ import {
   type QuizError,
   type QuizGateway,
   type QuizProps,
+  quizPropsError,
 } from '../../domain';
 
 export type SaveQuizInput = QuizProps;
@@ -26,7 +27,7 @@ export class SaveQuizUseCase {
   }
 
   public execute(input: SaveQuizInput): Promise<Result<Quiz, QuizError>> {
-    const invalid = validate(input);
+    const invalid = quizPropsError(input);
     if (invalid !== null) {
       this.logger.warn('Rejected invalid quiz', { reason: invalid });
       return Promise.resolve(err(new InvalidQuizError(invalid)));
@@ -34,27 +35,3 @@ export class SaveQuizUseCase {
     return this.quizGateway.save(new Quiz(input));
   }
 }
-
-const validate = (input: SaveQuizInput): string | null => {
-  if (input.questions.length === 0) {
-    return 'a quiz needs at least one question';
-  }
-  for (const question of input.questions) {
-    if (question.prompt.trim() === '') {
-      return 'every question needs a prompt';
-    }
-    if (question.options.length < 2) {
-      return 'every question needs at least two answers';
-    }
-    if (question.correctIndexes.length === 0) {
-      return 'every question needs at least one correct answer';
-    }
-    const outOfRange = question.correctIndexes.some(
-      (index) => index < 0 || index >= question.options.length,
-    );
-    if (outOfRange) {
-      return 'every correct answer must reference a real option';
-    }
-  }
-  return null;
-};

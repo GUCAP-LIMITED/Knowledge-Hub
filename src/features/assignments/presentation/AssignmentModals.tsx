@@ -105,7 +105,7 @@ export const CreateModal = ({
           </Button>
           <Button
             isLoading={creating}
-            disabled={!canSubmit}
+            disabled={!canSubmit || creating}
             onClick={() => {
               onCreate({
                 course: form.course,

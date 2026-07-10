@@ -2,6 +2,7 @@ import { useState, type ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { Award, BookOpen, CheckCircle, Clock, PlayCircle } from 'lucide-react';
 import {
+  Alert,
   EmptyState,
   PageHeader,
   ProgressBar,
@@ -95,6 +96,20 @@ export const MyLearningPage = (): ReactElement => {
       <div className={cn(styles.screen, styles.center)}>
         <Spinner size="lg" label="Loading your courses" />
       </div>
+    );
+  }
+
+  if (courses.isError) {
+    return (
+      <section className={styles.screen}>
+        <PageHeader
+          title="My Learning"
+          subtitle="Pick up where you left off, track completed courses, and start something new"
+        />
+        <Alert tone="error" title="Could not load your courses">
+          {courses.error.message}
+        </Alert>
+      </section>
     );
   }
 

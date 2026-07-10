@@ -59,6 +59,7 @@ export const QuizManagerModal = (props: QuizManagerModalProps): ReactElement => 
         contentId={contentId}
         contentKind={contentKind}
         isSaving={save.isPending}
+        saveError={save.isError ? save.error.message : null}
         deletingId={del.isPending ? del.variables.quizId : null}
         submit={submit}
         onList={toList}

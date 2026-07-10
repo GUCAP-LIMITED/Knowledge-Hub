@@ -19,6 +19,8 @@ export interface QuizManagerBodyProps {
   readonly contentId: string;
   readonly contentKind: QuizContentKind;
   readonly isSaving: boolean;
+  /** Message when the last save attempt failed (e.g. gateway error), else null. */
+  readonly saveError: string | null;
   readonly deletingId: string | null;
   readonly submit: UseMutationResult<QuizResult, Error, SubmitQuizInput>;
   readonly onList: () => void;
@@ -46,14 +48,21 @@ export const QuizManagerBody = (props: QuizManagerBodyProps): ReactElement => {
   }
   if (mode === 'build') {
     return (
-      <QuizBuild
-        existing={active}
-        contentId={props.contentId}
-        contentKind={props.contentKind}
-        isSaving={props.isSaving}
-        onCancel={props.onList}
-        onSave={props.onPersist}
-      />
+      <>
+        {props.saveError !== null ? (
+          <Alert tone="error" title="Could not save quiz">
+            {props.saveError}
+          </Alert>
+        ) : null}
+        <QuizBuild
+          existing={active}
+          contentId={props.contentId}
+          contentKind={props.contentKind}
+          isSaving={props.isSaving}
+          onCancel={props.onList}
+          onSave={props.onPersist}
+        />
+      </>
     );
   }
   if (mode === 'take' && active !== null) {

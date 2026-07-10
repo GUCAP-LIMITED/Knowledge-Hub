@@ -1,6 +1,11 @@
 import { useState, type ReactElement } from 'react';
 import { Button } from '@shared/ui';
-import type { Quiz, QuizContentKind, QuizProps } from '../domain';
+import {
+  type Quiz,
+  type QuizContentKind,
+  type QuizProps,
+  quizPropsError,
+} from '../domain';
 import { QuizBuilderBody } from './QuizBuilderBody';
 import { draftFromQuiz, draftToProps } from './quiz-draft';
 import styles from './QuizSection.module.css';
@@ -24,22 +29,28 @@ export const QuizBuild = ({
   onSave,
 }: QuizBuildProps): ReactElement => {
   const [draft, setDraft] = useState(() => draftFromQuiz(existing));
+  const props = draftToProps(draft, existing, contentId, contentKind);
+  const issue = quizPropsError(props);
   return (
     <div className={styles.build}>
       <QuizBuilderBody draft={draft} setDraft={setDraft} />
       <div className={styles.buildFoot}>
-        <Button variant="ghost" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button
-          variant="accent"
-          isLoading={isSaving}
-          onClick={() => {
-            onSave(draftToProps(draft, existing, contentId, contentKind));
-          }}
-        >
-          Save quiz
-        </Button>
+        {issue !== null ? <span className={styles.buildHint}>{issue}</span> : <span />}
+        <div className={styles.buildActions}>
+          <Button variant="ghost" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button
+            variant="accent"
+            isLoading={isSaving}
+            disabled={issue !== null}
+            onClick={() => {
+              onSave(props);
+            }}
+          >
+            Save quiz
+          </Button>
+        </div>
       </div>
     </div>
   );
