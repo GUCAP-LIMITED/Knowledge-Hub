@@ -1,12 +1,15 @@
 import type { ReactElement } from 'react';
-import { Button, PageHeader } from '@shared/ui';
+import { PageHeader } from '@shared/ui';
+import { cn } from '@shared/utils';
+import { typeLabel } from './upload-content-types';
 import { DoneCard } from './UploadSteps';
+import { DraftBanner } from './DraftBanner';
 import { UploadWizard } from './UploadWizard';
 import { UploadFooter } from './UploadFooter';
 import { useUploadFlow } from './use-upload-flow';
 import styles from './UploadPage.module.css';
 
-/** Upload Document: a type-aware create wizard (type → upload → details → curriculum → review). */
+/** Upload Document: a type-aware create wizard (type → details → upload → review → publish). */
 export const UploadPage = (): ReactElement => {
   const flow = useUploadFlow();
 
@@ -19,8 +22,12 @@ export const UploadPage = (): ReactElement => {
     );
   }
 
+  const stepKey = flow.steps[flow.current];
+  const isTypeStep = stepKey === 'type';
+  const showDraftBanner = flow.draft.hasDraft && flow.contentType === null;
+
   return (
-    <section className={styles.screen}>
+    <section className={cn(styles.screen, isTypeStep && styles.screenWide)}>
       <PageHeader
         title="Upload Document"
         subtitle={
@@ -29,18 +36,12 @@ export const UploadPage = (): ReactElement => {
             : 'Submit content for admin review.'
         }
       />
-      {flow.draft.hasDraft && flow.contentType === null ? (
-        <div className={styles.resumeBanner}>
-          <span>You have an unsaved draft from a previous session.</span>
-          <div className={styles.resumeActions}>
-            <Button size="sm" variant="ghost" onClick={flow.draft.dismiss}>
-              Discard
-            </Button>
-            <Button size="sm" onClick={flow.draft.resume}>
-              Resume draft
-            </Button>
-          </div>
-        </div>
+      {showDraftBanner ? (
+        <DraftBanner
+          savedAt={flow.draft.savedAt}
+          onResume={flow.draft.resume}
+          onDiscard={flow.draft.dismiss}
+        />
       ) : null}
       <UploadWizard
         steps={flow.steps}
@@ -61,11 +62,14 @@ export const UploadPage = (): ReactElement => {
         submitError={flow.submitError}
         footer={
           <UploadFooter
-            stepKey={flow.steps[flow.current]}
+            stepKey={stepKey}
             isFirst={flow.current === 0}
             fileReady={flow.fileReady}
             isAdmin={flow.isAdmin}
             isSubmitting={flow.isSubmitting}
+            selectedTypeLabel={
+              flow.contentType === null ? null : typeLabel(flow.contentType)
+            }
             onBack={flow.back}
             onContinue={flow.next}
             onSubmit={flow.publish}

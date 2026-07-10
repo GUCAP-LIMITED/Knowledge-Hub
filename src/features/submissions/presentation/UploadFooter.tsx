@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { Button } from '@shared/ui';
 import type { StepKey } from './upload-content-types';
+import { SelectionActionBar } from './SelectionActionBar';
 import styles from './UploadPage.module.css';
 
 export interface UploadFooterProps {
@@ -9,6 +10,7 @@ export interface UploadFooterProps {
   readonly fileReady: boolean;
   readonly isAdmin: boolean;
   readonly isSubmitting: boolean;
+  readonly selectedTypeLabel: string | null;
   readonly onBack: () => void;
   readonly onContinue: () => void;
   readonly onSubmit: () => void;
@@ -51,13 +53,23 @@ const PrimaryButton = ({
 };
 
 /** Footer navigation for the upload wizard — back plus the step-appropriate primary action. */
-export const UploadFooter = (props: UploadFooterProps): ReactElement => (
-  <div className={styles.footer}>
-    {props.isFirst ? null : (
-      <Button variant="ghost" onClick={props.onBack}>
-        Back
-      </Button>
-    )}
-    <PrimaryButton {...props} />
-  </div>
-);
+export const UploadFooter = (props: UploadFooterProps): ReactElement => {
+  if (props.stepKey === 'type') {
+    return (
+      <SelectionActionBar
+        selectedLabel={props.selectedTypeLabel}
+        onContinue={props.onContinue}
+      />
+    );
+  }
+  return (
+    <div className={styles.footer}>
+      {props.isFirst ? null : (
+        <Button variant="ghost" onClick={props.onBack}>
+          Back
+        </Button>
+      )}
+      <PrimaryButton {...props} />
+    </div>
+  );
+};

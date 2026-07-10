@@ -136,9 +136,9 @@ export const useUploadFlow = (): UploadFlow => {
     setFiles: s.setFiles,
     setSections: s.setSections,
     chooseType: (key) => {
+      // Select only — the user advances explicitly via the Continue action bar.
       s.setContentType(key);
       s.setDetails({ ...details, type: typeLabel(key) });
-      s.setCurrent(1);
     },
     submitDetails: (next) => {
       s.setDetails({ ...next, type: typeLabel(contentType) });

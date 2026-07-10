@@ -18,8 +18,12 @@ export interface UploadContentType {
   readonly key: ContentTypeKey;
   readonly label: string;
   readonly icon: LucideIcon;
+  /** One-line "Best for…" summary shown under the title. */
   readonly tagline: string;
-  readonly bullets: readonly string[];
+  /** A short "Use for…" line describing typical uses. */
+  readonly useFor: string;
+  /** Microcopy on the selectable card's call to action, e.g. "Select Course". */
+  readonly selectCta: string;
   readonly steps: readonly StepKey[];
   readonly slots: readonly UploadSlot[];
 }
@@ -63,14 +67,11 @@ export const UPLOAD_CONTENT_TYPES: readonly UploadContentType[] = [
     key: 'course',
     label: 'Course',
     icon: BookOpen,
-    tagline: 'Structured, multi-lesson learning',
-    bullets: [
-      'Multiple lessons & sections',
-      'Full curriculum builder',
-      'Completion tracking',
-      'Certificate eligible',
-    ],
-    steps: ['type', 'file', 'details', 'curriculum', 'preview'],
+    tagline: 'Best for structured learning.',
+    useFor:
+      'Onboarding, compliance, multi-lesson training, progress tracking, and certificates.',
+    selectCta: 'Select Course',
+    steps: ['type', 'details', 'file', 'curriculum', 'preview'],
     slots: [
       {
         id: 'thumbnail',
@@ -105,14 +106,10 @@ export const UPLOAD_CONTENT_TYPES: readonly UploadContentType[] = [
     key: 'tutorial',
     label: 'Tutorial',
     icon: Lightbulb,
-    tagline: 'Short, single-lesson how-to',
-    bullets: [
-      'One focused lesson',
-      'Quick to publish',
-      'Great for how-tos',
-      'No curriculum needed',
-    ],
-    steps: ['type', 'file', 'details', 'preview'],
+    tagline: 'Best for quick how-to lessons.',
+    useFor: 'Short guides, process walkthroughs, and focused training.',
+    selectCta: 'Select Tutorial',
+    steps: ['type', 'details', 'file', 'preview'],
     slots: [
       {
         id: 'primary',
@@ -128,14 +125,10 @@ export const UPLOAD_CONTENT_TYPES: readonly UploadContentType[] = [
     key: 'resource',
     label: 'Resource',
     icon: FolderOpen,
-    tagline: 'Reference material & downloads',
-    bullets: [
-      'PDF · DOCX · PPTX · XLSX',
-      'ZIP & images',
-      'Instant to share',
-      'No review needed',
-    ],
-    steps: ['type', 'file', 'details', 'preview'],
+    tagline: 'Best for downloadable materials.',
+    useFor: 'PDFs, documents, templates, images, spreadsheets, and files.',
+    selectCta: 'Select Resource',
+    steps: ['type', 'details', 'file', 'preview'],
     slots: [
       {
         id: 'files',

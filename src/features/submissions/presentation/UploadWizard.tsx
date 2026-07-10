@@ -1,7 +1,5 @@
 import type { ReactElement, ReactNode } from 'react';
-import { Check } from 'lucide-react';
 import { Alert } from '@shared/ui';
-import { cn } from '@shared/utils';
 import {
   type ContentTypeKey,
   type Section,
@@ -11,43 +9,13 @@ import {
 } from './upload-content-types';
 import type { Details } from './upload-details';
 import type { SaveStatus } from './use-upload-draft';
+import { UploadStepper } from './UploadStepper';
 import { UploadTypeStep } from './UploadTypeStep';
 import { UploadFileStep } from './UploadFileStep';
 import { UploadCurriculumStep } from './UploadCurriculumStep';
 import { DetailsStep } from './UploadDetailsStep';
 import { UploadPreviewStep } from './UploadPreviewStep';
 import styles from './UploadPage.module.css';
-
-const STEP_LABELS: Record<StepKey, string> = {
-  type: 'Type',
-  file: 'Upload',
-  details: 'Details',
-  curriculum: 'Curriculum',
-  preview: 'Preview',
-};
-
-const Stepper = ({
-  steps,
-  current,
-}: {
-  readonly steps: readonly StepKey[];
-  readonly current: number;
-}): ReactElement => (
-  <div className={styles.stepper}>
-    {steps.map((key, index) => (
-      <div key={key} className={styles.step}>
-        <span className={cn(styles.dot, current >= index && styles.dotActive)}>
-          {current > index ? <Check size={14} aria-hidden="true" /> : index + 1}
-        </span>
-        <span
-          className={cn(styles.stepLabel, current >= index && styles.stepLabelActive)}
-        >
-          {STEP_LABELS[key]}
-        </span>
-      </div>
-    ))}
-  </div>
-);
 
 export interface UploadWizardProps {
   readonly steps: readonly StepKey[];
@@ -125,18 +93,21 @@ const SaveStatusPill = ({
 };
 
 /** Type-aware upload wizard shell: progress stepper, the active step, and a footer. */
-export const UploadWizard = (props: UploadWizardProps): ReactElement => (
-  <div className={styles.card}>
-    <div className={styles.wizardHead}>
-      <Stepper steps={props.steps} current={props.current} />
-      <SaveStatusPill status={props.saveStatus} />
+export const UploadWizard = (props: UploadWizardProps): ReactElement => {
+  const activeKey = props.steps[props.current] ?? 'type';
+  return (
+    <div className={styles.card}>
+      <div className={styles.wizardHead}>
+        <UploadStepper activeKey={activeKey} done={false} />
+        <SaveStatusPill status={props.saveStatus} />
+      </div>
+      <StepBody {...props} />
+      {props.submitError !== undefined ? (
+        <Alert tone="error" title="Could not submit">
+          {props.submitError}
+        </Alert>
+      ) : null}
+      {props.footer}
     </div>
-    <StepBody {...props} />
-    {props.submitError !== undefined ? (
-      <Alert tone="error" title="Could not submit">
-        {props.submitError}
-      </Alert>
-    ) : null}
-    {props.footer}
-  </div>
-);
+  );
+};

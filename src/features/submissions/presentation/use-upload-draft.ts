@@ -10,6 +10,8 @@ export interface UploadDraft {
   readonly details: Details;
   readonly sections: readonly Section[];
   readonly files: SlotFiles;
+  /** Epoch ms of the last autosave — used to show "last saved …" in the resume banner. */
+  readonly savedAt?: number;
 }
 
 const DRAFT_KEY = 'uapp:upload-draft';
@@ -34,6 +36,8 @@ export const clearDraft = (): void => {
 export interface UseUploadDraftResult {
   readonly status: SaveStatus;
   readonly hasDraft: boolean;
+  /** Epoch ms the cached draft was last saved, or null when there is none. */
+  readonly savedAt: number | null;
   readonly resume: () => void;
   readonly dismiss: () => void;
 }
@@ -45,7 +49,8 @@ export const useUploadDraft = (params: {
   readonly onRestore: (draft: UploadDraft) => void;
 }): UseUploadDraftResult => {
   const [status, setStatus] = useState<SaveStatus>('idle');
-  const [hasDraft, setHasDraft] = useState<boolean>(() => loadDraft() !== null);
+  const initial = useState<UploadDraft | null>(() => loadDraft())[0];
+  const [hasDraft, setHasDraft] = useState<boolean>(() => initial !== null);
   const serialized = JSON.stringify(params.draft);
 
   useEffect(() => {
@@ -55,7 +60,9 @@ export const useUploadDraft = (params: {
     setStatus('saving');
     const id = setTimeout(() => {
       try {
-        localStorage.setItem(DRAFT_KEY, serialized);
+        const snapshot = JSON.parse(serialized) as UploadDraft;
+        const payload: UploadDraft = { ...snapshot, savedAt: Date.now() };
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
       } catch {
         /* private mode / quota — draft simply isn't cached */
       }
@@ -69,6 +76,7 @@ export const useUploadDraft = (params: {
   return {
     status,
     hasDraft,
+    savedAt: initial?.savedAt ?? null,
     resume: () => {
       const draft = loadDraft();
       if (draft !== null) {
