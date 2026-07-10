@@ -1,26 +1,38 @@
 import type { ReactElement } from 'react';
-import { Download, ExternalLink, FileText } from 'lucide-react';
+import { ExternalLink, FileText } from 'lucide-react';
 import type { MediaAsset } from './media-asset';
 import styles from './MediaViewer.module.css';
 
-const Fallback = ({ asset }: { readonly asset: MediaAsset }): ReactElement => (
+/**
+ * Office Online can render Word/PowerPoint/Excel inline in an iframe from a public URL — the same
+ * trick lets docs preview in the browser instead of forcing a download.
+ */
+const officeEmbedUrl = (url: string): string =>
+  `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
+
+const FramePreview = ({
+  src,
+  name,
+  url,
+}: {
+  readonly src: string;
+  readonly name: string;
+  readonly url: string;
+}): ReactElement => (
+  <div className={styles.docWrap}>
+    <iframe className={styles.frame} src={src} title={name} />
+    <a className={styles.openLink} href={url} target="_blank" rel="noreferrer">
+      <ExternalLink size={13} aria-hidden="true" /> Open in a new tab
+    </a>
+  </div>
+);
+
+const LinkFallback = ({ asset }: { readonly asset: MediaAsset }): ReactElement => (
   <div className={styles.fallback}>
     <FileText size={40} aria-hidden="true" className={styles.fallbackIcon} />
-    <p className={styles.fallbackText}>
-      {asset.kind === 'doc'
-        ? 'Word documents can’t be previewed inline — open or download to view.'
-        : 'This resource opens in a new tab.'}
-    </p>
+    <p className={styles.fallbackText}>This resource opens in a new tab.</p>
     <a className={styles.download} href={asset.url} target="_blank" rel="noreferrer">
-      {asset.kind === 'doc' ? (
-        <>
-          <Download size={15} aria-hidden="true" /> Download to view
-        </>
-      ) : (
-        <>
-          <ExternalLink size={15} aria-hidden="true" /> Open link
-        </>
-      )}
+      <ExternalLink size={15} aria-hidden="true" /> Open link
     </a>
   </div>
 );
@@ -37,21 +49,12 @@ export const MediaViewer = ({ asset }: { readonly asset: MediaAsset }): ReactEle
     case 'image':
       return <img className={styles.image} src={asset.url} alt={asset.name} />;
     case 'pdf':
-      return (
-        <div className={styles.docWrap}>
-          <iframe className={styles.frame} src={asset.url} title={asset.name} />
-          <a
-            className={styles.openLink}
-            href={asset.url}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <ExternalLink size={13} aria-hidden="true" /> Open in a new tab
-          </a>
-        </div>
-      );
+      return <FramePreview src={asset.url} name={asset.name} url={asset.url} />;
     case 'doc':
+      return (
+        <FramePreview src={officeEmbedUrl(asset.url)} name={asset.name} url={asset.url} />
+      );
     case 'link':
-      return <Fallback asset={asset} />;
+      return <LinkFallback asset={asset} />;
   }
 };
