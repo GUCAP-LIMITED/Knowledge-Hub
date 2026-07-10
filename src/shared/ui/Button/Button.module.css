@@ -57,6 +57,14 @@
   border-color: var(--color-primary);
 }
 
+.accent {
+  background-color: var(--color-secondary);
+  color: #fff;
+}
+.accent:hover:not(:disabled) {
+  background-color: var(--color-secondary-strong);
+}
+
 .ghost {
   background-color: transparent;
   color: var(--color-text);

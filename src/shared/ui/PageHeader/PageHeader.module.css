@@ -16,9 +16,21 @@
   color: var(--color-text-subtle);
 }
 .title {
+  position: relative;
   margin: 0;
+  padding-left: 0.75rem;
   font-size: 1.6rem;
   font-weight: 800;
+}
+.title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.15em;
+  bottom: 0.15em;
+  width: 4px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-secondary);
 }
 .subtitle {
   margin: 0;

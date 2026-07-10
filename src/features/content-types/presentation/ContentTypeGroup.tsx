@@ -68,7 +68,7 @@ export const ContentTypeGroup = ({
             setDraft(event.target.value);
           }}
         />
-        <Button type="submit" variant="secondary" disabled={draft.trim() === ''}>
+        <Button type="submit" variant="accent" disabled={draft.trim() === ''}>
           Add type
         </Button>
       </form>
