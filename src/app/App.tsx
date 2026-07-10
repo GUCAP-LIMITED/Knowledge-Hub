@@ -13,6 +13,7 @@ import { TeamModuleProvider } from '@features/team';
 import { AssignmentsModuleProvider } from '@features/assignments';
 import { NotificationsModuleProvider } from '@features/notifications';
 import { UsersModuleProvider } from '@features/users';
+import { QuizzesModuleProvider } from '@features/quizzes';
 import { TooltipProvider } from '@shared/ui';
 import { AppErrorBoundary } from '@app/AppErrorBoundary';
 import { AppRouter } from '@app/router/AppRouter';
@@ -56,14 +57,18 @@ export const App = (): ReactElement => {
                                   module={composition.notificationsModule}
                                 >
                                   <UsersModuleProvider module={composition.usersModule}>
-                                    <BrowserRouter
-                                      future={{
-                                        v7_startTransition: true,
-                                        v7_relativeSplatPath: true,
-                                      }}
+                                    <QuizzesModuleProvider
+                                      module={composition.quizzesModule}
                                     >
-                                      <AppRouter />
-                                    </BrowserRouter>
+                                      <BrowserRouter
+                                        future={{
+                                          v7_startTransition: true,
+                                          v7_relativeSplatPath: true,
+                                        }}
+                                      >
+                                        <AppRouter />
+                                      </BrowserRouter>
+                                    </QuizzesModuleProvider>
                                   </UsersModuleProvider>
                                 </NotificationsModuleProvider>
                               </AssignmentsModuleProvider>

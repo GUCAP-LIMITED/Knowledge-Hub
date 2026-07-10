@@ -15,6 +15,8 @@ import {
 import { Alert, Skeleton } from '@shared/ui';
 import { cn } from '@shared/utils';
 import { useCourse, useUpdateCourseProgress, type Course } from '@features/courses';
+import { useAuth } from '@features/auth';
+import { QuizSection } from '@features/quizzes';
 import { CourseReviewsPanel } from '@features/course-reviews';
 import { CurriculumCard, LessonPlayer, type Lesson } from './CourseCurriculum';
 import styles from './CourseDetailPage.module.css';
@@ -121,12 +123,57 @@ const DetailsSidebar = ({ course }: { readonly course: Course }): ReactElement =
   );
 };
 
+const CourseMain = ({
+  course,
+  isAdmin,
+  isBusy,
+  onAdvance,
+  onPlay,
+}: {
+  readonly course: Course;
+  readonly isAdmin: boolean;
+  readonly isBusy: boolean;
+  readonly onAdvance: () => void;
+  readonly onPlay: (lesson: Lesson) => void;
+}): ReactElement => (
+  <div className={styles.main}>
+    <CourseHero course={course} isBusy={isBusy} onAdvance={onAdvance} />
+    <section className={styles.card}>
+      <h2 className={styles.cardTitle}>What you'll learn</h2>
+      <div className={styles.outcomes}>
+        {course.outcomes.map((outcome) => (
+          <div key={outcome} className={styles.outcome}>
+            <CheckCircle size={16} aria-hidden="true" className={styles.outcomeIcon} />
+            {outcome}
+          </div>
+        ))}
+      </div>
+    </section>
+    <CurriculumCard course={course} onPlay={onPlay} />
+    <section className={styles.card}>
+      <QuizSection
+        contentId={course.id}
+        contentKind="course"
+        isAdmin={isAdmin}
+        rewatchLabel="Re-watch course"
+        onRewatch={onAdvance}
+      />
+    </section>
+    <section className={styles.card}>
+      <h2 className={styles.cardTitle}>Reviews</h2>
+      <CourseReviewsPanel courseId={course.id} courseName={course.title} />
+    </section>
+  </div>
+);
+
 /** Rich course detail: hero, outcomes, curriculum, reviews and a details sidebar. */
 export const CourseDetailPage = (): ReactElement => {
   const params = useParams();
   const id = params.id ?? '';
   const course = useCourse(id);
   const updateProgress = useUpdateCourseProgress();
+  const { user } = useAuth();
+  const isAdmin = user?.hasAnyRole(['admin']) ?? false;
   const [playing, setPlaying] = useState<Lesson | null>(null);
 
   const backLink = (
@@ -159,35 +206,15 @@ export const CourseDetailPage = (): ReactElement => {
     <section className={styles.screen}>
       {backLink}
       <div className={styles.layout}>
-        <div className={styles.main}>
-          <CourseHero
-            course={data}
-            isBusy={updateProgress.isPending}
-            onAdvance={() => {
-              updateProgress.mutate({ id: data.id, progress: nextProgress(data) });
-            }}
-          />
-          <section className={styles.card}>
-            <h2 className={styles.cardTitle}>What you'll learn</h2>
-            <div className={styles.outcomes}>
-              {data.outcomes.map((outcome) => (
-                <div key={outcome} className={styles.outcome}>
-                  <CheckCircle
-                    size={16}
-                    aria-hidden="true"
-                    className={styles.outcomeIcon}
-                  />
-                  {outcome}
-                </div>
-              ))}
-            </div>
-          </section>
-          <CurriculumCard course={data} onPlay={setPlaying} />
-          <section className={styles.card}>
-            <h2 className={styles.cardTitle}>Reviews</h2>
-            <CourseReviewsPanel courseId={data.id} courseName={data.title} />
-          </section>
-        </div>
+        <CourseMain
+          course={data}
+          isAdmin={isAdmin}
+          isBusy={updateProgress.isPending}
+          onAdvance={() => {
+            updateProgress.mutate({ id: data.id, progress: nextProgress(data) });
+          }}
+          onPlay={setPlaying}
+        />
         <DetailsSidebar course={data} />
       </div>
 

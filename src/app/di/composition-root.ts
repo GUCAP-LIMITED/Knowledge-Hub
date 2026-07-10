@@ -31,6 +31,7 @@ import {
   type NotificationsModule,
 } from '@features/notifications';
 import { createUsersModule, type UsersModule } from '@features/users';
+import { createQuizzesModule, type QuizzesModule } from '@features/quizzes';
 
 export interface AppComposition {
   readonly logger: Logger;
@@ -45,6 +46,7 @@ export interface AppComposition {
   readonly assignmentsModule: AssignmentsModule;
   readonly notificationsModule: NotificationsModule;
   readonly usersModule: UsersModule;
+  readonly quizzesModule: QuizzesModule;
   readonly queryClient: QueryClient;
 }
 
@@ -127,6 +129,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
   const assignmentsModule = createAssignmentsModule({ logger });
   const notificationsModule = createNotificationsModule({ logger });
   const usersModule = createUsersModule({ logger });
+  const quizzesModule = createQuizzesModule({ logger });
 
   logger.info('Application composition complete');
 
@@ -143,6 +146,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
     assignmentsModule,
     notificationsModule,
     usersModule,
+    quizzesModule,
     queryClient,
   };
 };
