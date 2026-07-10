@@ -12,6 +12,7 @@ export {
   useAllReviews,
   useCourseReviews,
   CourseReviewsPanel,
+  ContentReviewsPanel,
   useSubmitReview,
   useMarkReviewHelpful,
   useDeleteReview,

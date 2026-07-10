@@ -10,6 +10,7 @@ import {
   uploadedAsset,
 } from '@shared/ui';
 import { QuizManagerModal } from '@features/quizzes';
+import { ContentReviewsPanel } from '@features/course-reviews';
 import { useContentTypes } from '@features/content-types';
 import { DIFFICULTIES, type Difficulty, type Tutorial } from '../domain';
 import type { UpdateTutorialInput } from '../application';
@@ -97,7 +98,16 @@ export const TutorialsModals = ({
         description={watching ? `${watching.category} · ${watching.duration}` : undefined}
         size="lg"
       >
-        {watching !== null ? <MediaViewer asset={tutorialAsset(watching)} /> : null}
+        {watching !== null ? (
+          <>
+            <MediaViewer asset={tutorialAsset(watching)} />
+            <ContentReviewsPanel
+              contentId={watching.id}
+              contentName={watching.title}
+              heading="Ratings & reviews"
+            />
+          </>
+        ) : null}
       </Modal>
 
       <DetailsEditModal

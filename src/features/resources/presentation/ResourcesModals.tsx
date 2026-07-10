@@ -10,6 +10,7 @@ import {
   uploadedAsset,
 } from '@shared/ui';
 import { QuizManagerModal } from '@features/quizzes';
+import { ContentReviewsPanel } from '@features/course-reviews';
 import { useContentTypes } from '@features/content-types';
 import type { Resource } from '../domain';
 import type { UpdateResourceInput } from '../application';
@@ -94,7 +95,16 @@ export const ResourcesModals = ({
         description={active ? `${active.type} · ${active.category}` : undefined}
         size="lg"
       >
-        {active !== null ? <MediaViewer asset={resourceAsset(active)} /> : null}
+        {active !== null ? (
+          <>
+            <MediaViewer asset={resourceAsset(active)} />
+            <ContentReviewsPanel
+              contentId={active.id}
+              contentName={active.title}
+              heading="Ratings & reviews"
+            />
+          </>
+        ) : null}
       </Modal>
 
       <DetailsEditModal
