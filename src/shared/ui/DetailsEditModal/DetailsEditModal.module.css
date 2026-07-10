@@ -13,3 +13,21 @@
   justify-content: flex-end;
   gap: 0.5rem;
 }
+.fileField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.fileLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.fileField input[type='file'] {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+.fileNote {
+  font-size: 0.76rem;
+  color: var(--color-text-subtle);
+}

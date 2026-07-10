@@ -1,17 +1,20 @@
-import { useState, type ReactElement } from 'react';
+import { useState, type ChangeEvent, type ReactElement } from 'react';
 import { Button } from '@shared/ui/Button/Button';
 import { Modal } from '@shared/ui/Modal/Modal';
 import { Select } from '@shared/ui/Select/Select';
 import { TextField } from '@shared/ui/TextField/TextField';
+import { Textarea } from '@shared/ui/Textarea/Textarea';
 import styles from './DetailsEditModal.module.css';
 
-/** One editable field: a free-text input or a dropdown of options. */
+/** One editable field: free text, a dropdown, a multi-line box, or a file re-upload. */
 export interface EditFieldConfig {
   readonly name: string;
   readonly label: string;
-  readonly kind: 'text' | 'select';
+  readonly kind: 'text' | 'select' | 'textarea' | 'file';
   readonly initial: string;
   readonly options?: readonly string[];
+  /** For `file` fields — the accept filter (e.g. "video/*,application/pdf"). */
+  readonly accept?: string;
 }
 
 export type EditDraft = Record<string, string>;
@@ -24,6 +27,41 @@ export interface EditableItem {
 const buildInitial = (fields: readonly EditFieldConfig[]): EditDraft =>
   Object.fromEntries(fields.map((field) => [field.name, field.initial]));
 
+const FileField = ({
+  field,
+  value,
+  onChange,
+}: {
+  readonly field: EditFieldConfig;
+  readonly value: string;
+  readonly onChange: (value: string) => void;
+}): ReactElement => {
+  const onFile = (event: ChangeEvent<HTMLInputElement>): void => {
+    const file = event.target.files?.[0];
+    if (file === undefined) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (): void => {
+      if (typeof reader.result === 'string') {
+        onChange(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  return (
+    <label className={styles.fileField}>
+      <span className={styles.fileLabel}>{field.label}</span>
+      <input type="file" accept={field.accept} onChange={onFile} />
+      <span className={styles.fileNote}>
+        {value === ''
+          ? 'Leave empty to keep the current file.'
+          : '✓ New file ready to save.'}
+      </span>
+    </label>
+  );
+};
+
 const Field = ({
   field,
   value,
@@ -32,22 +70,40 @@ const Field = ({
   readonly field: EditFieldConfig;
   readonly value: string;
   readonly onChange: (value: string) => void;
-}): ReactElement =>
-  field.kind === 'select' ? (
-    <Select
-      label={field.label}
-      value={value}
-      onChange={(event) => {
-        onChange(event.target.value);
-      }}
-    >
-      {(field.options ?? []).map((option) => (
-        <option key={option} value={option}>
-          {option}
-        </option>
-      ))}
-    </Select>
-  ) : (
+}): ReactElement => {
+  if (field.kind === 'select') {
+    return (
+      <Select
+        label={field.label}
+        value={value}
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
+      >
+        {(field.options ?? []).map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </Select>
+    );
+  }
+  if (field.kind === 'textarea') {
+    return (
+      <Textarea
+        label={field.label}
+        rows={3}
+        value={value}
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
+      />
+    );
+  }
+  if (field.kind === 'file') {
+    return <FileField field={field} value={value} onChange={onChange} />;
+  }
+  return (
     <TextField
       label={field.label}
       value={value}
@@ -56,6 +112,7 @@ const Field = ({
       }}
     />
   );
+};
 
 const EditForm = ({
   fields,
@@ -129,7 +186,8 @@ export const DetailsEditModal = ({
       }
     }}
     title={heading}
-    description="Update the content details."
+    description="Update the content details, and replace the file if needed."
+    size="lg"
   >
     {item !== null ? (
       <EditForm

@@ -21,3 +21,24 @@ export const demoAsset = (kind: 'video' | 'pdf' | 'doc', name: string): MediaAss
   name,
   url: SAMPLE[kind],
 });
+
+/** Infer the media kind from an uploaded data-URL's MIME type. */
+const kindFromDataUrl = (url: string): MediaKind => {
+  if (url.startsWith('data:video')) {
+    return 'video';
+  }
+  if (url.startsWith('data:image')) {
+    return 'image';
+  }
+  if (url.startsWith('data:application/pdf')) {
+    return 'pdf';
+  }
+  return 'doc';
+};
+
+/** Build an asset from an admin-uploaded file (stored as a data URL). */
+export const uploadedAsset = (url: string, name: string): MediaAsset => ({
+  kind: kindFromDataUrl(url),
+  name,
+  url,
+});

@@ -7,6 +7,10 @@ export interface UpdateResourceInput {
   readonly title: string;
   readonly category: string;
   readonly type: string;
+  readonly description: string;
+  /** New content file (data URL). Omitted/empty keeps the existing media. */
+  readonly mediaUrl?: string;
+  readonly thumbnailUrl?: string;
 }
 
 export interface UpdateResourceUseCaseDeps {
@@ -37,6 +41,9 @@ export class UpdateResourceUseCase {
         title: input.title,
         category: input.category,
         type: input.type,
+        description: input.description,
+        ...(input.mediaUrl !== undefined ? { mediaUrl: input.mediaUrl } : {}),
+        ...(input.thumbnailUrl !== undefined ? { thumbnailUrl: input.thumbnailUrl } : {}),
       }),
     );
   }

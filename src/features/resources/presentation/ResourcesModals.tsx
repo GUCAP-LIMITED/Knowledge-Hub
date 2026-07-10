@@ -3,9 +3,11 @@ import type { UseMutationResult } from '@tanstack/react-query';
 import {
   DetailsEditModal,
   type EditFieldConfig,
+  type MediaAsset,
   MediaViewer,
   Modal,
   demoAsset,
+  uploadedAsset,
 } from '@shared/ui';
 import { QuizManagerModal } from '@features/quizzes';
 import { useContentTypes } from '@features/content-types';
@@ -15,6 +17,11 @@ import type { UpdateResourceInput } from '../application';
 /** Word-style resources preview inline as a fallback; everything else renders as a PDF. */
 const kindFor = (resource: Resource): 'pdf' | 'doc' =>
   resource.type.toLowerCase().includes('document') ? 'doc' : 'pdf';
+
+const resourceAsset = (resource: Resource): MediaAsset =>
+  resource.mediaUrl !== null
+    ? uploadedAsset(resource.mediaUrl, resource.title)
+    : demoAsset(kindFor(resource), resource.title);
 
 const resourceFields = (
   resource: Resource,
@@ -29,6 +36,26 @@ const resourceFields = (
     options: categories,
   },
   { name: 'type', label: 'Type', kind: 'text', initial: resource.type },
+  {
+    name: 'description',
+    label: 'Description',
+    kind: 'textarea',
+    initial: resource.description,
+  },
+  {
+    name: 'content',
+    label: 'Replace document / file',
+    kind: 'file',
+    initial: '',
+    accept: 'application/pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx',
+  },
+  {
+    name: 'thumbnail',
+    label: 'Cover image',
+    kind: 'file',
+    initial: '',
+    accept: 'image/*',
+  },
 ];
 
 export interface ResourcesModalsProps {
@@ -67,9 +94,7 @@ export const ResourcesModals = ({
         description={active ? `${active.type} · ${active.category}` : undefined}
         size="lg"
       >
-        {active !== null ? (
-          <MediaViewer asset={demoAsset(kindFor(active), active.title)} />
-        ) : null}
+        {active !== null ? <MediaViewer asset={resourceAsset(active)} /> : null}
       </Modal>
 
       <DetailsEditModal
@@ -85,6 +110,13 @@ export const ResourcesModals = ({
               title: draft.title ?? '',
               category: draft.category ?? '',
               type: draft.type ?? '',
+              description: draft.description ?? '',
+              ...(draft.content !== undefined && draft.content !== ''
+                ? { mediaUrl: draft.content }
+                : {}),
+              ...(draft.thumbnail !== undefined && draft.thumbnail !== ''
+                ? { thumbnailUrl: draft.thumbnail }
+                : {}),
             },
             { onSuccess: onCloseEdit },
           );

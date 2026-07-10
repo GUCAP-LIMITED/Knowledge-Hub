@@ -3,14 +3,21 @@ import type { UseMutationResult } from '@tanstack/react-query';
 import {
   DetailsEditModal,
   type EditFieldConfig,
+  type MediaAsset,
   MediaViewer,
   Modal,
   demoAsset,
+  uploadedAsset,
 } from '@shared/ui';
 import { QuizManagerModal } from '@features/quizzes';
 import { useContentTypes } from '@features/content-types';
 import { DIFFICULTIES, type Difficulty, type Tutorial } from '../domain';
 import type { UpdateTutorialInput } from '../application';
+
+const tutorialAsset = (tutorial: Tutorial): MediaAsset =>
+  tutorial.mediaUrl !== null
+    ? uploadedAsset(tutorial.mediaUrl, tutorial.title)
+    : demoAsset('video', tutorial.title);
 
 const tutorialFields = (
   tutorial: Tutorial,
@@ -31,6 +38,26 @@ const tutorialFields = (
     kind: 'select',
     initial: tutorial.difficulty,
     options: DIFFICULTIES,
+  },
+  {
+    name: 'description',
+    label: 'Description',
+    kind: 'textarea',
+    initial: tutorial.description,
+  },
+  {
+    name: 'content',
+    label: 'Replace video / file',
+    kind: 'file',
+    initial: '',
+    accept: 'video/*,application/pdf',
+  },
+  {
+    name: 'thumbnail',
+    label: 'Cover image',
+    kind: 'file',
+    initial: '',
+    accept: 'image/*',
   },
 ];
 
@@ -70,9 +97,7 @@ export const TutorialsModals = ({
         description={watching ? `${watching.category} · ${watching.duration}` : undefined}
         size="lg"
       >
-        {watching !== null ? (
-          <MediaViewer asset={demoAsset('video', watching.title)} />
-        ) : null}
+        {watching !== null ? <MediaViewer asset={tutorialAsset(watching)} /> : null}
       </Modal>
 
       <DetailsEditModal
@@ -89,6 +114,13 @@ export const TutorialsModals = ({
               category: draft.category ?? '',
               duration: draft.duration ?? '',
               difficulty: (draft.difficulty ?? 'Beginner') as Difficulty,
+              description: draft.description ?? '',
+              ...(draft.content !== undefined && draft.content !== ''
+                ? { mediaUrl: draft.content }
+                : {}),
+              ...(draft.thumbnail !== undefined && draft.thumbnail !== ''
+                ? { thumbnailUrl: draft.thumbnail }
+                : {}),
             },
             { onSuccess: onCloseEdit },
           );

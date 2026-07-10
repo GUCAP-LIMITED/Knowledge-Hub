@@ -11,14 +11,22 @@ export interface CourseProps {
   readonly outcomes: readonly string[];
   /** Per-learner progress projection (0–100), merged in for the current user. */
   readonly progress: number;
+  readonly description?: string;
+  /** Uploaded content file (data URL) that replaces the demo media, or null. */
+  readonly mediaUrl?: string | null;
+  /** Uploaded cover image (data URL), or null. */
+  readonly thumbnailUrl?: string | null;
 }
 
-/** The admin-editable subset of a course's display details. */
+/** The admin-editable subset of a course's details. Media fields are optional (kept if omitted). */
 export interface CourseDetailsPatch {
   readonly title: string;
   readonly category: string;
   readonly duration: string;
   readonly mandatory: boolean;
+  readonly description: string;
+  readonly mediaUrl?: string;
+  readonly thumbnailUrl?: string;
 }
 
 /**
@@ -38,6 +46,9 @@ export class Course {
   public readonly addedDate: Date;
   public readonly outcomes: readonly string[];
   public readonly progress: number;
+  public readonly description: string;
+  public readonly mediaUrl: string | null;
+  public readonly thumbnailUrl: string | null;
 
   public constructor(props: CourseProps) {
     this.id = props.id;
@@ -51,6 +62,9 @@ export class Course {
     this.addedDate = props.addedDate;
     this.outcomes = props.outcomes;
     this.progress = clampProgress(props.progress);
+    this.description = props.description ?? '';
+    this.mediaUrl = props.mediaUrl ?? null;
+    this.thumbnailUrl = props.thumbnailUrl ?? null;
   }
 
   /** True once the learner has finished every lesson. */
@@ -91,6 +105,9 @@ export class Course {
       addedDate: this.addedDate,
       outcomes: this.outcomes,
       progress: this.progress,
+      description: this.description,
+      mediaUrl: this.mediaUrl,
+      thumbnailUrl: this.thumbnailUrl,
     };
   }
 }

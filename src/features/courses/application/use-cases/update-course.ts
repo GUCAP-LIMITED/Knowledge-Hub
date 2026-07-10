@@ -8,6 +8,10 @@ export interface UpdateCourseInput {
   readonly category: string;
   readonly duration: string;
   readonly mandatory: boolean;
+  readonly description: string;
+  /** New content file (data URL). Omitted/empty keeps the existing media. */
+  readonly mediaUrl?: string;
+  readonly thumbnailUrl?: string;
 }
 
 export interface UpdateCourseUseCaseDeps {
@@ -37,6 +41,9 @@ export class UpdateCourseUseCase {
         category: input.category,
         duration: input.duration,
         mandatory: input.mandatory,
+        description: input.description,
+        ...(input.mediaUrl !== undefined ? { mediaUrl: input.mediaUrl } : {}),
+        ...(input.thumbnailUrl !== undefined ? { thumbnailUrl: input.thumbnailUrl } : {}),
       }),
     );
   }

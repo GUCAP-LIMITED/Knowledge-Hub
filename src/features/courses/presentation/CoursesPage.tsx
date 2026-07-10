@@ -8,6 +8,7 @@ import {
 import { useAuth } from '@features/auth';
 import { useContentTypes } from '@features/content-types';
 import type { Course } from '../domain';
+import type { UpdateCourseInput } from '../application';
 import {
   useCourses,
   useDeleteCourse,
@@ -46,23 +47,41 @@ const courseFields = (
     initial: course.mandatory ? 'Mandatory' : 'Optional',
     options: ['Mandatory', 'Optional'],
   },
+  {
+    name: 'description',
+    label: 'Description',
+    kind: 'textarea',
+    initial: course.description,
+  },
+  {
+    name: 'content',
+    label: 'Replace content file',
+    kind: 'file',
+    initial: '',
+    accept: 'video/*,application/pdf,.doc,.docx,.ppt,.pptx',
+  },
+  {
+    name: 'thumbnail',
+    label: 'Cover image',
+    kind: 'file',
+    initial: '',
+    accept: 'image/*',
+  },
 ];
 
-const toCourseUpdate = (
-  id: string,
-  draft: EditDraft,
-): {
-  id: string;
-  title: string;
-  category: string;
-  duration: string;
-  mandatory: boolean;
-} => ({
+const toCourseUpdate = (id: string, draft: EditDraft): UpdateCourseInput => ({
   id,
   title: draft.title ?? '',
   category: draft.category ?? '',
   duration: draft.duration ?? '',
   mandatory: draft.mandatory === 'Mandatory',
+  description: draft.description ?? '',
+  ...(draft.content !== undefined && draft.content !== ''
+    ? { mediaUrl: draft.content }
+    : {}),
+  ...(draft.thumbnail !== undefined && draft.thumbnail !== ''
+    ? { thumbnailUrl: draft.thumbnail }
+    : {}),
 });
 
 const matchesStatus = (course: Course, status: CourseStatusFilter): boolean => {
