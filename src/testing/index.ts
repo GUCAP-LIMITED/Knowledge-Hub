@@ -19,8 +19,6 @@ export * from './fakes/fake-team-gateway';
 export * from './builders/team-member.builder';
 export * from './fakes/fake-assignment-gateway';
 export * from './builders/assignment.builder';
-export * from './fakes/fake-content-gateway';
-export * from './builders/content-item.builder';
 export * from './fakes/fake-notification-gateway';
 export * from './builders/announcement.builder';
 export * from './fakes/fake-user-gateway';

@@ -48,4 +48,18 @@ export class InMemoryCourseGateway implements CourseGateway {
     this.courses.set(id, updated);
     return Promise.resolve(ok(updated));
   }
+
+  public save(course: Course): Promise<Result<Course, CourseError>> {
+    this.courses.set(course.id, course);
+    return Promise.resolve(ok(course));
+  }
+
+  public remove(id: string): Promise<Result<void, CourseError>> {
+    if (!this.courses.has(id)) {
+      this.logger.warn('Course not found for removal', { id });
+      return Promise.resolve(err(new CourseNotFoundError(id)));
+    }
+    this.courses.delete(id);
+    return Promise.resolve(ok(undefined));
+  }
 }

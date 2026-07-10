@@ -12,4 +12,10 @@ export interface TutorialGateway {
 
   /** Fetch a single tutorial by id. */
   getById(id: string): Promise<Result<Tutorial, TutorialError>>;
+
+  /** Persist an edited tutorial (title/category) and return it. */
+  save(tutorial: Tutorial): Promise<Result<Tutorial, TutorialError>>;
+
+  /** Remove a tutorial by id. */
+  remove(id: string): Promise<Result<void, TutorialError>>;
 }

@@ -1,28 +1,64 @@
 import type { ReactElement } from 'react';
-import { ChevronLeft, ChevronRight, FileText } from 'lucide-react';
-import { EmptyState } from '@shared/ui';
+import { ChevronLeft, ChevronRight, FileText, Pencil, Trash2 } from 'lucide-react';
+import { EmptyState, IconButton } from '@shared/ui';
 import { cn } from '@shared/utils';
 import type { Resource } from '../domain';
 import { type CategoryGroup, categoryMeta } from './resources-categories';
 import styles from './ResourcesPage.module.css';
 
+export interface ArticleActions {
+  readonly isAdmin: boolean;
+  readonly onOpen: (resource: Resource) => void;
+  readonly onEdit: (resource: Resource) => void;
+  readonly onDelete: (id: string) => void;
+}
+
 const ArticleRow = ({
-  title,
+  resource,
   meta,
-  onOpen,
+  actions,
 }: {
-  readonly title: string;
+  readonly resource: Resource;
   readonly meta: string;
-  readonly onOpen: () => void;
+  readonly actions: ArticleActions;
 }): ReactElement => (
-  <button type="button" className={styles.articleRow} onClick={onOpen}>
-    <FileText size={18} aria-hidden="true" className={styles.articleIcon} />
-    <span className={styles.articleBody}>
-      <span className={styles.articleTitle}>{title}</span>
-      <span className={styles.articleMeta}>{meta}</span>
-    </span>
-    <ChevronRight size={16} aria-hidden="true" className={styles.chevron} />
-  </button>
+  <div className={styles.articleRow}>
+    <button
+      type="button"
+      className={styles.articleMain}
+      onClick={() => {
+        actions.onOpen(resource);
+      }}
+    >
+      <FileText size={18} aria-hidden="true" className={styles.articleIcon} />
+      <span className={styles.articleBody}>
+        <span className={styles.articleTitle}>{resource.title}</span>
+        <span className={styles.articleMeta}>{meta}</span>
+      </span>
+      <ChevronRight size={16} aria-hidden="true" className={styles.chevron} />
+    </button>
+    {actions.isAdmin ? (
+      <div className={styles.articleAdmin}>
+        <IconButton
+          label="Edit resource"
+          onClick={() => {
+            actions.onEdit(resource);
+          }}
+        >
+          <Pencil size={15} />
+        </IconButton>
+        <IconButton
+          label="Delete resource"
+          variant="danger"
+          onClick={() => {
+            actions.onDelete(resource.id);
+          }}
+        >
+          <Trash2 size={15} />
+        </IconButton>
+      </div>
+    ) : null}
+  </div>
 );
 
 export interface CategoryCardsProps {
@@ -66,10 +102,10 @@ export const CategoryCards = ({
 /** "Popular articles" card — the five most-viewed resources. */
 export const PopularArticles = ({
   resources,
-  onOpen,
+  actions,
 }: {
   readonly resources: readonly Resource[];
-  readonly onOpen: (resource: Resource) => void;
+  readonly actions: ArticleActions;
 }): ReactElement => (
   <div className={styles.panel}>
     <h2 className={styles.panelHeading}>Popular articles</h2>
@@ -77,11 +113,9 @@ export const PopularArticles = ({
       {resources.slice(0, 5).map((resource) => (
         <ArticleRow
           key={resource.id}
-          title={resource.title}
+          resource={resource}
           meta={`${resource.category} • Updated ${resource.updated.toLocaleDateString('en-GB')} • ${resource.views.toLocaleString()} views`}
-          onOpen={() => {
-            onOpen(resource);
-          }}
+          actions={actions}
         />
       ))}
     </div>
@@ -92,7 +126,7 @@ export interface ArticleResultsProps {
   readonly heading: string;
   readonly resources: readonly Resource[];
   readonly onBack: () => void;
-  readonly onOpen: (resource: Resource) => void;
+  readonly actions: ArticleActions;
 }
 
 /** Filtered article results (a chosen category or a search), with a back link. */
@@ -100,7 +134,7 @@ export const ArticleResults = ({
   heading,
   resources,
   onBack,
-  onOpen,
+  actions,
 }: ArticleResultsProps): ReactElement => (
   <div className={styles.panel}>
     <button type="button" className={styles.backLink} onClick={onBack}>
@@ -117,11 +151,9 @@ export const ArticleResults = ({
         {resources.map((resource) => (
           <ArticleRow
             key={resource.id}
-            title={resource.title}
+            resource={resource}
             meta={`${String(resource.helpful)}% found this helpful • Updated ${resource.updated.toLocaleDateString('en-GB')}`}
-            onOpen={() => {
-              onOpen(resource);
-            }}
+            actions={actions}
           />
         ))}
       </div>

@@ -26,7 +26,6 @@ import {
 
 import { createTeamModule, type TeamModule } from '@features/team';
 import { createAssignmentsModule, type AssignmentsModule } from '@features/assignments';
-import { createContentModule, type ContentModule } from '@features/content';
 import {
   createNotificationsModule,
   type NotificationsModule,
@@ -44,7 +43,6 @@ export interface AppComposition {
   readonly courseReviewsModule: CourseReviewsModule;
   readonly teamModule: TeamModule;
   readonly assignmentsModule: AssignmentsModule;
-  readonly contentModule: ContentModule;
   readonly notificationsModule: NotificationsModule;
   readonly usersModule: UsersModule;
   readonly queryClient: QueryClient;
@@ -127,7 +125,6 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
   const courseReviewsModule = createCourseReviewsModule({ logger, clock });
   const teamModule = createTeamModule({ logger });
   const assignmentsModule = createAssignmentsModule({ logger });
-  const contentModule = createContentModule({ logger, clock });
   const notificationsModule = createNotificationsModule({ logger });
   const usersModule = createUsersModule({ logger });
 
@@ -144,7 +141,6 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
     courseReviewsModule,
     teamModule,
     assignmentsModule,
-    contentModule,
     notificationsModule,
     usersModule,
     queryClient,

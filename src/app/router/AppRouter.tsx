@@ -58,10 +58,6 @@ const AssignTrainingPage = lazy(async () => ({
   default: (await import('@features/assignments/presentation/AssignTrainingPage'))
     .AssignTrainingPage,
 }));
-const ContentManagementPage = lazy(async () => ({
-  default: (await import('@features/content/presentation/ContentManagementPage'))
-    .ContentManagementPage,
-}));
 const AdminSettingsPage = lazy(async () => ({
   default: (await import('@features/users/presentation/AdminSettingsPage'))
     .AdminSettingsPage,
@@ -113,7 +109,6 @@ export const AppRouter = (): ReactElement => {
               <Route path="/assign" element={<AssignTrainingPage />} />
               <Route path="/approvals" element={<ApprovalsPage />} />
               <Route path="/course-reviews" element={<CourseReviewsPage />} />
-              <Route path="/content" element={<ContentManagementPage />} />
               <Route path="/settings" element={<AdminSettingsPage />} />
             </Route>
           </Route>

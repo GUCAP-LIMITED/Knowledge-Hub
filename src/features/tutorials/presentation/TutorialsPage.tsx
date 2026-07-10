@@ -1,26 +1,24 @@
 import { useMemo, useState, type ReactElement } from 'react';
-import {
-  Alert,
-  EmptyState,
-  MediaViewer,
-  Modal,
-  PageHeader,
-  Spinner,
-  TextField,
-  demoAsset,
-} from '@shared/ui';
+import { PageHeader, TextField } from '@shared/ui';
+import { useAuth } from '@features/auth';
 import type { Tutorial } from '../domain';
-import { useTutorials } from './use-tutorials';
-import { TutorialCard } from './TutorialCard';
+import { useDeleteTutorial, useTutorials, useUpdateTutorial } from './use-tutorials';
+import { TutorialsResults } from './TutorialsResults';
+import { TutorialsModals } from './TutorialsModals';
 import { CategoryPills } from './CategoryPills';
 import styles from './TutorialsPage.module.css';
 
-/** Routed tutorials-library page with a category filter, search, and a video player. */
+/** Routed tutorials-library page: category filter, search, video player, admin edit/delete. */
 export const TutorialsPage = (): ReactElement => {
+  const { user } = useAuth();
+  const isAdmin = user?.hasAnyRole(['admin']) ?? false;
   const tutorials = useTutorials();
+  const update = useUpdateTutorial();
+  const remove = useDeleteTutorial();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
   const [watching, setWatching] = useState<Tutorial | null>(null);
+  const [editing, setEditing] = useState<Tutorial | null>(null);
 
   const categories = useMemo(
     () => [...new Set((tutorials.data ?? []).map((tutorial) => tutorial.category))],
@@ -63,45 +61,30 @@ export const TutorialsPage = (): ReactElement => {
         onSelect={setCategory}
       />
 
-      {tutorials.isLoading ? (
-        <div className={styles.center}>
-          <Spinner size="lg" label="Loading tutorials" />
-        </div>
-      ) : null}
-
-      {tutorials.isError ? (
-        <Alert tone="error" title="Could not load tutorials">
-          {tutorials.error.message}
-        </Alert>
-      ) : null}
-
-      {!tutorials.isLoading && !tutorials.isError && visible.length === 0 ? (
-        <EmptyState title="No tutorials match" description="Try a different search." />
-      ) : null}
-
-      {visible.length > 0 ? (
-        <div className={styles.grid}>
-          {visible.map((tutorial) => (
-            <TutorialCard key={tutorial.id} tutorial={tutorial} onWatch={setWatching} />
-          ))}
-        </div>
-      ) : null}
-
-      <Modal
-        open={watching !== null}
-        onOpenChange={(next) => {
-          if (!next) {
-            setWatching(null);
-          }
+      <TutorialsResults
+        tutorials={visible}
+        isLoading={tutorials.isLoading}
+        error={tutorials.isError ? tutorials.error : null}
+        isAdmin={isAdmin}
+        removingId={remove.isPending ? remove.variables : null}
+        onWatch={setWatching}
+        onEdit={setEditing}
+        onDelete={(id) => {
+          remove.mutate(id);
         }}
-        title={watching?.title ?? 'Tutorial'}
-        description={watching ? `${watching.category} · ${watching.duration}` : undefined}
-        size="lg"
-      >
-        {watching !== null ? (
-          <MediaViewer asset={demoAsset('video', watching.title)} />
-        ) : null}
-      </Modal>
+      />
+
+      <TutorialsModals
+        watching={watching}
+        editing={editing}
+        update={update}
+        onCloseWatch={() => {
+          setWatching(null);
+        }}
+        onCloseEdit={() => {
+          setEditing(null);
+        }}
+      />
     </section>
   );
 };

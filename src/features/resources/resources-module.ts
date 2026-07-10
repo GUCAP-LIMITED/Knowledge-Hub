@@ -1,5 +1,10 @@
 import type { Logger } from '@core/logger';
-import { ListResourcesUseCase, MarkResourceHelpfulUseCase } from './application';
+import {
+  DeleteResourceUseCase,
+  ListResourcesUseCase,
+  MarkResourceHelpfulUseCase,
+  UpdateResourceUseCase,
+} from './application';
 import { InMemoryResourceGateway } from './infrastructure';
 
 export interface ResourcesModuleDeps {
@@ -10,6 +15,8 @@ export interface ResourcesModuleDeps {
 export interface ResourcesModule {
   readonly listResources: ListResourcesUseCase;
   readonly markResourceHelpful: MarkResourceHelpfulUseCase;
+  readonly updateResource: UpdateResourceUseCase;
+  readonly deleteResource: DeleteResourceUseCase;
 }
 
 /**
@@ -25,5 +32,7 @@ export const createResourcesModule = (deps: ResourcesModuleDeps): ResourcesModul
       resourceGateway,
       logger: deps.logger,
     }),
+    updateResource: new UpdateResourceUseCase({ resourceGateway, logger: deps.logger }),
+    deleteResource: new DeleteResourceUseCase({ resourceGateway, logger: deps.logger }),
   };
 };

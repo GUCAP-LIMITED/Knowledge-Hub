@@ -39,4 +39,16 @@ export class Tutorial {
   public isBeginnerFriendly(): boolean {
     return this.difficulty === 'Beginner';
   }
+
+  /** Return a copy with edited display details (title + category). */
+  public withDetails(title: string, category: string): Tutorial {
+    return new Tutorial({
+      id: this.id,
+      title,
+      category,
+      duration: this.duration,
+      views: this.views,
+      difficulty: this.difficulty,
+    });
+  }
 }

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
-import { Clock, Eye, PlayCircle } from 'lucide-react';
-import { Badge, Button, CategoryBadge, type BadgeTone } from '@shared/ui';
+import { Clock, Eye, Pencil, PlayCircle, Trash2 } from 'lucide-react';
+import { Badge, Button, CategoryBadge, IconButton, type BadgeTone } from '@shared/ui';
 import type { Difficulty, Tutorial } from '../domain';
 import styles from './TutorialsPage.module.css';
 
@@ -13,15 +13,50 @@ const difficultyTone = (difficulty: Difficulty): BadgeTone => {
 
 export interface TutorialCardProps {
   readonly tutorial: Tutorial;
+  readonly isAdmin: boolean;
+  readonly isBusy: boolean;
   readonly onWatch: (tutorial: Tutorial) => void;
+  readonly onEdit: (tutorial: Tutorial) => void;
+  readonly onDelete: (id: string) => void;
 }
 
 /** Library card for a single tutorial. */
-export const TutorialCard = ({ tutorial, onWatch }: TutorialCardProps): ReactElement => (
+export const TutorialCard = ({
+  tutorial,
+  isAdmin,
+  isBusy,
+  onWatch,
+  onEdit,
+  onDelete,
+}: TutorialCardProps): ReactElement => (
   <article className={styles.card}>
     <div className={styles.cardTop}>
-      <CategoryBadge category={tutorial.category} />
-      <Badge tone={difficultyTone(tutorial.difficulty)}>{tutorial.difficulty}</Badge>
+      <div className={styles.cardTags}>
+        <CategoryBadge category={tutorial.category} />
+        <Badge tone={difficultyTone(tutorial.difficulty)}>{tutorial.difficulty}</Badge>
+      </div>
+      {isAdmin ? (
+        <div className={styles.cardAdmin}>
+          <IconButton
+            label="Edit tutorial"
+            onClick={() => {
+              onEdit(tutorial);
+            }}
+          >
+            <Pencil size={15} />
+          </IconButton>
+          <IconButton
+            label="Delete tutorial"
+            variant="danger"
+            disabled={isBusy}
+            onClick={() => {
+              onDelete(tutorial.id);
+            }}
+          >
+            <Trash2 size={15} />
+          </IconButton>
+        </div>
+      ) : null}
     </div>
     <h2 className={styles.cardTitle}>{tutorial.title}</h2>
     <div className={styles.metaRow}>

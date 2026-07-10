@@ -42,6 +42,11 @@ export class Resource {
     return new Resource({ ...this.toProps(), helpful: clampCount(next) });
   }
 
+  /** Return a copy with edited display details (title + category). */
+  public withDetails(title: string, category: string): Resource {
+    return new Resource({ ...this.toProps(), title, category });
+  }
+
   private toProps(): ResourceProps {
     return {
       id: this.id,

@@ -1,8 +1,14 @@
 import { useMemo, useState, type ReactElement } from 'react';
-import { Alert, EmptyState, PageHeader, Spinner } from '@shared/ui';
+import { DetailsEditModal, PageHeader } from '@shared/ui';
+import { useAuth } from '@features/auth';
 import type { Course } from '../domain';
-import { useCourses, useUpdateCourseProgress } from './use-courses';
-import { CourseCard } from './CourseCard';
+import {
+  useCourses,
+  useDeleteCourse,
+  useUpdateCourse,
+  useUpdateCourseProgress,
+} from './use-courses';
+import { CoursesResults } from './CoursesResults';
 import {
   CoursesToolbar,
   type CourseSort,
@@ -53,13 +59,18 @@ const sortCourses = (courses: readonly Course[], sort: CourseSort): readonly Cou
 
 /** Routed course-catalog page with search, category/status/type filters and sort. */
 export const CoursesPage = (): ReactElement => {
+  const { user } = useAuth();
+  const isAdmin = user?.hasAnyRole(['admin']) ?? false;
   const courses = useCourses();
   const updateProgress = useUpdateCourseProgress();
+  const update = useUpdateCourse();
+  const remove = useDeleteCourse();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
   const [status, setStatus] = useState<CourseStatusFilter>('all');
   const [type, setType] = useState<CourseTypeFilter>('all');
   const [sort, setSort] = useState<CourseSort>('popular');
+  const [editing, setEditing] = useState<Course | null>(null);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -96,37 +107,38 @@ export const CoursesPage = (): ReactElement => {
         onSort={setSort}
       />
 
-      {courses.isLoading ? (
-        <div className={styles.center}>
-          <Spinner size="lg" label="Loading courses" />
-        </div>
-      ) : null}
+      <CoursesResults
+        courses={visible}
+        isLoading={courses.isLoading}
+        error={courses.isError ? courses.error : null}
+        isAdmin={isAdmin}
+        advancingId={updateProgress.isPending ? updateProgress.variables.id : null}
+        removingId={remove.isPending ? remove.variables : null}
+        onAdvance={handleAdvance}
+        onEdit={setEditing}
+        onDelete={(id) => {
+          remove.mutate(id);
+        }}
+      />
 
-      {courses.isError ? (
-        <Alert tone="error" title="Could not load courses">
-          {courses.error.message}
-        </Alert>
-      ) : null}
-
-      {!courses.isLoading && !courses.isError && visible.length === 0 ? (
-        <EmptyState
-          title="No courses match"
-          description="Try a different search or filters."
-        />
-      ) : null}
-
-      {visible.length > 0 ? (
-        <div className={styles.grid}>
-          {visible.map((course) => (
-            <CourseCard
-              key={course.id}
-              course={course}
-              isBusy={updateProgress.isPending}
-              onAdvance={handleAdvance}
-            />
-          ))}
-        </div>
-      ) : null}
+      <DetailsEditModal
+        item={editing}
+        heading="Edit course"
+        isSubmitting={update.isPending}
+        onClose={() => {
+          setEditing(null);
+        }}
+        onSave={(id, draft) => {
+          update.mutate(
+            { id, ...draft },
+            {
+              onSuccess: () => {
+                setEditing(null);
+              },
+            },
+          );
+        }}
+      />
     </section>
   );
 };

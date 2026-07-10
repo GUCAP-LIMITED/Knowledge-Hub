@@ -65,6 +65,11 @@ export class Course {
     return new Course({ ...this.toProps(), progress: clampProgress(progress) });
   }
 
+  /** Return a copy with edited display details (title + category). */
+  public withDetails(title: string, category: string): Course {
+    return new Course({ ...this.toProps(), title, category });
+  }
+
   private toProps(): CourseProps {
     return {
       id: this.id,

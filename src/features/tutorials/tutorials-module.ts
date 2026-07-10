@@ -1,5 +1,10 @@
 import type { Logger } from '@core/logger';
-import { GetTutorialUseCase, ListTutorialsUseCase } from './application';
+import {
+  DeleteTutorialUseCase,
+  GetTutorialUseCase,
+  ListTutorialsUseCase,
+  UpdateTutorialUseCase,
+} from './application';
 import { InMemoryTutorialGateway } from './infrastructure';
 
 export interface TutorialsModuleDeps {
@@ -10,6 +15,8 @@ export interface TutorialsModuleDeps {
 export interface TutorialsModule {
   readonly listTutorials: ListTutorialsUseCase;
   readonly getTutorial: GetTutorialUseCase;
+  readonly updateTutorial: UpdateTutorialUseCase;
+  readonly deleteTutorial: DeleteTutorialUseCase;
 }
 
 /**
@@ -22,5 +29,7 @@ export const createTutorialsModule = (deps: TutorialsModuleDeps): TutorialsModul
   return {
     listTutorials: new ListTutorialsUseCase({ tutorialGateway, logger: deps.logger }),
     getTutorial: new GetTutorialUseCase({ tutorialGateway, logger: deps.logger }),
+    updateTutorial: new UpdateTutorialUseCase({ tutorialGateway, logger: deps.logger }),
+    deleteTutorial: new DeleteTutorialUseCase({ tutorialGateway, logger: deps.logger }),
   };
 };

@@ -40,4 +40,18 @@ export class InMemoryTutorialGateway implements TutorialGateway {
     }
     return Promise.resolve(ok(tutorial));
   }
+
+  public save(tutorial: Tutorial): Promise<Result<Tutorial, TutorialError>> {
+    this.tutorials.set(tutorial.id, tutorial);
+    return Promise.resolve(ok(tutorial));
+  }
+
+  public remove(id: string): Promise<Result<void, TutorialError>> {
+    if (!this.tutorials.has(id)) {
+      this.logger.warn('Tutorial not found for removal', { id });
+      return Promise.resolve(err(new TutorialNotFoundError(id)));
+    }
+    this.tutorials.delete(id);
+    return Promise.resolve(ok(undefined));
+  }
 }

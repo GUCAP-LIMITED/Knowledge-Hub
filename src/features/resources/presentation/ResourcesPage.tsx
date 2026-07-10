@@ -1,29 +1,25 @@
 import { useMemo, useState, type ReactElement } from 'react';
-import {
-  Alert,
-  MediaViewer,
-  Modal,
-  PageHeader,
-  Spinner,
-  TextField,
-  demoAsset,
-} from '@shared/ui';
+import { PageHeader, TextField } from '@shared/ui';
+import { useAuth } from '@features/auth';
 import type { Resource } from '../domain';
-import { useResources } from './use-resources';
-import { ArticleResults, CategoryCards, PopularArticles } from './ResourcesParts';
+import { useDeleteResource, useResources, useUpdateResource } from './use-resources';
+import type { ArticleActions } from './ResourcesParts';
+import { ResourcesBody } from './ResourcesBody';
+import { ResourcesModals } from './ResourcesModals';
 import { groupByCategory, mostViewed } from './resources-categories';
 import styles from './ResourcesPage.module.css';
 
-/** Word-style resources preview inline as a fallback; everything else renders as a PDF. */
-const kindFor = (resource: Resource): 'pdf' | 'doc' =>
-  resource.type.toLowerCase().includes('document') ? 'doc' : 'pdf';
-
 /** Routed knowledge-base page: category cards + popular articles, or filtered results. */
 export const ResourcesPage = (): ReactElement => {
+  const { user } = useAuth();
+  const isAdmin = user?.hasAnyRole(['admin']) ?? false;
   const resources = useResources();
+  const update = useUpdateResource();
+  const remove = useDeleteResource();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string | null>(null);
   const [active, setActive] = useState<Resource | null>(null);
+  const [editing, setEditing] = useState<Resource | null>(null);
 
   const all = useMemo(() => resources.data ?? [], [resources.data]);
   const categories = useMemo(() => groupByCategory(all), [all]);
@@ -37,9 +33,13 @@ export const ResourcesPage = (): ReactElement => {
       (q === '' || resource.title.toLowerCase().includes(q)),
   );
 
-  const back = (): void => {
-    setCategory(null);
-    setQuery('');
+  const actions: ArticleActions = {
+    isAdmin,
+    onOpen: setActive,
+    onEdit: setEditing,
+    onDelete: (id) => {
+      remove.mutate(id);
+    },
   };
 
   return (
@@ -60,49 +60,33 @@ export const ResourcesPage = (): ReactElement => {
         />
       </div>
 
-      {resources.isLoading ? (
-        <div className={styles.center}>
-          <Spinner size="lg" label="Loading resources" />
-        </div>
-      ) : null}
-
-      {resources.isError ? (
-        <Alert tone="error" title="Could not load resources">
-          {resources.error.message}
-        </Alert>
-      ) : null}
-
-      {!resources.isLoading && !resources.isError ? (
-        browsing ? (
-          <>
-            <CategoryCards categories={categories} onSelect={setCategory} />
-            <PopularArticles resources={popular} onOpen={setActive} />
-          </>
-        ) : (
-          <ArticleResults
-            heading={category ?? `Search results for “${query}”`}
-            resources={results}
-            onBack={back}
-            onOpen={setActive}
-          />
-        )
-      ) : null}
-
-      <Modal
-        open={active !== null}
-        onOpenChange={(next) => {
-          if (!next) {
-            setActive(null);
-          }
+      <ResourcesBody
+        isLoading={resources.isLoading}
+        error={resources.isError ? resources.error : null}
+        browsing={browsing}
+        categories={categories}
+        popular={popular}
+        heading={category ?? `Search results for “${query}”`}
+        results={results}
+        onSelectCategory={setCategory}
+        onBack={() => {
+          setCategory(null);
+          setQuery('');
         }}
-        title={active?.title ?? 'Resource'}
-        description={active ? `${active.type} · ${active.category}` : undefined}
-        size="lg"
-      >
-        {active !== null ? (
-          <MediaViewer asset={demoAsset(kindFor(active), active.title)} />
-        ) : null}
-      </Modal>
+        actions={actions}
+      />
+
+      <ResourcesModals
+        active={active}
+        editing={editing}
+        update={update}
+        onCloseView={() => {
+          setActive(null);
+        }}
+        onCloseEdit={() => {
+          setEditing(null);
+        }}
+      />
     </section>
   );
 };

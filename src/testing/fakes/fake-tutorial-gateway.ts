@@ -21,4 +21,12 @@ export class FakeTutorialGateway implements TutorialGateway {
     this.lastRequestedId = id;
     return Promise.resolve(this.getByIdResult);
   }
+
+  public save(tutorial: Tutorial): Promise<Result<Tutorial, TutorialError>> {
+    return Promise.resolve(ok(tutorial));
+  }
+
+  public remove(_id: string): Promise<Result<void, TutorialError>> {
+    return Promise.resolve(ok(undefined));
+  }
 }

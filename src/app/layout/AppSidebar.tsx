@@ -13,7 +13,6 @@ import {
   MessageSquare,
   BarChart3,
   CalendarCheck,
-  LayoutGrid,
   Upload,
   type LucideIcon,
   Settings,
@@ -96,7 +95,6 @@ const NAV: readonly NavEntry[] = [
     icon: MessageSquare,
     anyOf: ['admin'],
   },
-  { kind: 'link', to: '/content', label: 'Content', icon: LayoutGrid, anyOf: ['admin'] },
   { kind: 'link', to: '/settings', label: 'Settings', icon: Settings, anyOf: ['admin'] },
 ];
 

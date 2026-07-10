@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { isErr } from '@core/result';
 import type { Resource } from '../domain';
+import type { UpdateResourceInput } from '../application';
 import { useResourcesModule } from './use-resources-module';
 
 /** Stable query key for the knowledge base. Mutations invalidate this to refetch. */
@@ -48,6 +49,45 @@ export const useMarkResourceHelpful = (): UseMutationResult<
         throw result.error;
       }
       return result.value;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: resourcesQueryKey });
+    },
+  });
+};
+
+/** Mutation to edit a resource's title/category; refreshes the knowledge base on success. */
+export const useUpdateResource = (): UseMutationResult<
+  Resource,
+  Error,
+  UpdateResourceInput
+> => {
+  const { updateResource } = useResourcesModule();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: UpdateResourceInput): Promise<Resource> => {
+      const result = await updateResource.execute(input);
+      if (isErr(result)) {
+        throw result.error;
+      }
+      return result.value;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: resourcesQueryKey });
+    },
+  });
+};
+
+/** Mutation to delete a resource; refreshes the knowledge base on success. */
+export const useDeleteResource = (): UseMutationResult<void, Error, string> => {
+  const { deleteResource } = useResourcesModule();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string): Promise<void> => {
+      const result = await deleteResource.execute(id);
+      if (isErr(result)) {
+        throw result.error;
+      }
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: resourcesQueryKey });

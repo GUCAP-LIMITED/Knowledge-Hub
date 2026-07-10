@@ -15,4 +15,10 @@ export interface CourseGateway {
 
   /** Persist the learner's progress for a course and return the updated course. */
   setProgress(id: string, progress: number): Promise<Result<Course, CourseError>>;
+
+  /** Persist an edited course (title/category) and return it. */
+  save(course: Course): Promise<Result<Course, CourseError>>;
+
+  /** Remove a course from the catalog by id. */
+  remove(id: string): Promise<Result<void, CourseError>>;
 }

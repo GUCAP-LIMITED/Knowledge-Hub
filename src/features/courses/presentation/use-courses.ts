@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { isErr } from '@core/result';
 import type { Course } from '../domain';
+import type { UpdateCourseInput } from '../application';
 import { useCoursesModule } from './use-courses-module';
 
 /** Stable query key for the course catalog. Mutations invalidate this to refetch. */
@@ -66,6 +67,45 @@ export const useUpdateCourseProgress = (): UseMutationResult<
         throw result.error;
       }
       return result.value;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: coursesQueryKey });
+    },
+  });
+};
+
+/** Mutation to edit a course's title/category; refreshes the catalog on success. */
+export const useUpdateCourse = (): UseMutationResult<
+  Course,
+  Error,
+  UpdateCourseInput
+> => {
+  const { updateCourse } = useCoursesModule();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: UpdateCourseInput): Promise<Course> => {
+      const result = await updateCourse.execute(input);
+      if (isErr(result)) {
+        throw result.error;
+      }
+      return result.value;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: coursesQueryKey });
+    },
+  });
+};
+
+/** Mutation to delete a course; refreshes the catalog on success. */
+export const useDeleteCourse = (): UseMutationResult<void, Error, string> => {
+  const { deleteCourse } = useCoursesModule();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string): Promise<void> => {
+      const result = await deleteCourse.execute(id);
+      if (isErr(result)) {
+        throw result.error;
+      }
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: coursesQueryKey });

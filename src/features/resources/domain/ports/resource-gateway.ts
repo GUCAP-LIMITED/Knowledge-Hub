@@ -15,4 +15,10 @@ export interface ResourceGateway {
 
   /** Register a helpful vote for a resource (increments by 1) and return the updated resource. */
   markHelpful(id: string): Promise<Result<Resource, ResourceError>>;
+
+  /** Persist an edited resource (title/category) and return it. */
+  save(resource: Resource): Promise<Result<Resource, ResourceError>>;
+
+  /** Remove a resource by id. */
+  remove(id: string): Promise<Result<void, ResourceError>>;
 }

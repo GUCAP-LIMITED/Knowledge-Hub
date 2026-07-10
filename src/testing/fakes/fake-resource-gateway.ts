@@ -30,4 +30,12 @@ export class FakeResourceGateway implements ResourceGateway {
     this.lastMarkedHelpfulId = id;
     return Promise.resolve(this.markHelpfulResult);
   }
+
+  public save(resource: Resource): Promise<Result<Resource, ResourceError>> {
+    return Promise.resolve(ok(resource));
+  }
+
+  public remove(_id: string): Promise<Result<void, ResourceError>> {
+    return Promise.resolve(ok(undefined));
+  }
 }

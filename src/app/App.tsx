@@ -11,7 +11,6 @@ import { SubmissionsModuleProvider } from '@features/submissions';
 import { CourseReviewsModuleProvider } from '@features/course-reviews';
 import { TeamModuleProvider } from '@features/team';
 import { AssignmentsModuleProvider } from '@features/assignments';
-import { ContentModuleProvider } from '@features/content';
 import { NotificationsModuleProvider } from '@features/notifications';
 import { UsersModuleProvider } from '@features/users';
 import { TooltipProvider } from '@shared/ui';
@@ -53,22 +52,20 @@ export const App = (): ReactElement => {
                               <AssignmentsModuleProvider
                                 module={composition.assignmentsModule}
                               >
-                                <ContentModuleProvider module={composition.contentModule}>
-                                  <NotificationsModuleProvider
-                                    module={composition.notificationsModule}
-                                  >
-                                    <UsersModuleProvider module={composition.usersModule}>
-                                      <BrowserRouter
-                                        future={{
-                                          v7_startTransition: true,
-                                          v7_relativeSplatPath: true,
-                                        }}
-                                      >
-                                        <AppRouter />
-                                      </BrowserRouter>
-                                    </UsersModuleProvider>
-                                  </NotificationsModuleProvider>
-                                </ContentModuleProvider>
+                                <NotificationsModuleProvider
+                                  module={composition.notificationsModule}
+                                >
+                                  <UsersModuleProvider module={composition.usersModule}>
+                                    <BrowserRouter
+                                      future={{
+                                        v7_startTransition: true,
+                                        v7_relativeSplatPath: true,
+                                      }}
+                                    >
+                                      <AppRouter />
+                                    </BrowserRouter>
+                                  </UsersModuleProvider>
+                                </NotificationsModuleProvider>
                               </AssignmentsModuleProvider>
                             </TeamModuleProvider>
                           </CourseReviewsModuleProvider>

@@ -1,8 +1,10 @@
 import type { Logger } from '@core/logger';
 import {
+  DeleteCourseUseCase,
   GetCourseUseCase,
   ListCoursesUseCase,
   UpdateCourseProgressUseCase,
+  UpdateCourseUseCase,
 } from './application';
 import { InMemoryCourseGateway } from './infrastructure';
 
@@ -15,6 +17,8 @@ export interface CoursesModule {
   readonly listCourses: ListCoursesUseCase;
   readonly getCourse: GetCourseUseCase;
   readonly updateCourseProgress: UpdateCourseProgressUseCase;
+  readonly updateCourse: UpdateCourseUseCase;
+  readonly deleteCourse: DeleteCourseUseCase;
 }
 
 /**
@@ -31,5 +35,7 @@ export const createCoursesModule = (deps: CoursesModuleDeps): CoursesModule => {
       courseGateway,
       logger: deps.logger,
     }),
+    updateCourse: new UpdateCourseUseCase({ courseGateway, logger: deps.logger }),
+    deleteCourse: new DeleteCourseUseCase({ courseGateway, logger: deps.logger }),
   };
 };

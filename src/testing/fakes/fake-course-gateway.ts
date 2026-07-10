@@ -27,4 +27,17 @@ export class FakeCourseGateway implements CourseGateway {
     this.lastSetProgress = { id, progress };
     return Promise.resolve(this.setProgressResult);
   }
+
+  public saved: Course[] = [];
+  public removed: string[] = [];
+
+  public save(course: Course): Promise<Result<Course, CourseError>> {
+    this.saved.push(course);
+    return Promise.resolve(ok(course));
+  }
+
+  public remove(id: string): Promise<Result<void, CourseError>> {
+    this.removed.push(id);
+    return Promise.resolve(ok(undefined));
+  }
 }

@@ -50,4 +50,18 @@ export class InMemoryResourceGateway implements ResourceGateway {
     this.resources.set(id, updated);
     return Promise.resolve(ok(updated));
   }
+
+  public save(resource: Resource): Promise<Result<Resource, ResourceError>> {
+    this.resources.set(resource.id, resource);
+    return Promise.resolve(ok(resource));
+  }
+
+  public remove(id: string): Promise<Result<void, ResourceError>> {
+    if (!this.resources.has(id)) {
+      this.logger.warn('Resource not found for removal', { id });
+      return Promise.resolve(err(new ResourceNotFoundError(id)));
+    }
+    this.resources.delete(id);
+    return Promise.resolve(ok(undefined));
+  }
 }

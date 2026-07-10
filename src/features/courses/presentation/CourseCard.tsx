@@ -1,14 +1,17 @@
 import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Clock, Star, Users } from 'lucide-react';
-import { Badge, Button, CategoryBadge, ProgressBar } from '@shared/ui';
+import { BookOpen, Clock, Pencil, Star, Trash2, Users } from 'lucide-react';
+import { Badge, Button, CategoryBadge, IconButton, ProgressBar } from '@shared/ui';
 import type { Course } from '../domain';
 import styles from './CoursesPage.module.css';
 
 export interface CourseCardProps {
   readonly course: Course;
   readonly isBusy: boolean;
+  readonly isAdmin: boolean;
   readonly onAdvance: (course: Course) => void;
+  readonly onEdit: (course: Course) => void;
+  readonly onDelete: (id: string) => void;
 }
 
 const actionLabel = (course: Course): string => {
@@ -22,12 +25,39 @@ const actionLabel = (course: Course): string => {
 export const CourseCard = ({
   course,
   isBusy,
+  isAdmin,
   onAdvance,
+  onEdit,
+  onDelete,
 }: CourseCardProps): ReactElement => (
   <article className={styles.card}>
     <div className={styles.cardTop}>
-      <CategoryBadge category={course.category} />
-      {course.mandatory ? <Badge tone="secondary">Required</Badge> : null}
+      <div className={styles.cardTags}>
+        <CategoryBadge category={course.category} />
+        {course.mandatory ? <Badge tone="secondary">Required</Badge> : null}
+      </div>
+      {isAdmin ? (
+        <div className={styles.cardAdmin}>
+          <IconButton
+            label="Edit course"
+            onClick={() => {
+              onEdit(course);
+            }}
+          >
+            <Pencil size={15} />
+          </IconButton>
+          <IconButton
+            label="Delete course"
+            variant="danger"
+            disabled={isBusy}
+            onClick={() => {
+              onDelete(course.id);
+            }}
+          >
+            <Trash2 size={15} />
+          </IconButton>
+        </div>
+      ) : null}
     </div>
     <Link to={`/courses/${course.id}`} className={styles.cardTitle}>
       {course.title}
