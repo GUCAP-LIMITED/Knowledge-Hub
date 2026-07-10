@@ -79,9 +79,12 @@ export const WriteReviewForm = ({
       {lockedCourse === undefined ? <CourseSelect register={register} /> : null}
 
       <div className={styles.field}>
-        <span className={styles.label}>Your rating</span>
+        <span className={styles.label} id="review-rating-label">
+          Your rating
+        </span>
         <StarRating
           value={watch('rating')}
+          labelledBy="review-rating-label"
           onChange={(next) => {
             setValue('rating', next, { shouldValidate: true });
           }}

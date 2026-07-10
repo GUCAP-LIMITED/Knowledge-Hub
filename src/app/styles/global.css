@@ -87,6 +87,21 @@
   box-sizing: border-box;
 }
 
+/* Zero-specificity keyboard-focus fallback: any interactive element without its own
+   :focus-visible rule still gets a visible teal ring. Component styles override it. */
+:where(
+  button,
+  a,
+  summary,
+  [role='button'],
+  [role='tab'],
+  [role='radio'],
+  [role='switch']
+):focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
 html,
 body,
 #root {

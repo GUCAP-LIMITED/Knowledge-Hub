@@ -6,49 +6,58 @@ const STARS = [1, 2, 3, 4, 5] as const;
 
 export interface StarRatingProps {
   readonly value: number;
-  /** When provided, renders interactive buttons; otherwise a read-only display. */
+  /** When provided, renders interactive radio-style buttons; otherwise a read-only display. */
   readonly onChange?: (value: number) => void;
+  /** Id of a visible label to associate with the interactive group (instead of an aria-label). */
+  readonly labelledBy?: string;
   readonly size?: 'sm' | 'md';
 }
 
-/** Five-star rating — read-only display, or interactive when `onChange` is supplied. */
+/** Five-star rating — read-only display (value announced), or interactive radio group. */
 export const StarRating = ({
   value,
   onChange,
+  labelledBy,
   size = 'md',
-}: StarRatingProps): ReactElement => (
-  <div
-    className={cn(styles.stars, styles[size])}
-    role={onChange !== undefined ? 'radiogroup' : undefined}
-    aria-label="Star rating"
-  >
-    {STARS.map((star) => {
-      const filled = star <= value;
-      if (onChange === undefined) {
+}: StarRatingProps): ReactElement => {
+  const interactive = onChange !== undefined;
+  const groupLabel = interactive ? 'Your rating' : `Rated ${String(value)} out of 5`;
+  return (
+    <div
+      className={cn(styles.stars, styles[size])}
+      role={interactive ? 'radiogroup' : undefined}
+      aria-labelledby={interactive ? labelledBy : undefined}
+      aria-label={labelledBy !== undefined ? undefined : groupLabel}
+    >
+      {STARS.map((star) => {
+        const filled = star <= value;
+        if (onChange === undefined) {
+          return (
+            <span
+              key={star}
+              className={cn(styles.star, filled && styles.filled)}
+              aria-hidden="true"
+            >
+              ★
+            </span>
+          );
+        }
         return (
-          <span
+          <button
             key={star}
-            className={cn(styles.star, filled && styles.filled)}
-            aria-hidden="true"
+            type="button"
+            role="radio"
+            className={cn(styles.star, styles.button, filled && styles.filled)}
+            aria-label={`${String(star)} star${star > 1 ? 's' : ''}`}
+            aria-checked={star === value}
+            onClick={() => {
+              onChange(star);
+            }}
           >
             ★
-          </span>
+          </button>
         );
-      }
-      return (
-        <button
-          key={star}
-          type="button"
-          className={cn(styles.star, styles.button, filled && styles.filled)}
-          aria-label={`${String(star)} star${star > 1 ? 's' : ''}`}
-          aria-pressed={star === value}
-          onClick={() => {
-            onChange(star);
-          }}
-        >
-          ★
-        </button>
-      );
-    })}
-  </div>
-);
+      })}
+    </div>
+  );
+};

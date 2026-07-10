@@ -21,6 +21,11 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
 }
+@media (max-width: 560px) {
+  .summary {
+    grid-template-columns: 1fr;
+  }
+}
 .avgBox {
   text-align: center;
 }

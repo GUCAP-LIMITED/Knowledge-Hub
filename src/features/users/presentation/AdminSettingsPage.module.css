@@ -97,6 +97,11 @@
   gap: 1rem;
   align-items: start;
 }
+@media (max-width: 720px) {
+  .permBody {
+    grid-template-columns: 1fr;
+  }
+}
 .moduleList {
   display: flex;
   flex-direction: column;

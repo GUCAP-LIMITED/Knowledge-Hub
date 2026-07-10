@@ -17,6 +17,14 @@ export interface CourseRating {
 const mean = (values: readonly number[]): number =>
   values.reduce((sum, value) => sum + value, 0) / values.length;
 
+/**
+ * Reviews of actual courses only. Reviews are shared across content kinds (a review's `courseId`
+ * holds the reviewed content's id), and catalog ids are kind-prefixed (`course-` / `tutorial-` /
+ * `resource-`), so the admin course dashboard filters to course ids to avoid mislabeling.
+ */
+export const courseReviewsOnly = (reviews: readonly Review[]): readonly Review[] =>
+  reviews.filter((review) => review.courseId.startsWith('course-'));
+
 /** Top-line metrics across every review. */
 export const computeStats = (reviews: readonly Review[]): ReviewStats => {
   const courses = new Set(reviews.map((review) => review.courseId));

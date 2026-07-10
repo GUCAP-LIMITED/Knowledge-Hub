@@ -60,13 +60,17 @@ export const NotificationsBell = (): ReactElement => {
   return (
     <div className={styles.wrap}>
       <IconButton
-        label="Notifications"
+        label={unread > 0 ? `Notifications, ${String(unread)} unread` : 'Notifications'}
         onClick={() => {
           setOpen((prev) => !prev);
         }}
       >
         <Bell size={18} />
-        {unread > 0 ? <span className={styles.count}>{unread}</span> : null}
+        {unread > 0 ? (
+          <span className={styles.count} aria-hidden="true">
+            {unread}
+          </span>
+        ) : null}
       </IconButton>
       {open ? (
         <>

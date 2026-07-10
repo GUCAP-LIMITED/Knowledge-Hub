@@ -16,11 +16,13 @@ export const CategoryPills = ({
   allLabel,
   onSelect,
 }: CategoryPillsProps): ReactElement => (
-  <div className={styles.pills}>
+  <div className={styles.pills} role="tablist" aria-label="Filter tutorials by category">
     {['all', ...categories].map((cat) => (
       <button
         key={cat}
         type="button"
+        role="tab"
+        aria-selected={active === cat}
         className={cn(styles.pill, active === cat && styles.pillActive)}
         onClick={() => {
           onSelect(cat);

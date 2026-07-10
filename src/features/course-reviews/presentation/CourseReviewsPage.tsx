@@ -2,7 +2,11 @@ import { useMemo, type ReactElement } from 'react';
 import { BookOpen, Check, MessageSquare, Star } from 'lucide-react';
 import { Alert, PageHeader, Spinner, StatCard } from '@shared/ui';
 import { RecentReviewsCard, TopRatedCard } from './CourseReviewsParts';
-import { computeStats, topRatedCourses } from './course-reviews-analytics';
+import {
+  computeStats,
+  courseReviewsOnly,
+  topRatedCourses,
+} from './course-reviews-analytics';
 import { useAllReviews, useDeleteReview } from './use-course-reviews';
 import styles from './CourseReviewsPage.module.css';
 
@@ -10,7 +14,7 @@ import styles from './CourseReviewsPage.module.css';
 export const CourseReviewsPage = (): ReactElement => {
   const reviews = useAllReviews();
   const del = useDeleteReview();
-  const data = useMemo(() => reviews.data ?? [], [reviews.data]);
+  const data = useMemo(() => courseReviewsOnly(reviews.data ?? []), [reviews.data]);
   const stats = useMemo(() => computeStats(data), [data]);
   const topRated = useMemo(() => topRatedCourses(data), [data]);
 
