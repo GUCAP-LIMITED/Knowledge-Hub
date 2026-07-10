@@ -6,6 +6,8 @@ export interface UpdateCourseInput {
   readonly id: string;
   readonly title: string;
   readonly category: string;
+  readonly duration: string;
+  readonly mandatory: boolean;
 }
 
 export interface UpdateCourseUseCaseDeps {
@@ -30,7 +32,12 @@ export class UpdateCourseUseCase {
       return existing;
     }
     return this.courseGateway.save(
-      existing.value.withDetails(input.title, input.category),
+      existing.value.withDetails({
+        title: input.title,
+        category: input.category,
+        duration: input.duration,
+        mandatory: input.mandatory,
+      }),
     );
   }
 }

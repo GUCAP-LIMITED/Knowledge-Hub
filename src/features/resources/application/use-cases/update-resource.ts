@@ -6,6 +6,7 @@ export interface UpdateResourceInput {
   readonly id: string;
   readonly title: string;
   readonly category: string;
+  readonly type: string;
 }
 
 export interface UpdateResourceUseCaseDeps {
@@ -32,7 +33,11 @@ export class UpdateResourceUseCase {
       return existing;
     }
     return this.resourceGateway.save(
-      existing.value.withDetails(input.title, input.category),
+      existing.value.withDetails({
+        title: input.title,
+        category: input.category,
+        type: input.type,
+      }),
     );
   }
 }

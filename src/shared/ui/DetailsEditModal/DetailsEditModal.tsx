@@ -1,49 +1,89 @@
 import { useState, type ReactElement } from 'react';
 import { Button } from '@shared/ui/Button/Button';
 import { Modal } from '@shared/ui/Modal/Modal';
+import { Select } from '@shared/ui/Select/Select';
 import { TextField } from '@shared/ui/TextField/TextField';
 import styles from './DetailsEditModal.module.css';
 
-export interface DetailsDraft {
-  readonly title: string;
-  readonly category: string;
+/** One editable field: a free-text input or a dropdown of options. */
+export interface EditFieldConfig {
+  readonly name: string;
+  readonly label: string;
+  readonly kind: 'text' | 'select';
+  readonly initial: string;
+  readonly options?: readonly string[];
 }
 
-/** Any content item editable by title + category. */
-export interface EditableItem extends DetailsDraft {
+export type EditDraft = Record<string, string>;
+
+/** Open trigger for the modal — pass the item's id (or null to close). */
+export interface EditableItem {
   readonly id: string;
 }
 
+const buildInitial = (fields: readonly EditFieldConfig[]): EditDraft =>
+  Object.fromEntries(fields.map((field) => [field.name, field.initial]));
+
+const Field = ({
+  field,
+  value,
+  onChange,
+}: {
+  readonly field: EditFieldConfig;
+  readonly value: string;
+  readonly onChange: (value: string) => void;
+}): ReactElement =>
+  field.kind === 'select' ? (
+    <Select
+      label={field.label}
+      value={value}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+    >
+      {(field.options ?? []).map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </Select>
+  ) : (
+    <TextField
+      label={field.label}
+      value={value}
+      onChange={(event) => {
+        onChange(event.target.value);
+      }}
+    />
+  );
+
 const EditForm = ({
-  initial,
+  fields,
   isSubmitting,
   onCancel,
   onSave,
 }: {
-  readonly initial: DetailsDraft;
+  readonly fields: readonly EditFieldConfig[];
   readonly isSubmitting: boolean;
   readonly onCancel: () => void;
-  readonly onSave: (draft: DetailsDraft) => void;
+  readonly onSave: (draft: EditDraft) => void;
 }): ReactElement => {
-  const [title, setTitle] = useState(initial.title);
-  const [category, setCategory] = useState(initial.category);
+  const [draft, setDraft] = useState<EditDraft>(() => buildInitial(fields));
+  const titleEmpty = (draft.title ?? '').trim().length === 0;
+
   return (
     <div className={styles.body}>
       <div className={styles.fields}>
-        <TextField
-          label="Title"
-          value={title}
-          onChange={(event) => {
-            setTitle(event.target.value);
-          }}
-        />
-        <TextField
-          label="Category"
-          value={category}
-          onChange={(event) => {
-            setCategory(event.target.value);
-          }}
-        />
+        {fields.map((field) => (
+          <Field
+            key={field.name}
+            field={field}
+            value={draft[field.name] ?? ''}
+            onChange={(value) => {
+              setDraft((prev) => ({ ...prev, [field.name]: value }));
+            }}
+          />
+        ))}
       </div>
       <div className={styles.footer}>
         <Button variant="ghost" onClick={onCancel}>
@@ -51,9 +91,9 @@ const EditForm = ({
         </Button>
         <Button
           isLoading={isSubmitting}
-          disabled={title.trim().length === 0}
+          disabled={titleEmpty}
           onClick={() => {
-            onSave({ title: title.trim(), category: category.trim() });
+            onSave(draft);
           }}
         >
           Save changes
@@ -66,15 +106,17 @@ const EditForm = ({
 export interface DetailsEditModalProps {
   readonly item: EditableItem | null;
   readonly heading: string;
+  readonly fields: readonly EditFieldConfig[];
   readonly isSubmitting: boolean;
   readonly onClose: () => void;
-  readonly onSave: (id: string, draft: DetailsDraft) => void;
+  readonly onSave: (id: string, draft: EditDraft) => void;
 }
 
-/** Edit a content item's title + category. Pass `item` to open; it resets when the item changes. */
+/** Edit a content item's fields. Pass `item` to open; the form resets when the item changes. */
 export const DetailsEditModal = ({
   item,
   heading,
+  fields,
   isSubmitting,
   onClose,
   onSave,
@@ -87,12 +129,12 @@ export const DetailsEditModal = ({
       }
     }}
     title={heading}
-    description="Update the title and category."
+    description="Update the content details."
   >
     {item !== null ? (
       <EditForm
         key={item.id}
-        initial={item}
+        fields={fields}
         isSubmitting={isSubmitting}
         onCancel={onClose}
         onSave={(draft) => {

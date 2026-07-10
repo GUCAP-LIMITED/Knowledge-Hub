@@ -13,6 +13,14 @@ export interface CourseProps {
   readonly progress: number;
 }
 
+/** The admin-editable subset of a course's display details. */
+export interface CourseDetailsPatch {
+  readonly title: string;
+  readonly category: string;
+  readonly duration: string;
+  readonly mandatory: boolean;
+}
+
 /**
  * A learning course. Immutable: a progress change returns a new `Course` so the presentation layer
  * can rely on reference equality for cache updates. Business questions ("is this complete?",
@@ -65,9 +73,9 @@ export class Course {
     return new Course({ ...this.toProps(), progress: clampProgress(progress) });
   }
 
-  /** Return a copy with edited display details (title + category). */
-  public withDetails(title: string, category: string): Course {
-    return new Course({ ...this.toProps(), title, category });
+  /** Return a copy with edited display details (title, category, duration, mandatory). */
+  public withDetails(patch: CourseDetailsPatch): Course {
+    return new Course({ ...this.toProps(), ...patch });
   }
 
   private toProps(): CourseProps {

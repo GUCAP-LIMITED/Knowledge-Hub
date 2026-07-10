@@ -1,6 +1,12 @@
 import { useMemo, useState, type ReactElement } from 'react';
-import { DetailsEditModal, PageHeader } from '@shared/ui';
+import {
+  DetailsEditModal,
+  type EditDraft,
+  type EditFieldConfig,
+  PageHeader,
+} from '@shared/ui';
 import { useAuth } from '@features/auth';
+import { useContentTypes } from '@features/content-types';
 import type { Course } from '../domain';
 import {
   useCourses,
@@ -19,6 +25,45 @@ import styles from './CoursesPage.module.css';
 
 const nextProgress = (course: Course): number =>
   course.hasStarted() ? Math.min(100, course.progress + 10) : 5;
+
+const courseFields = (
+  course: Course,
+  categories: readonly string[],
+): readonly EditFieldConfig[] => [
+  { name: 'title', label: 'Title', kind: 'text', initial: course.title },
+  {
+    name: 'category',
+    label: 'Category',
+    kind: 'select',
+    initial: course.category,
+    options: categories,
+  },
+  { name: 'duration', label: 'Duration', kind: 'text', initial: course.duration },
+  {
+    name: 'mandatory',
+    label: 'Requirement',
+    kind: 'select',
+    initial: course.mandatory ? 'Mandatory' : 'Optional',
+    options: ['Mandatory', 'Optional'],
+  },
+];
+
+const toCourseUpdate = (
+  id: string,
+  draft: EditDraft,
+): {
+  id: string;
+  title: string;
+  category: string;
+  duration: string;
+  mandatory: boolean;
+} => ({
+  id,
+  title: draft.title ?? '',
+  category: draft.category ?? '',
+  duration: draft.duration ?? '',
+  mandatory: draft.mandatory === 'Mandatory',
+});
 
 const matchesStatus = (course: Course, status: CourseStatusFilter): boolean => {
   if (status === 'completed') {
@@ -71,6 +116,7 @@ export const CoursesPage = (): ReactElement => {
   const [type, setType] = useState<CourseTypeFilter>('all');
   const [sort, setSort] = useState<CourseSort>('popular');
   const [editing, setEditing] = useState<Course | null>(null);
+  const courseTypes = useContentTypes('course');
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -122,21 +168,19 @@ export const CoursesPage = (): ReactElement => {
       />
 
       <DetailsEditModal
-        item={editing}
+        item={editing === null ? null : { id: editing.id }}
         heading="Edit course"
+        fields={editing === null ? [] : courseFields(editing, courseTypes)}
         isSubmitting={update.isPending}
         onClose={() => {
           setEditing(null);
         }}
         onSave={(id, draft) => {
-          update.mutate(
-            { id, ...draft },
-            {
-              onSuccess: () => {
-                setEditing(null);
-              },
+          update.mutate(toCourseUpdate(id, draft), {
+            onSuccess: () => {
+              setEditing(null);
             },
-          );
+          });
         }}
       />
     </section>

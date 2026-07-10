@@ -6,13 +6,21 @@ export type ContentKind = 'course' | 'tutorial' | 'resource';
 
 export const CONTENT_KINDS: readonly ContentKind[] = ['course', 'tutorial', 'resource'];
 
-/** moduleId → key persisted in localStorage. */
-const STORAGE_KEY = 'kh.content-types.v1';
+/** Key persisted in localStorage. Bump the suffix to re-seed defaults for returning users. */
+const STORAGE_KEY = 'kh.content-types.v2';
 
+// Seeded from the actual catalog data so the filters match existing content out of the box.
 const DEFAULT_TYPES: Record<ContentKind, readonly string[]> = {
-  course: ['Onboarding', 'Compliance', 'Leadership', 'Sales', 'Technical Guides'],
-  tutorial: ['Getting Started', 'Best Practices', 'Troubleshooting', 'Applications'],
-  resource: ['Policies & SOPs', 'Documents', 'FAQs', 'Reports', 'Marketing'],
+  course: ['Compliance', 'Leadership', 'Marketing', 'Onboarding', 'Operations', 'Sales'],
+  tutorial: ['Applications', 'Documents', 'Reports', 'Settings', 'Students'],
+  resource: [
+    'Best Practices',
+    'FAQs',
+    'Getting Started',
+    'Policies & SOPs',
+    'Technical Guides',
+    'Troubleshooting',
+  ],
 };
 
 export interface ContentTypesState {

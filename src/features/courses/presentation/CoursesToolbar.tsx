@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { Select, TextField } from '@shared/ui';
-import { CATEGORIES } from '@core/domain';
+import { useContentTypes } from '@features/content-types';
 import styles from './CoursesPage.module.css';
 
 export type CourseSort = 'popular' | 'rating' | 'newest' | 'duration';
@@ -13,24 +13,27 @@ const CategoryCell = ({
 }: {
   readonly value: string;
   readonly onChange: (value: string) => void;
-}): ReactElement => (
-  <div className={styles.toolbarCell}>
-    <Select
-      label="Category"
-      value={value}
-      onChange={(event) => {
-        onChange(event.target.value);
-      }}
-    >
-      <option value="all">All categories</option>
-      {CATEGORIES.map((cat) => (
-        <option key={cat} value={cat}>
-          {cat}
-        </option>
-      ))}
-    </Select>
-  </div>
-);
+}): ReactElement => {
+  const categories = useContentTypes('course');
+  return (
+    <div className={styles.toolbarCell}>
+      <Select
+        label="Category"
+        value={value}
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
+      >
+        <option value="all">All categories</option>
+        {categories.map((cat) => (
+          <option key={cat} value={cat}>
+            {cat}
+          </option>
+        ))}
+      </Select>
+    </div>
+  );
+};
 
 export interface CoursesToolbarProps {
   readonly query: string;

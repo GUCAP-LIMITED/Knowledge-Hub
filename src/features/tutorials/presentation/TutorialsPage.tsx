@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { PageHeader, TextField } from '@shared/ui';
 import { useAuth } from '@features/auth';
+import { useContentTypes } from '@features/content-types';
 import type { Tutorial } from '../domain';
 import { useDeleteTutorial, useTutorials, useUpdateTutorial } from './use-tutorials';
 import { TutorialsResults } from './TutorialsResults';
@@ -20,11 +21,7 @@ export const TutorialsPage = (): ReactElement => {
   const [watching, setWatching] = useState<Tutorial | null>(null);
   const [editing, setEditing] = useState<Tutorial | null>(null);
   const [quizzing, setQuizzing] = useState<Tutorial | null>(null);
-
-  const categories = useMemo(
-    () => [...new Set((tutorials.data ?? []).map((tutorial) => tutorial.category))],
-    [tutorials.data],
-  );
+  const categories = useContentTypes('tutorial');
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();

@@ -8,6 +8,13 @@ export interface ResourceProps {
   readonly updated: Date;
 }
 
+/** The admin-editable subset of a resource's details. */
+export interface ResourceDetailsPatch {
+  readonly title: string;
+  readonly category: string;
+  readonly type: string;
+}
+
 /**
  * A knowledge-base resource. Immutable: a "helpful" change returns a new `Resource` so the
  * presentation layer can rely on reference equality for cache updates. Business questions
@@ -42,9 +49,9 @@ export class Resource {
     return new Resource({ ...this.toProps(), helpful: clampCount(next) });
   }
 
-  /** Return a copy with edited display details (title + category). */
-  public withDetails(title: string, category: string): Resource {
-    return new Resource({ ...this.toProps(), title, category });
+  /** Return a copy with edited display details (title, category, type). */
+  public withDetails(patch: ResourceDetailsPatch): Resource {
+    return new Resource({ ...this.toProps(), ...patch });
   }
 
   private toProps(): ResourceProps {

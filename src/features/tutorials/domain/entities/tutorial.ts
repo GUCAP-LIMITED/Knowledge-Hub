@@ -13,6 +13,14 @@ export interface TutorialProps {
   readonly difficulty: Difficulty;
 }
 
+/** The admin-editable subset of a tutorial's details. */
+export interface TutorialDetailsPatch {
+  readonly title: string;
+  readonly category: string;
+  readonly duration: string;
+  readonly difficulty: Difficulty;
+}
+
 /**
  * A bite-sized how-to tutorial. Immutable: fields are set once at construction so the presentation
  * layer can rely on reference equality for cache updates. Business questions ("is this a good
@@ -41,14 +49,14 @@ export class Tutorial {
   }
 
   /** Return a copy with edited display details (title + category). */
-  public withDetails(title: string, category: string): Tutorial {
+  public withDetails(patch: TutorialDetailsPatch): Tutorial {
     return new Tutorial({
       id: this.id,
-      title,
-      category,
-      duration: this.duration,
+      title: patch.title,
+      category: patch.category,
+      duration: patch.duration,
       views: this.views,
-      difficulty: this.difficulty,
+      difficulty: patch.difficulty,
     });
   }
 }

@@ -1,11 +1,13 @@
 import { type Result, isErr } from '@core/result';
 import type { Logger } from '@core/logger';
-import type { Tutorial, TutorialError, TutorialGateway } from '../../domain';
+import type { Difficulty, Tutorial, TutorialError, TutorialGateway } from '../../domain';
 
 export interface UpdateTutorialInput {
   readonly id: string;
   readonly title: string;
   readonly category: string;
+  readonly duration: string;
+  readonly difficulty: Difficulty;
 }
 
 export interface UpdateTutorialUseCaseDeps {
@@ -32,7 +34,12 @@ export class UpdateTutorialUseCase {
       return existing;
     }
     return this.tutorialGateway.save(
-      existing.value.withDetails(input.title, input.category),
+      existing.value.withDetails({
+        title: input.title,
+        category: input.category,
+        duration: input.duration,
+        difficulty: input.difficulty,
+      }),
     );
   }
 }
