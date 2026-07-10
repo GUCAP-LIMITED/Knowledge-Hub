@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { useForm } from 'react-hook-form';
 import { domainResolver } from '@shared/forms';
+import type { ContentTypeKey } from './upload-content-types';
 import { SubmissionTitle } from '../domain';
 import type { Details } from './upload-details';
 import {
@@ -15,10 +16,15 @@ import styles from './UploadPage.module.css';
 export interface DetailsStepProps {
   readonly defaults: Details;
   readonly onSubmit: (details: Details) => void;
+  readonly contentType: ContentTypeKey | null;
 }
 
 /** Step 3 — scannable, sectioned authoring form (title validity IS the value object). */
-export const DetailsStep = ({ defaults, onSubmit }: DetailsStepProps): ReactElement => {
+export const DetailsStep = ({
+  defaults,
+  onSubmit,
+  contentType,
+}: DetailsStepProps): ReactElement => {
   const {
     register,
     handleSubmit,
@@ -38,7 +44,7 @@ export const DetailsStep = ({ defaults, onSubmit }: DetailsStepProps): ReactElem
       }}
       className={styles.detailForm}
     >
-      <GeneralSection register={register} errors={errors} />
+      <GeneralSection register={register} errors={errors} kind={contentType} />
       <MediaSection register={register} />
       <MetadataSection register={register} />
       <VisibilitySection register={register} />

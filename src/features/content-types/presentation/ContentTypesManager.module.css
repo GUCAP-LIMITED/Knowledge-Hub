@@ -1,0 +1,95 @@
+.manager {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.lead {
+  margin: 0;
+  color: var(--color-text-subtle);
+  font-size: 0.85rem;
+  max-width: 46rem;
+}
+
+.groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 1rem;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+}
+
+.groupHead {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.groupTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.groupHint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-subtle);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-height: 2rem;
+}
+
+.empty {
+  font-size: 0.78rem;
+  color: var(--color-text-subtle);
+  font-style: italic;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.2rem 0.3rem 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+}
+
+.chipLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.chipRemove {
+  width: 1.4rem;
+  height: 1.4rem;
+  min-width: 1.4rem;
+}
+
+.addRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.addRow > :first-child {
+  flex: 1;
+}

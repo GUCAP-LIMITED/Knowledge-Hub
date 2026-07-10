@@ -2,7 +2,7 @@ import type { ReactElement, ReactNode } from 'react';
 import type { FieldErrors, UseFormRegister } from 'react-hook-form';
 import { Image, Info, Search, Tags } from 'lucide-react';
 import { Select, TextField, Textarea } from '@shared/ui';
-import { CATEGORIES } from '@core/domain';
+import { type ContentKind, useContentTypes } from '@features/content-types';
 import {
   DIFFICULTIES,
   type Details,
@@ -36,59 +36,64 @@ export const DetailsSection = ({
 export const GeneralSection = ({
   register,
   errors,
+  kind,
 }: {
   readonly register: Register;
   readonly errors: FieldErrors<Details>;
-}): ReactElement => (
-  <DetailsSection icon={Info} title="General information">
-    <div className={styles.form}>
-      <TextField
-        label="Title"
-        placeholder="e.g. Mastering the UAPP Sales Pipeline"
-        error={errors.title?.message ?? ''}
-        {...register('title')}
-      />
-      <TextField
-        label="Subtitle"
-        placeholder="Short, benefit-led summary"
-        {...register('subtitle')}
-      />
-      <Textarea
-        label="Description"
-        rows={4}
-        placeholder="What will learners take away? Who is it for?"
-        error={errors.description?.message ?? ''}
-        {...register('description')}
-      />
-      <div className={styles.formRow}>
-        <Select
-          label="Category"
-          error={errors.category?.message ?? ''}
-          {...register('category')}
-        >
-          <option value="">Select…</option>
-          {CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </Select>
+  readonly kind: ContentKind | null;
+}): ReactElement => {
+  const categories = useContentTypes(kind ?? 'course');
+  return (
+    <DetailsSection icon={Info} title="General information">
+      <div className={styles.form}>
         <TextField
-          label="Topic"
-          placeholder="e.g. Objection handling"
-          {...register('topic')}
+          label="Title"
+          placeholder="e.g. Mastering the UAPP Sales Pipeline"
+          error={errors.title?.message ?? ''}
+          {...register('title')}
         />
-        <Select label="Difficulty" {...register('difficulty')}>
-          {DIFFICULTIES.map((level) => (
-            <option key={level} value={level}>
-              {level}
-            </option>
-          ))}
-        </Select>
+        <TextField
+          label="Subtitle"
+          placeholder="Short, benefit-led summary"
+          {...register('subtitle')}
+        />
+        <Textarea
+          label="Description"
+          rows={4}
+          placeholder="What will learners take away? Who is it for?"
+          error={errors.description?.message ?? ''}
+          {...register('description')}
+        />
+        <div className={styles.formRow}>
+          <Select
+            label="Category"
+            error={errors.category?.message ?? ''}
+            {...register('category')}
+          >
+            <option value="">Select…</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </Select>
+          <TextField
+            label="Topic"
+            placeholder="e.g. Objection handling"
+            {...register('topic')}
+          />
+          <Select label="Difficulty" {...register('difficulty')}>
+            {DIFFICULTIES.map((level) => (
+              <option key={level} value={level}>
+                {level}
+              </option>
+            ))}
+          </Select>
+        </div>
       </div>
-    </div>
-  </DetailsSection>
-);
+    </DetailsSection>
+  );
+};
 
 export const MetadataSection = ({
   register,

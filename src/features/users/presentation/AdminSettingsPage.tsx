@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { Alert, PageHeader, Spinner, Tabs, TabsPanel } from '@shared/ui';
+import { ContentTypesManager } from '@features/content-types';
 import type { UserAccount } from '../domain';
 import { useSetUserStatus, useUsers } from './use-users';
 import { SettingsToggles, type ToggleSetting } from './SettingsToggles';
@@ -83,12 +84,16 @@ export const AdminSettingsPage = (): ReactElement => {
           onValueChange={setSection}
           tabs={[
             { value: 'platform', label: 'Platform' },
+            { value: 'content-types', label: 'Content Types' },
             { value: 'users', label: `Users (${String(accounts.length)})` },
             { value: 'permissions', label: 'Permissions' },
           ]}
         >
           <TabsPanel value="platform">
             <SettingsToggles settings={PLATFORM_SETTINGS} />
+          </TabsPanel>
+          <TabsPanel value="content-types">
+            <ContentTypesManager />
           </TabsPanel>
           <TabsPanel value="users">
             {users.isLoading ? (

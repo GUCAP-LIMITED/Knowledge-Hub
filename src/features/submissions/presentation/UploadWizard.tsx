@@ -86,7 +86,13 @@ const StepBody = (props: UploadWizardProps): ReactElement | null => {
         />
       );
     case 'details':
-      return <DetailsStep defaults={props.details} onSubmit={props.onDetailsSubmit} />;
+      return (
+        <DetailsStep
+          defaults={props.details}
+          onSubmit={props.onDetailsSubmit}
+          contentType={props.contentType}
+        />
+      );
     case 'curriculum':
       return (
         <UploadCurriculumStep sections={props.sections} onChange={props.onSections} />
