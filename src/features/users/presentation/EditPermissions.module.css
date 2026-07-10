@@ -1,0 +1,152 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-info-soft, var(--color-primary-soft));
+  color: var(--color-text);
+  font-size: 0.82rem;
+}
+.sectionLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+  margin-top: 0.25rem;
+}
+
+/* --- Set assignment --- */
+.assignRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.assignBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+.assignBtn:hover {
+  border-color: var(--color-primary);
+}
+.assignActive {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.assignTag {
+  padding: 0.05rem 0.35rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* --- Override module cards --- */
+.moduleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.85rem;
+}
+.moduleCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  overflow: hidden;
+}
+.moduleCardHead {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  background-color: var(--color-bg-subtle);
+  border-bottom: 1px solid var(--color-border);
+}
+.moduleCardIcon {
+  color: var(--color-text-muted);
+}
+.moduleCardLabel {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+.capRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.capRow:last-child {
+  border-bottom: none;
+}
+.capText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-right: auto;
+  min-width: 0;
+}
+.capName {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--color-text);
+}
+.overrideTag {
+  padding: 0.05rem 0.35rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-warning-soft, var(--color-primary-soft));
+  color: var(--color-warning, var(--color-primary));
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.capSource {
+  font-size: 0.72rem;
+  color: var(--color-text-subtle);
+}
+.resetLink {
+  border: none;
+  background: none;
+  color: var(--color-primary);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.resetLink:hover {
+  text-decoration: underline;
+}
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}

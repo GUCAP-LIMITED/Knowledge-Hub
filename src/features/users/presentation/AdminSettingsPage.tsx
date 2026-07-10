@@ -4,7 +4,7 @@ import { PageHeader } from '@shared/ui';
 import { ContentTypesManager } from '@features/content-types';
 import { CertificateTemplatesManager } from '@features/certificate-templates';
 import { SettingsToggles } from './SettingsToggles';
-import { RolePermissions } from './RolePermissions';
+import { PermissionSets } from './PermissionSets';
 import { UsersSection } from './UsersSection';
 import {
   PLATFORM_SETTINGS,
@@ -19,7 +19,7 @@ const PANELS: Record<SettingsSectionKey, () => ReactElement> = {
   'content-types': () => <ContentTypesManager />,
   certificates: () => <CertificateTemplatesManager />,
   users: () => <UsersSection />,
-  permissions: () => <RolePermissions />,
+  permissions: () => <PermissionSets />,
 };
 
 /** Routed admin Settings page — one section per URL, chosen from the sidebar submenu. */

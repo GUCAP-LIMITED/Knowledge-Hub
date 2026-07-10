@@ -26,12 +26,10 @@ const HEADERS: readonly string[] = [
 
 const UserRow = ({
   user,
-  isBusy,
-  onToggle,
+  onOpen,
 }: {
   readonly user: UserAccount;
-  readonly isBusy: boolean;
-  readonly onToggle: (user: UserAccount) => void;
+  readonly onOpen: (user: UserAccount) => void;
 }): ReactElement => {
   const active = user.isActive();
   return (
@@ -59,12 +57,11 @@ const UserRow = ({
         <Button
           size="sm"
           variant="secondary"
-          isLoading={isBusy}
           onClick={() => {
-            onToggle(user);
+            onOpen(user);
           }}
         >
-          {active ? 'Deactivate' : 'Activate'}
+          Manage
         </Button>
       </td>
     </tr>
@@ -73,16 +70,11 @@ const UserRow = ({
 
 export interface UsersTableProps {
   readonly users: readonly UserAccount[];
-  readonly busyId: string | null;
-  readonly onToggle: (user: UserAccount) => void;
+  readonly onOpen: (user: UserAccount) => void;
 }
 
-/** Directory table of every platform user with an activate/deactivate action. */
-export const UsersTable = ({
-  users,
-  busyId,
-  onToggle,
-}: UsersTableProps): ReactElement => (
+/** Directory table of every platform user; "Manage" opens the member details drawer. */
+export const UsersTable = ({ users, onOpen }: UsersTableProps): ReactElement => (
   <div className={styles.tableWrap}>
     <table className={styles.table}>
       <thead>
@@ -99,12 +91,7 @@ export const UsersTable = ({
       </thead>
       <tbody>
         {users.map((user) => (
-          <UserRow
-            key={user.id}
-            user={user}
-            isBusy={busyId === user.id}
-            onToggle={onToggle}
-          />
+          <UserRow key={user.id} user={user} onOpen={onOpen} />
         ))}
       </tbody>
     </table>

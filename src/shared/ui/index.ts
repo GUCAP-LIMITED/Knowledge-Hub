@@ -16,6 +16,7 @@ export * from './StatusBadge/StatusBadge';
 export * from './FilterBar/FilterBar';
 export * from './PageHeader/PageHeader';
 export * from './Toggle/Toggle';
+export * from './Switch/Switch';
 export * from './Modal/Modal';
 export * from './DetailsEditModal/DetailsEditModal';
 export * from './MediaViewer/MediaViewer';
