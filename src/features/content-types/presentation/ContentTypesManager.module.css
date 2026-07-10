@@ -4,48 +4,166 @@
   gap: 1.25rem;
 }
 
-.lead {
-  margin: 0;
-  color: var(--color-text-subtle);
-  font-size: 0.85rem;
-  max-width: 46rem;
+/* --- Summary stats --- */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.85rem;
 }
 
-.groups {
+/* --- Search + filter bar --- */
+.searchBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.searchField {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+}
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-subtle);
+  pointer-events: none;
+}
+.searchInput {
+  width: 100%;
+  padding: 0.55rem 0.75rem 0.55rem 2.35rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.88rem;
+}
+.searchInput::placeholder {
+  color: var(--color-text-subtle);
+}
+.searchInput:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--ring);
+}
+.segmented {
+  display: inline-flex;
+  padding: 0.2rem;
+  gap: 0.15rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-subtle);
+}
+.segment {
+  padding: 0.35rem 0.75rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.segment:hover {
+  color: var(--color-text);
+}
+.segmentActive {
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-xs);
+}
+.segment:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* --- Two-column layout --- */
+.layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  grid-template-columns: 1fr 300px;
+  gap: 1.25rem;
+  align-items: start;
+}
+.mainCol {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+.sideCol {
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
 }
 
-.group {
+/* --- Manager card --- */
+.card {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  padding: 1.1rem;
+  gap: 0.9rem;
+  padding: 1.15rem 1.25rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background-color: var(--color-surface);
+  box-shadow: var(--shadow-xs);
 }
-
-.groupHead {
+.cardHead {
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+  align-items: center;
+  gap: 0.75rem;
 }
-
-.groupTitle {
+.cardIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.cardHeadText {
+  min-width: 0;
+  margin-right: auto;
+}
+.cardTitle {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   font-weight: 700;
   color: var(--color-text);
 }
-
-.groupHint {
-  margin: 0;
-  font-size: 0.75rem;
+.cardDesc {
+  margin: 0.1rem 0 0;
+  font-size: 0.78rem;
   color: var(--color-text-subtle);
 }
+.cardCount {
+  flex-shrink: 0;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.cardEmpty {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-subtle);
+  font-size: 0.8rem;
+}
 
+/* --- Chips --- */
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -53,43 +171,215 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  min-height: 2rem;
 }
-
-.empty {
-  font-size: 0.78rem;
-  color: var(--color-text-subtle);
-  font-style: italic;
-}
-
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 0.15rem;
-  padding: 0.2rem 0.3rem 0.2rem 0.6rem;
+  padding: 0.28rem 0.35rem 0.28rem 0.7rem;
   border-radius: var(--radius-full);
-  background-color: var(--color-bg-subtle);
+  background-color: var(--color-surface-muted);
   border: 1px solid var(--color-border);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 }
-
+.chip:hover {
+  border-color: var(--color-border-strong);
+  background-color: var(--color-bg-subtle);
+}
 .chipLabel {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--color-text);
 }
-
 .chipRemove {
-  width: 1.4rem;
-  height: 1.4rem;
-  min-width: 1.4rem;
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.chip:hover .chipRemove,
+.chip:focus-within .chipRemove {
+  opacity: 1;
+}
+.chipRemove:hover {
+  background-color: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+.chipRemove:focus-visible {
+  opacity: 1;
+  outline: none;
+  box-shadow: var(--ring);
 }
 
+/* --- Add-type row --- */
+.addForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--color-border);
+}
 .addRow {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 0.5rem;
 }
-
-.addRow > :first-child {
+.addInput {
   flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.85rem;
+}
+.addInput::placeholder {
+  color: var(--color-text-subtle);
+}
+.addInput:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--ring);
+}
+.addInput[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+.addError {
+  font-size: 0.74rem;
+  color: var(--color-danger);
+}
+
+/* --- Side panels (guidance + activity) --- */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.15rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-muted);
+}
+.panelHead {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-primary);
+}
+.panelTitle {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.panelEmpty {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--color-text-subtle);
+}
+.guidanceList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0;
+  padding-left: 1.05rem;
+}
+.guidanceItem {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+/* --- Activity log --- */
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.activityItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+.activityIcon {
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+}
+.activityAdd {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.activityRemove {
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+}
+.activityText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.activityName {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.activityMeta {
+  font-size: 0.72rem;
+  color: var(--color-text-subtle);
+}
+
+/* --- Confirm delete modal --- */
+.confirmBody {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+.confirmFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+/* --- Responsive --- */
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .summary {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .searchBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .segmented {
+    overflow-x: auto;
+  }
 }

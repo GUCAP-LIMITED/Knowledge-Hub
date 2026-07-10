@@ -24,4 +24,6 @@ export * from './MediaViewer/media-asset';
 export * from './DropdownMenu/DropdownMenu';
 export * from './Tooltip/Tooltip';
 export * from './Tabs/Tabs';
+export * from './Toast/Toast';
+export * from './Toast/use-toasts';
 export * from './motion';
