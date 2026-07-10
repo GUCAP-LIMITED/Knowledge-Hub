@@ -1,12 +1,14 @@
 import { useMemo, useState, type ReactElement } from 'react';
-import { PageHeader, TextField } from '@shared/ui';
+import { PageHeader } from '@shared/ui';
 import { useAuth } from '@features/auth';
 import { useContentTypes } from '@features/content-types';
 import type { Tutorial } from '../domain';
 import { useDeleteTutorial, useTutorials, useUpdateTutorial } from './use-tutorials';
 import { TutorialsResults } from './TutorialsResults';
 import { TutorialsModals } from './TutorialsModals';
+import { TutorialsToolbar } from './TutorialsToolbar';
 import { CategoryPills } from './CategoryPills';
+import { type TutorialSort, filterAndSortTutorials } from './tutorials-filter';
 import styles from './TutorialsPage.module.css';
 
 /** Routed tutorials-library page: category filter, search, video player, admin edit/delete. */
@@ -18,21 +20,16 @@ export const TutorialsPage = (): ReactElement => {
   const remove = useDeleteTutorial();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
+  const [sort, setSort] = useState<TutorialSort>('recent');
   const [watching, setWatching] = useState<Tutorial | null>(null);
   const [editing, setEditing] = useState<Tutorial | null>(null);
   const [quizzing, setQuizzing] = useState<Tutorial | null>(null);
   const categories = useContentTypes('tutorial');
 
-  const visible = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return (tutorials.data ?? []).filter(
-      (tutorial) =>
-        (category === 'all' || tutorial.category === category) &&
-        (q === '' ||
-          tutorial.title.toLowerCase().includes(q) ||
-          tutorial.category.toLowerCase().includes(q)),
-    );
-  }, [tutorials.data, query, category]);
+  const visible = useMemo(
+    () => filterAndSortTutorials(tutorials.data ?? [], query, category, sort),
+    [tutorials.data, query, category, sort],
+  );
 
   return (
     <section className={styles.screen}>
@@ -41,16 +38,7 @@ export const TutorialsPage = (): ReactElement => {
         subtitle="Short, focused how-to guides for everyday tasks."
       />
 
-      <div className={styles.toolbar}>
-        <TextField
-          label="Search"
-          placeholder="Search tutorials…"
-          value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-          }}
-        />
-      </div>
+      <TutorialsToolbar query={query} sort={sort} onQuery={setQuery} onSort={setSort} />
 
       <CategoryPills
         categories={categories}
@@ -58,6 +46,13 @@ export const TutorialsPage = (): ReactElement => {
         allLabel="All Tutorials"
         onSelect={setCategory}
       />
+
+      <div className={styles.resultRow}>
+        <span className={styles.count}>
+          {visible.length} tutorial{visible.length === 1 ? '' : 's'}
+          {category === 'all' ? '' : ` in ${category}`}
+        </span>
+      </div>
 
       <TutorialsResults
         tutorials={visible}

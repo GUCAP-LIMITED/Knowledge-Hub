@@ -11,7 +11,16 @@ export interface TutorialProps {
   readonly duration: string;
   readonly views: number;
   readonly difficulty: Difficulty;
+  /** One-line summary of what the tutorial covers. */
+  readonly description: string;
+  /** When the tutorial was last revised — the key freshness signal for a how-to library. */
+  readonly updatedAt: Date;
 }
+
+/** A tutorial is treated as "recently updated" within this many days of its last revision. */
+export const RECENTLY_UPDATED_DAYS = 30;
+
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 /** The admin-editable subset of a tutorial's details. */
 export interface TutorialDetailsPatch {
@@ -33,6 +42,8 @@ export class Tutorial {
   public readonly duration: string;
   public readonly views: number;
   public readonly difficulty: Difficulty;
+  public readonly description: string;
+  public readonly updatedAt: Date;
 
   public constructor(props: TutorialProps) {
     this.id = props.id;
@@ -41,6 +52,8 @@ export class Tutorial {
     this.duration = props.duration;
     this.views = props.views;
     this.difficulty = props.difficulty;
+    this.description = props.description;
+    this.updatedAt = props.updatedAt;
   }
 
   /** True when the tutorial is aimed at newcomers (no prior knowledge assumed). */
@@ -48,7 +61,13 @@ export class Tutorial {
     return this.difficulty === 'Beginner';
   }
 
-  /** Return a copy with edited display details (title + category). */
+  /** Whether the tutorial was revised recently enough to flag as fresh. */
+  public isRecentlyUpdated(now: Date): boolean {
+    const days = (now.getTime() - this.updatedAt.getTime()) / MS_PER_DAY;
+    return days >= 0 && days <= RECENTLY_UPDATED_DAYS;
+  }
+
+  /** Return a copy with edited display details (title, category, duration, difficulty). */
   public withDetails(patch: TutorialDetailsPatch): Tutorial {
     return new Tutorial({
       id: this.id,
@@ -57,6 +76,8 @@ export class Tutorial {
       duration: patch.duration,
       views: this.views,
       difficulty: patch.difficulty,
+      description: this.description,
+      updatedAt: this.updatedAt,
     });
   }
 }
