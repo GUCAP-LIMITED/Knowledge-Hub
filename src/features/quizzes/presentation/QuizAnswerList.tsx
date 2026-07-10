@@ -17,16 +17,29 @@ export const QuizAnswerList = ({
   onChange,
 }: QuizAnswerListProps): ReactElement => {
   const setOption = (i: number, value: string): void => {
-    onChange((q) => ({ ...q, options: q.options.map((o, j) => (j === i ? value : o)) }));
+    onChange((q) => ({
+      ...q,
+      options: q.options.map((o, j) => (j === i ? value : o)),
+      // A blank option can't stay marked correct, or the marker is silently lost on save.
+      correctIndexes:
+        value.trim() === '' ? q.correctIndexes.filter((x) => x !== i) : q.correctIndexes,
+    }));
   };
 
   const toggleCorrect = (i: number): void => {
-    onChange((q) => ({
-      ...q,
-      correctIndexes: q.correctIndexes.includes(i)
-        ? q.correctIndexes.filter((x) => x !== i)
-        : [...q.correctIndexes, i],
-    }));
+    onChange((q) => {
+      const isCorrect = q.correctIndexes.includes(i);
+      // Guard: never mark an empty answer correct.
+      if (!isCorrect && (q.options[i] ?? '').trim() === '') {
+        return q;
+      }
+      return {
+        ...q,
+        correctIndexes: isCorrect
+          ? q.correctIndexes.filter((x) => x !== i)
+          : [...q.correctIndexes, i],
+      };
+    });
   };
 
   const removeOption = (i: number): void => {

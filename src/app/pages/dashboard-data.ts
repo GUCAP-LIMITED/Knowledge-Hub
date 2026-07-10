@@ -4,8 +4,6 @@ import {
   BarChart3,
   BookOpen,
   CheckCircle,
-  Clock,
-  Eye,
   FileCheck,
   FolderOpen,
   HelpCircle,
@@ -164,7 +162,6 @@ export const buildStats = (role: Role, ctx: DashCtx): readonly Stat[] => {
         value: ctx.usersCount,
         icon: Users,
         tone: 'primary',
-        trend: 8,
       },
       {
         label: 'Active Courses',
@@ -173,7 +170,7 @@ export const buildStats = (role: Role, ctx: DashCtx): readonly Stat[] => {
         tone: 'success',
       },
       { label: 'Pending Reviews', value: ctx.pending, icon: FileCheck, tone: 'warning' },
-      { label: 'Views (7d)', value: '1,240', icon: Eye, tone: 'info', trend: 12 },
+      { label: 'Published', value: ctx.publishedCount, icon: CheckCircle, tone: 'info' },
     ];
   }
   if (role === 'manager') {
@@ -210,6 +207,6 @@ export const buildStats = (role: Role, ctx: DashCtx): readonly Stat[] => {
     { label: 'In Progress', value: ctx.inProgressCount, icon: BookOpen, tone: 'primary' },
     { label: 'Completed', value: ctx.completedCount, icon: CheckCircle, tone: 'success' },
     { label: 'Certificates', value: ctx.certCount, icon: Award, tone: 'secondary' },
-    { label: 'Hours Logged', value: '47h', icon: Clock, tone: 'info' },
+    { label: 'Available', value: ctx.coursesCount, icon: PlayCircle, tone: 'info' },
   ];
 };

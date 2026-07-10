@@ -77,7 +77,7 @@ export const ModulePermissionGrid = ({
         <div className={styles.granText}>
           <span className={styles.granName}>{CAP_LABEL[BASE_CAP]}</span>
           <span className={styles.granDesc}>
-            {CAP_DESC[BASE_CAP]} · controls the module&apos;s menu visibility
+            {CAP_DESC[BASE_CAP]} · every other permission builds on it
           </span>
         </div>
         <Switch

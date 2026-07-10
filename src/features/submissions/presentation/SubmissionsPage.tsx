@@ -37,7 +37,7 @@ const SubmissionsBody = ({
     return (
       <p className={styles.empty}>
         {isAdmin
-          ? 'Documents you publish will appear here.'
+          ? 'Published documents will appear here.'
           : 'Documents you upload will appear here while they are reviewed.'}
       </p>
     );
@@ -45,7 +45,7 @@ const SubmissionsBody = ({
   return <SubmissionsTable submissions={data} />;
 };
 
-/** "My Submissions": authors track their review status; admins see what they've published. */
+/** "My Submissions": authors track their review status; admins see all published content. */
 export const SubmissionsPage = (): ReactElement => {
   const { user } = useAuth();
   const isAdmin = user?.hasAnyRole(['admin']) ?? false;
@@ -62,7 +62,7 @@ export const SubmissionsPage = (): ReactElement => {
         title="My Submissions"
         subtitle={
           isAdmin
-            ? 'Documents you have published'
+            ? 'Published content across the platform'
             : 'Track the status of your submissions'
         }
       >

@@ -30,8 +30,7 @@ export const PermissionSets = (): ReactElement => {
     <div className={styles.page}>
       <p className={styles.lead}>
         Group capabilities into reusable access levels, then assign a set to each person
-        from the Users directory. Turning a module off hides it and clears its
-        permissions.
+        from the Users directory. Turning a module off clears every permission beneath it.
       </p>
 
       <PermissionSetCards

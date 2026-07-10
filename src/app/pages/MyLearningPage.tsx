@@ -13,6 +13,7 @@ import {
 } from '@shared/ui';
 import { cn } from '@shared/utils';
 import { useCourses, type Course } from '@features/courses';
+import { useCertificates } from '@features/certificates';
 import styles from './MyLearningPage.module.css';
 
 const actionLabel = (course: Course): string => {
@@ -82,8 +83,10 @@ const LearningGrid = ({
 /** Learner's personal view of their courses, grouped by progress. */
 export const MyLearningPage = (): ReactElement => {
   const courses = useCourses();
+  const certificates = useCertificates();
   const [tab, setTab] = useState<string>('in-progress');
   const list = courses.data ?? [];
+  const certCount = (certificates.data ?? []).length;
 
   const buckets = {
     'in-progress': list.filter((course) => course.hasStarted() && !course.isCompleted()),
@@ -138,12 +141,7 @@ export const MyLearningPage = (): ReactElement => {
           icon={Clock}
           tone="warning"
         />
-        <StatCard
-          label="Certificates"
-          value={buckets.completed.length}
-          icon={Award}
-          tone="secondary"
-        />
+        <StatCard label="Certificates" value={certCount} icon={Award} tone="secondary" />
       </div>
       <Tabs
         value={tab}

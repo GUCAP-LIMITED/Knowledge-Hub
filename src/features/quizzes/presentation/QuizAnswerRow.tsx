@@ -23,34 +23,39 @@ export const QuizAnswerRow = ({
   onToggle,
   onText,
   onRemove,
-}: QuizAnswerRowProps): ReactElement => (
-  <div className={cn(styles.answerRow, correct && styles.answerRowCorrect)}>
-    <button
-      type="button"
-      className={cn(styles.answerCheck, correct && styles.answerCheckOn)}
-      aria-pressed={correct}
-      aria-label={`Mark answer ${String(index + 1)} correct`}
-      onClick={onToggle}
-    >
-      {correct ? <Check size={14} aria-hidden /> : null}
-    </button>
-    <input
-      className={styles.answerInput}
-      value={value}
-      placeholder={`Answer ${String(index + 1)}`}
-      onChange={(event) => {
-        onText(event.target.value);
-      }}
-    />
-    {canRemove ? (
-      <IconButton
-        label={`Remove answer ${String(index + 1)}`}
-        variant="ghost"
-        className={styles.answerRemove}
-        onClick={onRemove}
+}: QuizAnswerRowProps): ReactElement => {
+  const blank = value.trim() === '';
+  return (
+    <div className={cn(styles.answerRow, correct && styles.answerRowCorrect)}>
+      <button
+        type="button"
+        className={cn(styles.answerCheck, correct && styles.answerCheckOn)}
+        aria-pressed={correct}
+        aria-label={`Mark answer ${String(index + 1)} correct`}
+        disabled={blank}
+        title={blank ? 'Add answer text before marking it correct' : undefined}
+        onClick={onToggle}
       >
-        <X size={14} aria-hidden />
-      </IconButton>
-    ) : null}
-  </div>
-);
+        {correct ? <Check size={14} aria-hidden /> : null}
+      </button>
+      <input
+        className={styles.answerInput}
+        value={value}
+        placeholder={`Answer ${String(index + 1)}`}
+        onChange={(event) => {
+          onText(event.target.value);
+        }}
+      />
+      {canRemove ? (
+        <IconButton
+          label={`Remove answer ${String(index + 1)}`}
+          variant="ghost"
+          className={styles.answerRemove}
+          onClick={onRemove}
+        >
+          <X size={14} aria-hidden />
+        </IconButton>
+      ) : null}
+    </div>
+  );
+};

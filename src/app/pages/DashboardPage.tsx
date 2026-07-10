@@ -51,7 +51,7 @@ export const DashboardPage = (): ReactElement => {
   const ann = announcements.data ?? [];
 
   const ctx: DashCtx = {
-    pending: subs.filter((s) => s.status === 'pending').length,
+    pending: subs.filter((s) => s.awaitsDecision()).length,
     coursesCount: list.length,
     completedCount: list.filter((c) => c.isCompleted()).length,
     inProgressCount: inProgress.length,
