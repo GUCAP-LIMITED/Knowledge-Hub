@@ -1,26 +1,21 @@
 import {
-  AlertCircle,
   Award,
   BarChart3,
   BookOpen,
+  CalendarCheck,
   CheckCircle,
-  Clock,
-  Eye,
   FileCheck,
   FolderOpen,
-  HelpCircle,
-  LayoutGrid,
+  GraduationCap,
   Play,
   PlayCircle,
-  Star,
   Upload,
   Users,
   type LucideIcon,
 } from 'lucide-react';
-import type { StatTone } from '@shared/ui';
+import type { KpiDelta } from '@shared/ui';
 
 export type Role = 'admin' | 'manager' | 'consultant';
-export type QuickTone = 'primary' | 'secondary' | 'info' | 'warning';
 
 export interface DashCtx {
   readonly pending: number;
@@ -39,177 +34,229 @@ export interface QuickAction {
   readonly label: string;
   readonly desc: string;
   readonly icon: LucideIcon;
-  readonly tone: QuickTone;
   readonly to: string;
+  readonly count?: number;
 }
 
-export interface Stat {
+export interface Kpi {
   readonly label: string;
   readonly value: string | number;
   readonly icon: LucideIcon;
-  readonly tone: StatTone;
-  readonly hint?: string;
-  readonly trend?: number;
+  readonly to: string;
+  readonly spark: readonly number[];
+  readonly delta?: KpiDelta;
 }
+
+export interface GreetingCta {
+  readonly label: string;
+  readonly to: string;
+  /** A low-emphasis CTA (e.g. "all caught up") renders as a secondary button. */
+  readonly muted?: boolean;
+}
+
+// Placeholder trend shapes until real analytics land; kept deterministic so cards don't flicker.
+const SPARK_UP = [30, 33, 32, 37, 41, 44, 46, 52] as const;
+const SPARK_DOWN = [58, 54, 51, 47, 44, 38, 33, 27] as const;
+const SPARK_STEADY = [40, 42, 41, 43, 42, 44, 43, 45] as const;
+
+const rate = (part: number, whole: number): number =>
+  whole === 0 ? 0 : Math.round((part / whole) * 100);
+
+const adminKpis = (ctx: DashCtx): readonly Kpi[] => [
+  {
+    label: 'Pending reviews',
+    value: ctx.pending,
+    icon: FileCheck,
+    to: '/approvals',
+    spark: SPARK_DOWN,
+    delta: { text: '12% · 30d', tone: 'good', dir: 'down' },
+  },
+  {
+    label: 'Learners',
+    value: ctx.usersCount,
+    icon: Users,
+    to: '/settings/users',
+    spark: SPARK_UP,
+    delta: { text: '8% · 30d', tone: 'good', dir: 'up' },
+  },
+  {
+    label: 'Completion rate',
+    value: `${String(rate(ctx.completedCount, ctx.coursesCount))}%`,
+    icon: BarChart3,
+    to: '/team-progress',
+    spark: SPARK_UP,
+    delta: { text: '4% · 30d', tone: 'good', dir: 'up' },
+  },
+  {
+    label: 'Certificates issued',
+    value: ctx.certCount,
+    icon: Award,
+    to: '/certificates',
+    spark: SPARK_UP,
+    delta: { text: 'this quarter', tone: 'muted' },
+  },
+];
+
+const learnerKpis = (ctx: DashCtx): readonly Kpi[] => [
+  {
+    label: 'In progress',
+    value: ctx.inProgressCount,
+    icon: BookOpen,
+    to: '/my-learning',
+    spark: SPARK_STEADY,
+  },
+  {
+    label: 'Completed',
+    value: ctx.completedCount,
+    icon: CheckCircle,
+    to: '/my-learning',
+    spark: SPARK_UP,
+    delta: { text: 'this month', tone: 'muted' },
+  },
+  {
+    label: 'Certificates',
+    value: ctx.certCount,
+    icon: Award,
+    to: '/certificates',
+    spark: SPARK_UP,
+  },
+  {
+    label: 'Courses available',
+    value: ctx.coursesCount,
+    icon: PlayCircle,
+    to: '/courses',
+    spark: SPARK_STEADY,
+  },
+];
+
+const managerKpis = (ctx: DashCtx): readonly Kpi[] => [
+  {
+    label: 'In progress',
+    value: ctx.inProgressCount,
+    icon: BookOpen,
+    to: '/my-learning',
+    spark: SPARK_STEADY,
+  },
+  {
+    label: 'Submissions',
+    value: ctx.submissionsCount,
+    icon: Upload,
+    to: '/submissions',
+    spark: SPARK_UP,
+    delta: { text: `${String(ctx.pending)} pending`, tone: 'muted' },
+  },
+  {
+    label: 'Published',
+    value: ctx.publishedCount,
+    icon: CheckCircle,
+    to: '/submissions',
+    spark: SPARK_UP,
+  },
+  {
+    label: 'Needs action',
+    value: ctx.rejectedCount,
+    icon: BarChart3,
+    to: '/submissions',
+    spark: SPARK_DOWN,
+    delta:
+      ctx.rejectedCount > 0
+        ? { text: 'to revise', tone: 'bad' }
+        : { text: 'all clear', tone: 'good' },
+  },
+];
+
+export const buildKpis = (role: Role, ctx: DashCtx): readonly Kpi[] => {
+  if (role === 'admin') {
+    return adminKpis(ctx);
+  }
+  return role === 'manager' ? managerKpis(ctx) : learnerKpis(ctx);
+};
+
+const learnRoute = (ctx: DashCtx): string =>
+  ctx.continueTitle !== null ? '/my-learning' : '/courses';
 
 const adminActions = (ctx: DashCtx): readonly QuickAction[] => [
   {
-    label: 'Review Queue',
-    desc: `${String(ctx.pending)} items waiting`,
+    label: 'Review queue',
+    desc: 'Approve or reject uploads',
     icon: CheckCircle,
-    tone: 'warning',
     to: '/approvals',
+    count: ctx.pending,
   },
   {
-    label: 'Manage Content',
-    desc: 'Edit and publish',
-    icon: LayoutGrid,
-    tone: 'info',
-    to: '/content',
+    label: 'Assign training',
+    desc: 'Set required courses',
+    icon: CalendarCheck,
+    to: '/assign',
   },
   {
-    label: 'Team Progress',
-    desc: 'View team analytics',
+    label: 'Team progress',
+    desc: 'Completion & activity',
     icon: BarChart3,
-    tone: 'primary',
     to: '/team-progress',
-  },
-  {
-    label: 'Course Reviews',
-    desc: 'See all feedback',
-    icon: Star,
-    tone: 'secondary',
-    to: '/course-reviews',
   },
 ];
 
-const managerActions = (ctx: DashCtx, learnTo: string): readonly QuickAction[] => [
+const managerActions = (ctx: DashCtx): readonly QuickAction[] => [
   {
-    label: 'Continue Learning',
-    desc: ctx.continueTitle ?? 'Browse catalog',
+    label: 'Resume learning',
+    desc: ctx.continueTitle ?? 'Browse the catalog',
     icon: Play,
-    tone: 'primary',
-    to: learnTo,
+    to: learnRoute(ctx),
   },
   {
-    label: 'Upload Document',
+    label: 'Upload document',
     desc: 'Submit for review',
     icon: Upload,
-    tone: 'secondary',
     to: '/upload',
   },
   {
-    label: 'My Submissions',
+    label: 'My submissions',
     desc: 'Track status',
     icon: FileCheck,
-    tone: 'info',
     to: '/submissions',
-  },
-  {
-    label: 'Knowledge Base',
-    desc: 'Browse resources',
-    icon: FolderOpen,
-    tone: 'primary',
-    to: '/resources',
+    count: ctx.pending,
   },
 ];
 
-const learnerActions = (ctx: DashCtx, learnTo: string): readonly QuickAction[] => [
+const learnerActions = (ctx: DashCtx): readonly QuickAction[] => [
   {
-    label: 'Resume Learning',
-    desc: ctx.continueTitle ?? 'Browse catalog',
+    label: ctx.continueTitle !== null ? 'Resume learning' : 'Browse courses',
+    desc: ctx.continueTitle ?? `${String(ctx.coursesCount)} available`,
     icon: Play,
-    tone: 'primary',
-    to: learnTo,
+    to: learnRoute(ctx),
   },
   {
-    label: 'Browse Courses',
-    desc: `${String(ctx.coursesCount)} available`,
-    icon: PlayCircle,
-    tone: 'secondary',
-    to: '/courses',
-  },
-  {
-    label: 'My Certificates',
+    label: 'My certificates',
     desc: `${String(ctx.certCount)} earned`,
-    icon: Award,
-    tone: 'warning',
+    icon: GraduationCap,
     to: '/certificates',
   },
   {
     label: 'Resources',
-    desc: 'Help & guides',
-    icon: HelpCircle,
-    tone: 'info',
+    desc: 'Guides & policies',
+    icon: FolderOpen,
     to: '/resources',
   },
 ];
 
 export const buildActions = (role: Role, ctx: DashCtx): readonly QuickAction[] => {
-  const learnTo = ctx.continueTitle !== null ? '/my-learning' : '/courses';
   if (role === 'admin') {
     return adminActions(ctx);
   }
-  if (role === 'manager') {
-    return managerActions(ctx, learnTo);
-  }
-  return learnerActions(ctx, learnTo);
+  return role === 'manager' ? managerActions(ctx) : learnerActions(ctx);
 };
 
-export const buildStats = (role: Role, ctx: DashCtx): readonly Stat[] => {
+export const buildGreetingCta = (role: Role, ctx: DashCtx): GreetingCta => {
   if (role === 'admin') {
-    return [
-      {
-        label: 'Total Users',
-        value: ctx.usersCount,
-        icon: Users,
-        tone: 'primary',
-        trend: 8,
-      },
-      {
-        label: 'Active Courses',
-        value: ctx.coursesCount,
-        icon: BookOpen,
-        tone: 'success',
-      },
-      { label: 'Pending Reviews', value: ctx.pending, icon: FileCheck, tone: 'warning' },
-      { label: 'Views (7d)', value: '1,240', icon: Eye, tone: 'info', trend: 12 },
-    ];
+    return ctx.pending > 0
+      ? {
+          label: `Review ${String(ctx.pending)} submission${ctx.pending === 1 ? '' : 's'}`,
+          to: '/approvals',
+        }
+      : { label: 'Review queue is clear', to: '/approvals', muted: true };
   }
-  if (role === 'manager') {
-    return [
-      {
-        label: 'My Progress',
-        value: ctx.inProgressCount,
-        icon: BookOpen,
-        tone: 'primary',
-        hint: `${String(ctx.completedCount)} completed`,
-      },
-      {
-        label: 'Submissions',
-        value: ctx.submissionsCount,
-        icon: Upload,
-        tone: 'info',
-        hint: `${String(ctx.pending)} pending`,
-      },
-      {
-        label: 'Published',
-        value: ctx.publishedCount,
-        icon: CheckCircle,
-        tone: 'success',
-      },
-      {
-        label: 'Need Action',
-        value: ctx.rejectedCount,
-        icon: AlertCircle,
-        tone: 'danger',
-      },
-    ];
-  }
-  return [
-    { label: 'In Progress', value: ctx.inProgressCount, icon: BookOpen, tone: 'primary' },
-    { label: 'Completed', value: ctx.completedCount, icon: CheckCircle, tone: 'success' },
-    { label: 'Certificates', value: ctx.certCount, icon: Award, tone: 'secondary' },
-    { label: 'Hours Logged', value: '47h', icon: Clock, tone: 'info' },
-  ];
+  return ctx.continueTitle !== null
+    ? { label: `Resume: ${ctx.continueTitle}`, to: '/my-learning' }
+    : { label: 'Browse the catalog', to: '/courses' };
 };

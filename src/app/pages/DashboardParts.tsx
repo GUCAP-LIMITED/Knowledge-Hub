@@ -1,166 +1,101 @@
 import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Bell, PlayCircle } from 'lucide-react';
-import { Badge, EmptyState, ProgressBar, StatCard } from '@shared/ui';
+import { ArrowRight, ChevronRight } from 'lucide-react';
+import { Badge, KpiCard, Skeleton } from '@shared/ui';
 import { cn } from '@shared/utils';
-import type { Course } from '@features/courses';
-import type { Announcement } from '@features/notifications';
-import type { QuickAction, Stat } from './dashboard-data';
+import type { GreetingCta, Kpi, QuickAction } from './dashboard-data';
 import styles from './DashboardPage.module.css';
 
-export const WelcomeHero = ({
+const todayLabel = (): string =>
+  new Date().toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+
+export const GreetingBar = ({
   firstName,
   subtitle,
+  cta,
 }: {
   readonly firstName: string;
   readonly subtitle: string;
+  readonly cta: GreetingCta;
 }): ReactElement => (
-  <div className={styles.hero}>
-    <div className={styles.heroBlob} />
-    <div className={styles.heroEyebrow}>Knowledge Hub</div>
-    <h1 className={styles.heroTitle}>Welcome back, {firstName}</h1>
-    <p className={styles.heroSubtitle}>{subtitle}</p>
+  <div className={styles.greet}>
+    <div className={styles.greetText}>
+      <div className={styles.greetRow}>
+        <h1 className={styles.greetTitle}>Welcome back, {firstName}</h1>
+        <span className={styles.greetDate}>{todayLabel()}</span>
+      </div>
+      <p className={styles.greetSub}>{subtitle}</p>
+    </div>
+    <Link to={cta.to} className={cn(styles.cta, cta.muted === true && styles.ctaMuted)}>
+      {cta.label}
+      <ArrowRight size={16} aria-hidden="true" />
+    </Link>
   </div>
 );
 
-export const QuickActions = ({
-  actions,
-}: {
-  readonly actions: readonly QuickAction[];
-}): ReactElement => (
-  <div className={styles.actions}>
-    {actions.map((action) => {
-      const Icon = action.icon;
-      return (
-        <Link key={action.label} to={action.to} className={styles.action}>
-          <span className={cn(styles.actionIcon, styles[action.tone])}>
-            <Icon size={18} aria-hidden="true" />
-          </span>
-          <span className={styles.actionText}>
-            <span className={styles.actionLabel}>{action.label}</span>
-            <span className={styles.actionDesc}>{action.desc}</span>
-          </span>
-        </Link>
-      );
-    })}
-  </div>
-);
-
-export const StatsGrid = ({
-  stats,
-}: {
-  readonly stats: readonly Stat[];
-}): ReactElement => (
-  <div className={styles.stats}>
-    {stats.map((stat) => (
-      <StatCard
-        key={stat.label}
-        label={stat.label}
-        value={stat.value}
-        icon={stat.icon}
-        tone={stat.tone}
-        {...(stat.hint !== undefined ? { hint: stat.hint } : {})}
-        {...(stat.trend !== undefined ? { trend: stat.trend } : {})}
+export const KpiStrip = ({ kpis }: { readonly kpis: readonly Kpi[] }): ReactElement => (
+  <div className={styles.kpis}>
+    {kpis.map((kpi) => (
+      <KpiCard
+        key={kpi.label}
+        label={kpi.label}
+        value={kpi.value}
+        icon={kpi.icon}
+        to={kpi.to}
+        spark={kpi.spark}
+        {...(kpi.delta !== undefined ? { delta: kpi.delta } : {})}
       />
     ))}
   </div>
 );
 
-export const ContinueLearningCard = ({
-  courses,
-}: {
-  readonly courses: readonly Course[];
-}): ReactElement => (
-  <div className={styles.panel}>
-    <div className={styles.panelHead}>
-      <h2 className={styles.panelTitle}>Continue Learning</h2>
-      <Link to="/my-learning" className={styles.viewAll}>
-        View all
-      </Link>
-    </div>
-    {courses.length === 0 ? (
-      <EmptyState
-        icon={BookOpen}
-        title="No courses in progress"
-        description="Start a course from the catalog to see it here."
-      />
-    ) : (
-      <div className={styles.rows}>
-        {courses.slice(0, 4).map((course) => (
-          <Link key={course.id} to={`/courses/${course.id}`} className={styles.courseRow}>
-            <span className={styles.courseThumb}>
-              <PlayCircle size={22} aria-hidden="true" />
-            </span>
-            <span className={styles.courseInfo}>
-              <span className={styles.courseTitle}>{course.title}</span>
-              <span className={styles.courseMeta}>
-                {course.category} · {course.duration} · {course.progress}%
-              </span>
-              <ProgressBar value={course.progress} tone="auto" />
-            </span>
-          </Link>
-        ))}
+export const KpiStripSkeleton = (): ReactElement => (
+  <div className={styles.kpis}>
+    {[0, 1, 2, 3].map((i) => (
+      <div key={i} className={styles.kpiSkeleton}>
+        <Skeleton width="45%" height={12} />
+        <Skeleton width="40%" height={26} />
+        <Skeleton width="100%" height={16} />
       </div>
-    )}
+    ))}
   </div>
 );
 
-export const AnnouncementsCard = ({
-  announcements,
-  unread,
-  onMarkAll,
+export const QuickActionsRail = ({
+  actions,
 }: {
-  readonly announcements: readonly Announcement[];
-  readonly unread: number;
-  readonly onMarkAll: () => void;
+  readonly actions: readonly QuickAction[];
 }): ReactElement => (
   <div className={styles.panel}>
     <div className={styles.panelHead}>
-      <h2 className={styles.panelTitle}>
-        Announcements{' '}
-        {unread > 0 ? (
-          <Badge tone="warning" size="sm">
-            {unread} new
-          </Badge>
-        ) : null}
-      </h2>
-      {unread > 0 ? (
-        <button type="button" className={styles.viewAll} onClick={onMarkAll}>
-          Mark all read
-        </button>
-      ) : null}
+      <h2 className={styles.panelTitle}>Quick actions</h2>
     </div>
-    {announcements.length === 0 ? (
-      <EmptyState
-        icon={Bell}
-        title="No announcements"
-        description="When something is announced, you'll see it here."
-      />
-    ) : (
-      <div className={styles.announceRows}>
-        {announcements.slice(0, 4).map((item) => (
-          <div
-            key={item.id}
-            className={cn(styles.announce, item.isUnread() && styles.announceUnread)}
-          >
-            <span className={cn(styles.announceDot, styles[`p_${item.priority}`])} />
-            <span className={styles.announceBody}>
-              <span className={styles.announceTitle}>
-                {item.title}{' '}
-                {item.isUnread() ? (
-                  <Badge tone="warning" size="sm">
-                    New
-                  </Badge>
-                ) : null}
-              </span>
-              <span className={styles.announceText}>{item.content}</span>
-              <span className={styles.announceMeta}>
-                {item.author} · {item.date}
-              </span>
+    <div className={styles.railList}>
+      {actions.map((action) => {
+        const Icon = action.icon;
+        return (
+          <Link key={action.label} to={action.to} className={styles.railItem}>
+            <span className={styles.railIcon}>
+              <Icon size={17} aria-hidden="true" />
             </span>
-          </div>
-        ))}
-      </div>
-    )}
+            <span className={styles.railText}>
+              <span className={styles.railLabel}>{action.label}</span>
+              <span className={styles.railDesc}>{action.desc}</span>
+            </span>
+            {action.count !== undefined && action.count > 0 ? (
+              <Badge tone="warning" size="sm">
+                {action.count}
+              </Badge>
+            ) : (
+              <ChevronRight size={16} aria-hidden="true" className={styles.railChevron} />
+            )}
+          </Link>
+        );
+      })}
+    </div>
   </div>
 );
