@@ -107,6 +107,24 @@
   flex-direction: column;
 }
 
+.navGroupToggle {
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.navChevron {
+  margin-left: auto;
+  transition: transform 0.15s ease;
+}
+
+.navChevronOpen {
+  transform: rotate(180deg);
+}
+
 .subNav {
   display: flex;
   flex-direction: column;

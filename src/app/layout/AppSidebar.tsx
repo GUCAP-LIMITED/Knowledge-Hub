@@ -1,5 +1,5 @@
-import type { ReactElement } from 'react';
-import { NavLink } from 'react-router-dom';
+import { useState, type ReactElement } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   PlayCircle,
@@ -8,6 +8,7 @@ import {
   Award,
   BookOpen,
   Star,
+  ChevronDown,
   FileCheck,
   ClipboardList,
   MessageSquare,
@@ -151,25 +152,53 @@ const NavGroup = ({
   icon: LucideIcon;
   items: readonly SubLink[];
   onNavigate: () => void;
-}): ReactElement => (
-  <div className={styles.navGroup}>
-    <NavItem to={to} label={label} icon={Icon} onNavigate={onNavigate} />
-    <div className={styles.subNav}>
-      {items.map((child) => (
-        <NavLink
-          key={child.to}
-          to={child.to}
-          onClick={onNavigate}
-          className={({ isActive }) =>
-            cn(styles.subLink, isActive && styles.subLinkActive)
-          }
-        >
-          {child.label}
-        </NavLink>
-      ))}
+}): ReactElement => {
+  const location = useLocation();
+  const base = `/${to.split('/')[1] ?? ''}`;
+  const onSection = location.pathname.startsWith(base);
+  const [open, setOpen] = useState(onSection);
+
+  return (
+    <div className={styles.navGroup}>
+      <button
+        type="button"
+        className={cn(
+          styles.navLink,
+          styles.navGroupToggle,
+          onSection && styles.navLinkActive,
+        )}
+        aria-expanded={open}
+        onClick={() => {
+          setOpen((value) => !value);
+        }}
+      >
+        <Icon size={18} aria-hidden="true" />
+        {label}
+        <ChevronDown
+          size={16}
+          aria-hidden="true"
+          className={cn(styles.navChevron, open && styles.navChevronOpen)}
+        />
+      </button>
+      {open ? (
+        <div className={styles.subNav}>
+          {items.map((child) => (
+            <NavLink
+              key={child.to}
+              to={child.to}
+              onClick={onNavigate}
+              className={({ isActive }) =>
+                cn(styles.subLink, isActive && styles.subLinkActive)
+              }
+            >
+              {child.label}
+            </NavLink>
+          ))}
+        </div>
+      ) : null}
     </div>
-  </div>
-);
+  );
+};
 
 const renderEntry = (entry: NavEntry, onNavigate: () => void): ReactElement => {
   if (entry.kind === 'section') {
