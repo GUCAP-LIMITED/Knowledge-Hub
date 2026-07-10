@@ -44,10 +44,16 @@ const validate = (input: SaveQuizInput): string | null => {
       return 'every question needs a prompt';
     }
     if (question.options.length < 2) {
-      return 'every question needs at least two options';
+      return 'every question needs at least two answers';
     }
-    if (question.correctIndex < 0 || question.correctIndex >= question.options.length) {
-      return 'every question needs a valid correct answer';
+    if (question.correctIndexes.length === 0) {
+      return 'every question needs at least one correct answer';
+    }
+    const outOfRange = question.correctIndexes.some(
+      (index) => index < 0 || index >= question.options.length,
+    );
+    if (outOfRange) {
+      return 'every correct answer must reference a real option';
     }
   }
   return null;

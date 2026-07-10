@@ -146,6 +146,32 @@
   background-color: var(--color-primary-soft);
 }
 
+.optionInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.optionBox {
+  display: grid;
+  place-items: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.optionBoxOn {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 .runnerFoot {
   display: flex;
   align-items: center;
@@ -251,36 +277,111 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding: 1rem;
+  padding: 1.1rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  background-color: var(--color-bg-subtle);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .editorHead {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.6rem;
 }
 
 .editorNo {
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  margin-right: auto;
+}
+
+.editorCount {
+  font-size: 0.75rem;
+  color: var(--color-text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+.editorPrompt {
+  width: 100%;
+  padding: 0.6rem 0.15rem;
+  border: none;
+  border-bottom: 2px solid var(--color-border);
+  background: none;
+  font-size: 1.05rem;
+  font-weight: 600;
   color: var(--color-text);
 }
 
-.editorOptions {
+.editorPrompt:focus {
+  outline: none;
+  border-bottom-color: var(--color-primary);
+}
+
+.editorHint {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--color-text-subtle);
+}
+
+.answers {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.editorOption {
+.answerRow {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 0.6rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 }
 
-.editorOption > :last-child {
+.answerRowCorrect {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+}
+
+.answerCheck {
+  display: grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  flex-shrink: 0;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: #fff;
+  cursor: pointer;
+}
+
+.answerCheckOn {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.answerInput {
   flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.answerInput:focus {
+  outline: none;
+}
+
+.answerRemove {
+  width: 1.6rem;
+  height: 1.6rem;
+  min-width: 1.6rem;
 }

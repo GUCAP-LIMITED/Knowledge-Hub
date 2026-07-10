@@ -15,10 +15,15 @@ export const QuizBuilderBody = ({
   draft,
   setDraft,
 }: QuizBuilderBodyProps): ReactElement => {
-  const setQuestion = (index: number, question: DraftQuestion): void => {
+  // Apply the updater to one question inside a functional state update, so rapid successive
+  // edits (e.g. toggling two correct answers quickly) never read stale question state.
+  const updateQuestion = (
+    index: number,
+    updater: (question: DraftQuestion) => DraftQuestion,
+  ): void => {
     setDraft((prev) => ({
       ...prev,
-      questions: prev.questions.map((q, i) => (i === index ? question : q)),
+      questions: prev.questions.map((q, i) => (i === index ? updater(q) : q)),
     }));
   };
 
@@ -47,8 +52,8 @@ export const QuizBuilderBody = ({
           index={index}
           question={question}
           canRemove={draft.questions.length > 1}
-          onChange={(next) => {
-            setQuestion(index, next);
+          onChange={(updater) => {
+            updateQuestion(index, updater);
           }}
           onRemove={() => {
             setDraft((prev) => ({

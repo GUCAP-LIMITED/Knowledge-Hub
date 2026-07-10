@@ -4,8 +4,8 @@ import { QuizResult } from '../value-objects/quiz-result';
 /** The kind of catalog content a quiz is attached to. */
 export type QuizContentKind = 'course' | 'tutorial' | 'resource';
 
-/** Learner answers: question id → chosen option index. */
-export type QuizAnswers = Readonly<Record<string, number>>;
+/** Learner answers: question id → chosen option indexes (one or more). */
+export type QuizAnswers = Readonly<Record<string, readonly number[]>>;
 
 export interface QuizProps {
   readonly id: string;
@@ -48,7 +48,7 @@ export class Quiz {
   public grade(answers: QuizAnswers): QuizResult {
     const correct = this.questions.reduce(
       (total, question) =>
-        total + (question.isCorrect(answers[question.id] ?? -1) ? 1 : 0),
+        total + (question.isCorrect(answers[question.id] ?? []) ? 1 : 0),
       0,
     );
     return QuizResult.from(correct, this.questions.length, this.passMark);
@@ -75,7 +75,7 @@ export class Quiz {
         id: q.id,
         prompt: q.prompt,
         options: q.options,
-        correctIndex: q.correctIndex,
+        correctIndexes: q.correctIndexes,
       })),
     };
   }

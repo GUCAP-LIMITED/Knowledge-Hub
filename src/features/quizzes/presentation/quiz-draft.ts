@@ -1,10 +1,14 @@
 import type { Quiz, QuizContentKind, QuizProps } from '../domain';
 
+/** Max characters for a question prompt (mirrors the authoring counter). */
+export const PROMPT_MAX = 150;
+
 export interface DraftQuestion {
   readonly id: string;
   readonly prompt: string;
   readonly options: readonly string[];
-  readonly correctIndex: number;
+  /** Indexes into `options` marked correct (one or more). */
+  readonly correctIndexes: readonly number[];
 }
 
 export interface QuizDraft {
@@ -21,12 +25,12 @@ export const nextQuizId = (prefix: string): string => {
   return `${prefix}-${String(sequence)}`;
 };
 
-/** A fresh empty question with two blank options. */
+/** A fresh empty question with three blank answers. */
 export const blankQuestion = (): DraftQuestion => ({
   id: nextQuizId('q'),
   prompt: '',
-  options: ['', ''],
-  correctIndex: 0,
+  options: ['', '', ''],
+  correctIndexes: [],
 });
 
 /** Build an editable draft from an existing quiz, or a starter draft when none exists. */
@@ -40,11 +44,30 @@ export const draftFromQuiz = (quiz: Quiz | null): QuizDraft =>
           id: q.id,
           prompt: q.prompt,
           options: q.options,
-          correctIndex: q.correctIndex,
+          correctIndexes: q.correctIndexes,
         })),
       };
 
-/** Assemble the persistable quiz props from a draft, trimming empty option slots. */
+// Drop blank answers and remap the correct indexes to the surviving option positions.
+const compactQuestion = (
+  question: DraftQuestion,
+): { options: readonly string[]; correctIndexes: readonly number[] } => {
+  const kept: string[] = [];
+  const remap = new Map<number, number>();
+  question.options.forEach((option, index) => {
+    const trimmed = option.trim();
+    if (trimmed !== '') {
+      remap.set(index, kept.length);
+      kept.push(trimmed);
+    }
+  });
+  const correctIndexes = question.correctIndexes
+    .map((index) => remap.get(index))
+    .filter((index): index is number => index !== undefined);
+  return { options: kept, correctIndexes };
+};
+
+/** Assemble the persistable quiz props from a draft, trimming empty answer slots. */
 export const draftToProps = (
   draft: QuizDraft,
   existing: Quiz | null,
@@ -59,7 +82,6 @@ export const draftToProps = (
   questions: draft.questions.map((q) => ({
     id: q.id,
     prompt: q.prompt.trim(),
-    options: q.options.map((o) => o.trim()).filter((o) => o !== ''),
-    correctIndex: q.correctIndex,
+    ...compactQuestion(q),
   })),
 });

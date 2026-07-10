@@ -10,7 +10,7 @@ const quiz = new Quiz({
   contentKind: 'course',
   title: 'Test',
   passMark: 50,
-  questions: [{ id: 'a', prompt: 'A?', options: ['x', 'y'], correctIndex: 1 }],
+  questions: [{ id: 'a', prompt: 'A?', options: ['x', 'y'], correctIndexes: [1] }],
 });
 
 describe('SubmitQuizUseCase', () => {
@@ -22,7 +22,7 @@ describe('SubmitQuizUseCase', () => {
       logger: silentLogger(),
     });
 
-    const result = await useCase.execute('quiz-1', { a: 1 });
+    const result = await useCase.execute('quiz-1', { a: [1] });
 
     expect(result.ok).toBe(true);
     if (result.ok) {
