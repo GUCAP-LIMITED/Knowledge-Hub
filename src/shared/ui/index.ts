@@ -12,7 +12,6 @@ export * from './ProgressBar/ProgressBar';
 export * from './Skeleton/Skeleton';
 export * from './EmptyState/EmptyState';
 export * from './StatCard/StatCard';
-export * from './KpiCard/KpiCard';
 export * from './StatusBadge/StatusBadge';
 export * from './FilterBar/FilterBar';
 export * from './PageHeader/PageHeader';

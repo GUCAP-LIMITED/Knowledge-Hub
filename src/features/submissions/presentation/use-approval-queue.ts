@@ -11,7 +11,20 @@ import {
 
 const isDecisionTab = (tab: string): boolean => tab === 'pending' || tab === 'review';
 
-export interface ApprovalQueue {
+export interface ApprovalActions {
+  readonly switchTab: (value: string) => void;
+  readonly toggleSelect: (id: string) => void;
+  readonly clearSelected: () => void;
+  readonly approveSelected: () => void;
+  readonly openReview: (submission: Submission) => void;
+  readonly closeReview: () => void;
+  readonly approveReviewed: (id: string, note: string) => void;
+  readonly rejectReviewed: (id: string, reason: string) => void;
+  readonly flag: (id: string) => void;
+  readonly publish: (id: string) => void;
+}
+
+export interface ApprovalQueue extends ApprovalActions {
   readonly query: string;
   readonly setQuery: (value: string) => void;
   readonly type: string;
@@ -20,24 +33,67 @@ export interface ApprovalQueue {
   readonly data: readonly Submission[];
   readonly busy: boolean;
   readonly activeTab: string;
-  readonly switchTab: (value: string) => void;
   readonly selected: readonly string[];
   readonly selectedInTab: readonly string[];
-  readonly toggleSelect: (id: string) => void;
-  readonly clearSelected: () => void;
   readonly selectable: boolean;
-  readonly approveSelected: () => void;
   readonly reviewing: Submission | null;
-  readonly openReview: (submission: Submission) => void;
-  readonly closeReview: () => void;
-  readonly approveReviewed: (id: string, note: string) => void;
-  readonly rejectReviewed: (id: string, reason: string) => void;
-  readonly flag: (id: string) => void;
-  readonly publish: (id: string) => void;
   readonly rejectError: string | undefined;
   readonly isLoading: boolean;
   readonly error: Error | null;
 }
+
+interface Mutations {
+  readonly approve: ReturnType<typeof useApproveSubmission>;
+  readonly reject: ReturnType<typeof useRejectSubmission>;
+  readonly flag: ReturnType<typeof useFlagSubmission>;
+  readonly publish: ReturnType<typeof usePublishSubmission>;
+}
+
+interface ActionDeps extends Mutations {
+  readonly selectedInTab: readonly string[];
+  readonly setActiveTab: (value: string) => void;
+  readonly setSelected: (updater: (prev: readonly string[]) => readonly string[]) => void;
+  readonly clearSelected: () => void;
+  readonly closeReview: () => void;
+  readonly openReviewId: (id: string) => void;
+}
+
+const makeActions = (d: ActionDeps): ApprovalActions => ({
+  switchTab: (value) => {
+    d.setActiveTab(value);
+    d.clearSelected();
+  },
+  toggleSelect: (id) => {
+    d.setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  },
+  clearSelected: d.clearSelected,
+  approveSelected: () => {
+    d.selectedInTab.forEach((id) => {
+      d.approve.mutate({ id });
+    });
+    d.clearSelected();
+  },
+  openReview: (submission) => {
+    d.openReviewId(submission.id);
+  },
+  closeReview: d.closeReview,
+  approveReviewed: (id, note) => {
+    d.approve.mutate(note.length > 0 ? { id, note } : { id }, {
+      onSuccess: d.closeReview,
+    });
+  },
+  rejectReviewed: (id, reason) => {
+    d.reject.mutate({ id, reason }, { onSuccess: d.closeReview });
+  },
+  flag: (id) => {
+    d.flag.mutate(id);
+  },
+  publish: (id) => {
+    d.publish.mutate(id);
+  },
+});
 
 /** All state, derived data and handlers for the approval queue, kept out of the view component. */
 export const useApprovalQueue = (): ApprovalQueue => {
@@ -67,40 +123,25 @@ export const useApprovalQueue = (): ApprovalQueue => {
   const inTab = data.filter((s) => s.status === activeTab).map((s) => s.id);
   const selectedInTab = selected.filter((id) => inTab.includes(id));
 
-  const switchTab = (value: string): void => {
-    setActiveTab(value);
-    setSelected([]);
-  };
-  const toggleSelect = (id: string): void => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
-  };
-  const approveSelected = (): void => {
-    selectedInTab.forEach((id) => {
-      approve.mutate({ id });
-    });
-    setSelected([]);
-  };
-  const approveReviewed = (id: string, note: string): void => {
-    approve.mutate(note.length > 0 ? { id, note } : { id }, {
-      onSuccess: () => {
-        setReviewId(null);
-      },
-    });
-  };
-  const rejectReviewed = (id: string, reason: string): void => {
-    reject.mutate(
-      { id, reason },
-      {
-        onSuccess: () => {
-          setReviewId(null);
-        },
-      },
-    );
-  };
+  const actions = makeActions({
+    approve,
+    reject,
+    flag,
+    publish,
+    selectedInTab,
+    setActiveTab,
+    setSelected,
+    clearSelected: () => {
+      setSelected([]);
+    },
+    closeReview: () => {
+      setReviewId(null);
+    },
+    openReviewId: setReviewId,
+  });
 
   return {
+    ...actions,
     query,
     setQuery,
     type,
@@ -109,30 +150,10 @@ export const useApprovalQueue = (): ApprovalQueue => {
     data,
     busy,
     activeTab,
-    switchTab,
     selected,
     selectedInTab,
-    toggleSelect,
-    clearSelected: () => {
-      setSelected([]);
-    },
     selectable: isDecisionTab(activeTab),
-    approveSelected,
     reviewing,
-    openReview: (submission: Submission) => {
-      setReviewId(submission.id);
-    },
-    closeReview: () => {
-      setReviewId(null);
-    },
-    approveReviewed,
-    rejectReviewed,
-    flag: (id: string) => {
-      flag.mutate(id);
-    },
-    publish: (id: string) => {
-      publish.mutate(id);
-    },
     rejectError: reject.error?.message,
     isLoading: submissions.isLoading,
     error: submissions.isError ? submissions.error : null,
