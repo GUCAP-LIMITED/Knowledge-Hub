@@ -1,7 +1,9 @@
-import type { ReactElement } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import { AlertTriangle, Award } from 'lucide-react';
 import { Modal } from '@shared/ui';
 import { cn } from '@shared/utils';
+import { useAuth } from '@features/auth';
+import { useCertificateTemplate } from '@features/certificate-templates';
 import type { Certificate } from '../domain';
 import { gradeTone, verifyUrl } from './certificate-view';
 import { CertificateActions } from './CertificateActions';
@@ -28,8 +30,20 @@ export const CertificateModal = ({
   now,
   onClose,
 }: CertificateModalProps): ReactElement => {
+  const { user } = useAuth();
+  const template = useCertificateTemplate(user?.roleNames ?? [], 'course');
   const daysLeft = certificate?.daysUntilExpiry(now) ?? 0;
   const expiringSoon = certificate?.isExpiringSoon(now) ?? false;
+  const heroStyle: CSSProperties = {
+    borderColor: template.accentColor,
+    color: template.accentColor,
+    backgroundImage:
+      template.backgroundImage !== undefined
+        ? `linear-gradient(rgba(255,255,255,0.86), rgba(255,255,255,0.86)), url(${template.backgroundImage})`
+        : undefined,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  };
   return (
     <Modal
       open={certificate !== null}
@@ -55,7 +69,7 @@ export const CertificateModal = ({
               </span>
             </div>
           ) : null}
-          <div className={styles.certHero}>
+          <div className={styles.certHero} style={heroStyle}>
             <Award size={48} aria-hidden="true" />
             <div className={styles.certKicker}>This is to certify that</div>
             <div className={styles.certName}>{certificate.userName}</div>

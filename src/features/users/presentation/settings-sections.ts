@@ -1,6 +1,11 @@
 import type { ToggleSetting } from './SettingsToggles';
 
-export type SettingsSectionKey = 'platform' | 'content-types' | 'users' | 'permissions';
+export type SettingsSectionKey =
+  | 'platform'
+  | 'content-types'
+  | 'certificates'
+  | 'users'
+  | 'permissions';
 
 export interface SettingsSectionMeta {
   readonly key: SettingsSectionKey;
@@ -22,6 +27,12 @@ export const SETTINGS_SECTIONS: readonly SettingsSectionMeta[] = [
     label: 'Content Types',
     title: 'Content Types',
     subtitle: 'Manage the types available for courses, tutorials & resources.',
+  },
+  {
+    key: 'certificates',
+    label: 'Certificates',
+    title: 'Certificate Templates',
+    subtitle: 'Design certificates per user type and content kind.',
   },
   {
     key: 'users',

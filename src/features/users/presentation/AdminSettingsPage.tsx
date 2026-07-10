@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { PageHeader } from '@shared/ui';
 import { ContentTypesManager } from '@features/content-types';
+import { CertificateTemplatesManager } from '@features/certificate-templates';
 import { SettingsToggles } from './SettingsToggles';
 import { PermissionsTab } from './PermissionsTab';
 import { UsersSection } from './UsersSection';
@@ -16,6 +17,7 @@ import styles from './AdminSettingsPage.module.css';
 const PANELS: Record<SettingsSectionKey, () => ReactElement> = {
   platform: () => <SettingsToggles settings={PLATFORM_SETTINGS} />,
   'content-types': () => <ContentTypesManager />,
+  certificates: () => <CertificateTemplatesManager />,
   users: () => <UsersSection />,
   permissions: () => <PermissionsTab />,
 };
