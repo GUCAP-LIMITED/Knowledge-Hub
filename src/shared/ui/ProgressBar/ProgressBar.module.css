@@ -8,7 +8,7 @@
   height: 100%;
   background-color: var(--color-primary);
   border-radius: var(--radius-full);
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width var(--motion-slow) var(--motion-ease-in-out);
 }
 .complete {
   background-color: var(--color-success);

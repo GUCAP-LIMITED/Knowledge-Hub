@@ -54,7 +54,23 @@
   --ring: 0 0 0 3px rgba(4, 93, 94, 0.22);
   --color-overlay: rgba(15, 23, 42, 0.45);
 
+  /* Motion — see docs/design-motion.md. Three durations, two easings. */
+  --motion-fast: 0.12s;
+  --motion-base: 0.18s;
+  --motion-slow: 0.28s;
+  --motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
   color-scheme: light;
+}
+
+/* Honour the OS "reduce motion" preference: collapse durations everywhere. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0.01ms;
+    --motion-base: 0.01ms;
+    --motion-slow: 0.01ms;
+  }
 }
 
 /* Manual dark theme (set on <html data-theme="dark"> by the ThemeProvider, which initialises

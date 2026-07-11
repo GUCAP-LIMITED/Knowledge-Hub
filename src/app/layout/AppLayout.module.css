@@ -234,7 +234,7 @@
   padding: 0;
   background-color: var(--color-overlay);
   cursor: pointer;
-  animation: backdropIn 0.2s ease-out;
+  animation: backdropIn var(--motion-base) var(--motion-ease-out);
 }
 
 @keyframes backdropIn {
@@ -262,7 +262,7 @@
     z-index: 50;
     overflow-y: auto;
     transform: translateX(-100%);
-    transition: transform 0.22s ease;
+    transition: transform var(--motion-slow) var(--motion-ease-out);
     box-shadow: var(--shadow-xl);
   }
 

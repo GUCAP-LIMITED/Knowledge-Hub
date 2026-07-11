@@ -19,7 +19,7 @@
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-lg);
   pointer-events: auto;
-  animation: toastIn 0.18s ease;
+  animation: toastIn var(--motion-base) var(--motion-ease-out);
 }
 .icon {
   flex-shrink: 0;

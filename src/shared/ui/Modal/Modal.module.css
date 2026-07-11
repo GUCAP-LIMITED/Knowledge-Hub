@@ -3,7 +3,7 @@
   inset: 0;
   background-color: var(--color-overlay);
   z-index: 50;
-  animation: overlayIn 0.16s ease-out;
+  animation: overlayIn var(--motion-base) var(--motion-ease-out);
 }
 
 .content {
@@ -24,7 +24,7 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   z-index: 51;
-  animation: contentIn 0.16s ease-out;
+  animation: contentIn var(--motion-base) var(--motion-ease-out);
 }
 
 @keyframes overlayIn {
