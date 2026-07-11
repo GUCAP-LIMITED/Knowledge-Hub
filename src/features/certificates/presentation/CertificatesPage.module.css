@@ -73,7 +73,7 @@
   border: none;
   cursor: pointer;
   padding: 1.15rem 1.25rem;
-  color: #fff;
+  color: var(--color-on-primary);
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
 }
 .cardHeadTop {
@@ -173,7 +173,7 @@
   text-align: center;
   padding: 1.75rem 1.25rem;
   border-radius: var(--radius-lg);
-  color: #fff;
+  color: var(--color-on-primary);
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
 }
 .certName {

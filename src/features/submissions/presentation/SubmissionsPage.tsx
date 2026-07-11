@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, Upload } from 'lucide-react';
-import { Alert, PageHeader, Spinner } from '@shared/ui';
+import { CheckCircle, FileText, Upload } from 'lucide-react';
+import { Alert, EmptyState, PageHeader, Spinner } from '@shared/ui';
 import { useAuth } from '@features/auth';
 import type { Submission } from '../domain';
 import { SubmissionsTable } from './SubmissionsTable';
@@ -35,11 +35,15 @@ const SubmissionsBody = ({
   }
   if (data.length === 0) {
     return (
-      <p className={styles.empty}>
-        {isAdmin
-          ? 'Published documents will appear here.'
-          : 'Documents you upload will appear here while they are reviewed.'}
-      </p>
+      <EmptyState
+        icon={FileText}
+        title={isAdmin ? 'No published documents' : 'No submissions yet'}
+        description={
+          isAdmin
+            ? 'Published documents will appear here.'
+            : 'Documents you upload will appear here while they are reviewed.'
+        }
+      />
     );
   }
   return <SubmissionsTable submissions={data} />;

@@ -161,7 +161,7 @@
   padding: 0.1rem 0.5rem;
   border-radius: var(--radius-full);
   background-color: var(--color-success);
-  color: #04241a;
+  color: var(--color-on-success);
   font-size: 0.62rem;
   font-weight: 700;
   text-transform: uppercase;

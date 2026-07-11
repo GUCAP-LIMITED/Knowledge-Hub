@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
-import { Pencil, Play, Plus, Trash2 } from 'lucide-react';
-import { Button, IconButton } from '@shared/ui';
+import { ClipboardList, Pencil, Play, Plus, Trash2 } from 'lucide-react';
+import { Button, EmptyState, IconButton } from '@shared/ui';
 import type { Quiz } from '../domain';
 import styles from './QuizSection.module.css';
 
@@ -26,11 +26,15 @@ export const QuizList = ({
 }: QuizListProps): ReactElement => (
   <div className={styles.list}>
     {quizzes.length === 0 ? (
-      <p className={styles.empty}>
-        {isAdmin
-          ? 'No quizzes yet. Add one so learners can test themselves.'
-          : 'No quizzes are available for this content yet.'}
-      </p>
+      <EmptyState
+        icon={ClipboardList}
+        title="No quizzes yet"
+        description={
+          isAdmin
+            ? 'Add one so learners can test themselves.'
+            : 'No quizzes are available for this content yet.'
+        }
+      />
     ) : (
       quizzes.map((quiz) => (
         <div key={quiz.id} className={styles.listRow}>
@@ -43,7 +47,8 @@ export const QuizList = ({
           >
             <span className={styles.listTitle}>{quiz.title}</span>
             <span className={styles.listMeta}>
-              {quiz.questionCount} questions · {quiz.passMark}% to pass
+              {quiz.questionCount} question{quiz.questionCount === 1 ? '' : 's'} ·{' '}
+              {quiz.passMark}% to pass
             </span>
           </button>
           <div className={styles.listActions}>

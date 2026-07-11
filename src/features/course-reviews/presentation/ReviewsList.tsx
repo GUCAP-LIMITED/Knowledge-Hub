@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import type { UseQueryResult } from '@tanstack/react-query';
-import { Alert, Spinner } from '@shared/ui';
+import { MessageSquare } from 'lucide-react';
+import { Alert, EmptyState, Spinner } from '@shared/ui';
 import type { Review } from '../domain';
 import { ReviewCard } from './ReviewCard';
 import styles from './ReviewsList.module.css';
@@ -35,7 +36,13 @@ export const ReviewsList = ({
   }
   const reviews = query.data ?? [];
   if (reviews.length === 0) {
-    return <p className={styles.empty}>No reviews yet.</p>;
+    return (
+      <EmptyState
+        icon={MessageSquare}
+        title="No reviews yet"
+        description="Be the first to share your feedback."
+      />
+    );
   }
   return (
     <div className={styles.list}>

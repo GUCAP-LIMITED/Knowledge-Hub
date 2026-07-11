@@ -156,8 +156,8 @@ export const ViewProgressModal = ({
   >
     {assignment !== null ? (
       <p className={styles.note}>
-        Status: <strong>{assignment.status}</strong>. Per-learner progress tracking is
-        coming soon.
+        Current status: <strong>{assignment.status}</strong>. Lesson-level progress for
+        this assignment isn’t tracked here — check the learner’s course page for detail.
       </p>
     ) : null}
   </Modal>

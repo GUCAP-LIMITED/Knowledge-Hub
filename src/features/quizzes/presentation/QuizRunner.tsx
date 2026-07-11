@@ -27,7 +27,8 @@ export const QuizRunner = ({
   return (
     <div className={styles.runner}>
       <p className={styles.runnerMeta}>
-        {quiz.questionCount} questions · {quiz.passMark}% to pass · select all that apply
+        {quiz.questionCount} question{quiz.questionCount === 1 ? '' : 's'} ·{' '}
+        {quiz.passMark}% to pass · select all that apply
       </p>
       {quiz.questions.map((question, index) => (
         <fieldset key={question.id} className={styles.question}>
