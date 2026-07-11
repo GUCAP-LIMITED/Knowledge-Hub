@@ -264,3 +264,90 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- Onboarding checklist (E4) ---- */
+.onboard {
+  padding: 1.25rem 1.35rem;
+  border: 1px solid var(--color-primary-soft);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(140deg, var(--color-primary-soft), var(--color-surface));
+}
+.onboardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.onboardTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+.onboardSub {
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+.onboardClose {
+  display: inline-flex;
+  padding: 0.35rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+  transition: background-color var(--motion-base) var(--motion-ease-out);
+}
+.onboardClose:hover {
+  background-color: var(--color-surface-muted);
+}
+.onboardSteps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.onboardStep {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-size: 0.9rem;
+}
+.onboardStepDone {
+  opacity: 0.65;
+}
+.onboardStepDone .onboardLabel {
+  text-decoration: line-through;
+}
+.onboardCheck {
+  color: var(--color-success-strong);
+  flex-shrink: 0;
+}
+.onboardCircle {
+  color: var(--color-text-subtle);
+  flex-shrink: 0;
+}
+.onboardStepIcon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+.onboardLabel {
+  color: var(--color-text);
+}
+.onboardLink {
+  margin-left: auto;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+}

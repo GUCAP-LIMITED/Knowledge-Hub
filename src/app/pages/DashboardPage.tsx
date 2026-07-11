@@ -13,6 +13,7 @@ import {
   WelcomeHero,
 } from './DashboardParts';
 import { buildActions, buildStats, type DashCtx, type Role } from './dashboard-data';
+import { OnboardingChecklist } from './OnboardingChecklist';
 import styles from './DashboardPage.module.css';
 
 const roleOf = (user: AuthenticatedUser | null): Role => {
@@ -31,6 +32,20 @@ const subtitleFor = (role: Role, ctx: DashCtx): string => {
   }
   return 'No active courses. Browse the catalog to start learning.';
 };
+
+const renderOnboarding = (
+  role: Role,
+  user: AuthenticatedUser | null,
+  ctx: DashCtx,
+): ReactElement | null =>
+  role === 'admin' ? null : (
+    <OnboardingChecklist
+      userId={user?.id ?? 'guest'}
+      started={ctx.inProgressCount > 0 || ctx.completedCount > 0}
+      completed={ctx.completedCount > 0}
+      certified={ctx.certCount > 0}
+    />
+  );
 
 /** Role-aware home dashboard: hero, quick actions, stats, continue-learning + announcements. */
 export const DashboardPage = (): ReactElement => {
@@ -67,6 +82,7 @@ export const DashboardPage = (): ReactElement => {
   return (
     <section className={styles.screen}>
       <WelcomeHero firstName={firstName} subtitle={subtitleFor(role, ctx)} />
+      {renderOnboarding(role, user, ctx)}
       <QuickActions actions={buildActions(role, ctx)} />
       <StatsGrid stats={buildStats(role, ctx)} />
       <div className={styles.twoCol}>
