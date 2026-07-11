@@ -10,6 +10,7 @@ export * from './CategoryBadge/CategoryBadge';
 export * from './Avatar/Avatar';
 export * from './ProgressBar/ProgressBar';
 export * from './Skeleton/Skeleton';
+export * from './Skeleton/CardGridSkeleton';
 export * from './EmptyState/EmptyState';
 export * from './StatCard/StatCard';
 export * from './Spot/Spot';

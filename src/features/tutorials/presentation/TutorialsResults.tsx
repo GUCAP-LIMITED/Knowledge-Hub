@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
-import { Alert, EmptyState, Spinner } from '@shared/ui';
+import { SearchX } from 'lucide-react';
+import { Alert, CardGridSkeleton, EmptyState } from '@shared/ui';
 import type { Tutorial } from '../domain';
 import { TutorialCard } from './TutorialCard';
 import styles from './TutorialsPage.module.css';
@@ -8,6 +9,8 @@ export interface TutorialsResultsProps {
   readonly tutorials: readonly Tutorial[];
   readonly isLoading: boolean;
   readonly error: Error | null;
+  /** True when a search or filter is narrowing the list (changes the empty message). */
+  readonly filtered: boolean;
   readonly removingId: string | null;
   readonly onWatch: (tutorial: Tutorial) => void;
   readonly onEdit: (tutorial: Tutorial) => void;
@@ -20,6 +23,7 @@ export const TutorialsResults = ({
   tutorials,
   isLoading,
   error,
+  filtered,
   removingId,
   onWatch,
   onEdit,
@@ -27,11 +31,7 @@ export const TutorialsResults = ({
   onQuiz,
 }: TutorialsResultsProps): ReactElement => {
   if (isLoading) {
-    return (
-      <div className={styles.center}>
-        <Spinner size="lg" label="Loading tutorials" />
-      </div>
-    );
+    return <CardGridSkeleton />;
   }
   if (error !== null) {
     return (
@@ -41,8 +41,17 @@ export const TutorialsResults = ({
     );
   }
   if (tutorials.length === 0) {
-    return (
-      <EmptyState title="No tutorials match" description="Try a different search." />
+    return filtered ? (
+      <EmptyState
+        icon={SearchX}
+        title="No tutorials match"
+        description="Try a different search term or category."
+      />
+    ) : (
+      <EmptyState
+        title="No tutorials yet"
+        description="Tutorials will appear here once they're published."
+      />
     );
   }
   return (

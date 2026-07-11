@@ -170,6 +170,8 @@ export const CoursesPage = (): ReactElement => {
     () => selectCourses(courses.data ?? [], { query, category, status, type, sort }),
     [courses.data, query, category, status, type, sort],
   );
+  const filtered =
+    query.trim() !== '' || category !== 'all' || status !== 'all' || type !== 'all';
 
   const handleAdvance = (course: Course): void => {
     updateProgress.mutate({ id: course.id, progress: nextProgress(course) });
@@ -196,6 +198,7 @@ export const CoursesPage = (): ReactElement => {
         courses={visible}
         isLoading={courses.isLoading}
         error={courses.isError ? courses.error : null}
+        filtered={filtered}
         advancingId={updateProgress.isPending ? updateProgress.variables.id : null}
         removingId={remove.isPending ? remove.variables : null}
         onAdvance={handleAdvance}

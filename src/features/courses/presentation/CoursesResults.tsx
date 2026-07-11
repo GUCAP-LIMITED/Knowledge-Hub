@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
-import { Alert, EmptyState, Spinner } from '@shared/ui';
+import { SearchX } from 'lucide-react';
+import { Alert, CardGridSkeleton, EmptyState } from '@shared/ui';
 import type { Course } from '../domain';
 import { CourseCard } from './CourseCard';
 import styles from './CoursesPage.module.css';
@@ -8,6 +9,8 @@ export interface CoursesResultsProps {
   readonly courses: readonly Course[];
   readonly isLoading: boolean;
   readonly error: Error | null;
+  /** True when a search or filter is narrowing the list (changes the empty message). */
+  readonly filtered: boolean;
   readonly advancingId: string | null;
   readonly removingId: string | null;
   readonly onAdvance: (course: Course) => void;
@@ -20,6 +23,7 @@ export const CoursesResults = ({
   courses,
   isLoading,
   error,
+  filtered,
   advancingId,
   removingId,
   onAdvance,
@@ -27,11 +31,7 @@ export const CoursesResults = ({
   onDelete,
 }: CoursesResultsProps): ReactElement => {
   if (isLoading) {
-    return (
-      <div className={styles.center}>
-        <Spinner size="lg" label="Loading courses" />
-      </div>
-    );
+    return <CardGridSkeleton />;
   }
   if (error !== null) {
     return (
@@ -41,10 +41,16 @@ export const CoursesResults = ({
     );
   }
   if (courses.length === 0) {
-    return (
+    return filtered ? (
       <EmptyState
+        icon={SearchX}
         title="No courses match"
-        description="Try a different search or filters."
+        description="Try a different search term or clear your filters."
+      />
+    ) : (
+      <EmptyState
+        title="No courses yet"
+        description="Courses will appear here once they're published."
       />
     );
   }

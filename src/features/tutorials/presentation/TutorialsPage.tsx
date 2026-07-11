@@ -38,6 +38,7 @@ export const TutorialsPage = (): ReactElement => {
     () => filterAndSortTutorials(tutorials.data ?? [], query, category, sort),
     [tutorials.data, query, category, sort],
   );
+  const filtered = query.trim() !== '' || category !== 'all';
 
   return (
     <section className={styles.screen}>
@@ -66,6 +67,7 @@ export const TutorialsPage = (): ReactElement => {
         tutorials={visible}
         isLoading={tutorials.isLoading}
         error={tutorials.isError ? tutorials.error : null}
+        filtered={filtered}
         removingId={remove.isPending ? remove.variables : null}
         onWatch={setWatching}
         onEdit={setEditing}
