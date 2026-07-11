@@ -1,16 +1,16 @@
 import type { ReactElement, ReactNode } from 'react';
-import { AuthAside } from './AuthAside';
+import { UappLogo } from './UappLogo';
 import styles from './AuthLayout.module.css';
 
 export interface AuthLayoutProps {
   readonly title: string;
   readonly subtitle: string;
   readonly children: ReactNode;
-  /** Footer row under the form (links such as "Sign up" / "Back to login"). */
+  /** Footer row under the form (links such as "Sign up" / "Log in"). */
   readonly footer?: ReactNode;
 }
 
-/** Split-screen auth shell: a focused form card on the left, the marketing panel on the right. */
+/** Single-column, centered auth shell matching the UAPP SSO: logo, heading, form, footer. */
 export const AuthLayout = ({
   title,
   subtitle,
@@ -18,20 +18,14 @@ export const AuthLayout = ({
   footer,
 }: AuthLayoutProps): ReactElement => (
   <main className={styles.screen}>
-    <section className={styles.panel}>
-      <div className={styles.brand}>
-        <span className={styles.brandMark}>UA</span>
-        <span>UAPP Academy</span>
-      </div>
-      <div className={styles.card}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>{title}</h1>
-          <p className={styles.subtitle}>{subtitle}</p>
-        </header>
-        {children}
-      </div>
+    <div className={styles.card}>
+      <UappLogo size={40} />
+      <header className={styles.header}>
+        <h1 className={styles.title}>{title}</h1>
+        <p className={styles.subtitle}>{subtitle}</p>
+      </header>
+      {children}
       {footer !== undefined ? <div className={styles.footer}>{footer}</div> : null}
-    </section>
-    <AuthAside />
+    </div>
   </main>
 );

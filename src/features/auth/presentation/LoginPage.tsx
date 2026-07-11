@@ -1,8 +1,10 @@
 import { useState, type FormEvent, type ReactElement } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Alert, Button, TextField } from '@shared/ui';
+import { Lock, Mail } from 'lucide-react';
+import { Alert, Spinner } from '@shared/ui';
 import { useAuth } from './use-auth';
 import { AuthLayout } from './AuthLayout';
+import { AuthField } from './AuthField';
 import styles from './AuthLayout.module.css';
 
 /** Sign-in screen. Collects an email + password and authenticates against the demo directory. */
@@ -48,26 +50,24 @@ export const LoginPage = (): ReactElement => {
           void handleSubmit(event);
         }}
       >
-        <TextField
-          label="Email"
+        <AuthField
+          label="Email Address"
+          icon={Mail}
           type="email"
           autoComplete="email"
           value={email}
-          onChange={(event) => {
-            setEmail(event.target.value);
-          }}
-          placeholder="you@example.com"
+          onChange={setEmail}
+          placeholder="name@email.com"
           required
         />
-        <TextField
+        <AuthField
           label="Password"
+          icon={Lock}
           type="password"
           autoComplete="current-password"
           value={password}
-          onChange={(event) => {
-            setPassword(event.target.value);
-          }}
-          placeholder="Enter your password"
+          onChange={setPassword}
+          placeholder="Password"
           required
         />
         <div className={styles.formRowEnd}>
@@ -75,9 +75,9 @@ export const LoginPage = (): ReactElement => {
             Forgot password?
           </Link>
         </div>
-        <Button type="submit" isLoading={isBusy} fullWidth disabled={!canSubmit}>
-          Log in
-        </Button>
+        <button type="submit" className={styles.submit} disabled={!canSubmit || isBusy}>
+          {isBusy ? <Spinner size="sm" /> : 'Log in'}
+        </button>
       </form>
     </AuthLayout>
   );

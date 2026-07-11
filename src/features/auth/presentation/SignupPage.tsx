@@ -1,8 +1,10 @@
 import { useState, type FormEvent, type ReactElement } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Alert, Button, TextField } from '@shared/ui';
+import { Lock, Mail } from 'lucide-react';
+import { Alert, Spinner } from '@shared/ui';
 import { useAuth } from './use-auth';
 import { AuthLayout } from './AuthLayout';
+import { AuthField } from './AuthField';
 import styles from './AuthLayout.module.css';
 
 /** Single-step sign-up: email + password creates the account and signs the user straight in. */
@@ -47,31 +49,29 @@ export const SignupPage = (): ReactElement => {
           void handleSubmit(event);
         }}
       >
-        <TextField
+        <AuthField
           label="Email Address"
+          icon={Mail}
           type="email"
           autoComplete="email"
           value={email}
-          onChange={(event) => {
-            setEmail(event.target.value);
-          }}
+          onChange={setEmail}
           placeholder="name@email.com"
           required
         />
-        <TextField
+        <AuthField
           label="Password"
+          icon={Lock}
           type="password"
           autoComplete="new-password"
           value={password}
-          onChange={(event) => {
-            setPassword(event.target.value);
-          }}
+          onChange={setPassword}
           placeholder="Create a password"
           required
         />
-        <Button type="submit" isLoading={isBusy} fullWidth disabled={!canSubmit}>
-          Sign up
-        </Button>
+        <button type="submit" className={styles.submit} disabled={!canSubmit || isBusy}>
+          {isBusy ? <Spinner size="sm" /> : 'Sign up'}
+        </button>
       </form>
     </AuthLayout>
   );

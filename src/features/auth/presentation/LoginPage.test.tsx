@@ -59,8 +59,8 @@ describe('<LoginPage />', () => {
     const user = userEvent.setup();
     renderLogin(new FakeAuthGateway());
 
-    await user.clear(screen.getByLabelText('Email'));
-    await user.type(screen.getByLabelText('Email'), 'user@example.com');
+    await user.clear(screen.getByLabelText('Email Address'));
+    await user.type(screen.getByLabelText('Email Address'), 'user@example.com');
     await user.clear(screen.getByLabelText('Password'));
     await user.type(screen.getByLabelText('Password'), 'wrong-password');
     await user.click(screen.getByRole('button', { name: 'Log in' }));
@@ -77,7 +77,7 @@ describe('<LoginPage />', () => {
     renderLogin(gateway);
 
     // The demo screen prefills credentials; clearing them must disable submit.
-    await user.clear(screen.getByLabelText('Email'));
+    await user.clear(screen.getByLabelText('Email Address'));
     await user.clear(screen.getByLabelText('Password'));
 
     expect(screen.getByRole('button', { name: 'Log in' })).toBeDisabled();
