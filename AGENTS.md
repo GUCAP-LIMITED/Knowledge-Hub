@@ -146,7 +146,9 @@ nesting, too many params, `any`, `!`, `==`, `console`, floating promises, unused
   `src/app/styles/global.css`. **No inline `style={{}}`, no Tailwind, no hard-coded colors.** Build
   conditional class names with `cn()` (`@shared/utils`). Reuse the Radix-based accessible primitives
   in `shared/ui` (`Button`, `Modal`, `DropdownMenu`, `Tooltip`, `Tabs`, `TextField`, `Spinner`,
-  `Alert`) instead of hand-rolling widgets.
+  `Alert`) instead of hand-rolling widgets. Teal (`--color-primary`) is the workhorse; the orange
+  accent (`--color-secondary`) is reserved for a few sanctioned "moments" — see
+  [`docs/design-accents.md`](./docs/design-accents.md) before reaching for it.
 - **Pages are code-split:** a routed `*Page` is **not** exported from the feature barrel — the router
   lazy-imports it from its module path. Export the module, provider, hooks, and types from
   `index.ts`; keep the page out of it.
