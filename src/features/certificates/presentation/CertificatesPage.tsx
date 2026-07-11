@@ -7,6 +7,7 @@ import { useCertificates } from './use-certificates';
 import { useCertificatesModule } from './use-certificates-module';
 import { CertificateCard } from './CertificateCard';
 import { CertificateStats } from './CertificateStats';
+import { CertificateInsights } from './CertificateInsights';
 import { CertCategoryPills } from './CertCategoryPills';
 import { CertificateModal } from './CertificateModal';
 import { byCategory, certSubtitle, scopeCertificates } from './certificate-view';
@@ -48,6 +49,8 @@ export const CertificatesPage = (): ReactElement => {
       />
 
       <CertificateStats certificates={mine} now={now} isAdmin={isAdmin} />
+
+      {isAdmin ? <CertificateInsights certificates={mine} now={now} /> : null}
 
       <CertCategoryPills certificates={mine} active={category} onSelect={setCategory} />
 
