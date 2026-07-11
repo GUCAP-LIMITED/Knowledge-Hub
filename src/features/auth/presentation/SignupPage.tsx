@@ -1,44 +1,75 @@
 import { useState, type FormEvent, type ReactElement } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import { Button, TextField } from '@shared/ui';
+import { Alert, Button, TextField } from '@shared/ui';
+import { useAuth } from './use-auth';
 import { AuthLayout } from './AuthLayout';
 import styles from './AuthLayout.module.css';
 
-/** Public sign-up: collect an email, then hand off to email verification. */
+/** Single-step sign-up: email + password creates the account and signs the user straight in. */
 export const SignupPage = (): ReactElement => {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { register, error, isBusy } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    // No backend yet — the email is passed to the verify screen via router state (never the URL).
-    navigate('/verify', { state: { email: email.trim() } });
+    const succeeded = await register(email, password);
+    if (succeeded) {
+      navigate('/', { replace: true });
+    }
   };
+
+  const canSubmit = email.trim() !== '' && password.trim() !== '';
 
   return (
     <AuthLayout
       title="Get Started with UAPP"
       subtitle="Create your account to explore courses, tutorials and resources."
       footer={
-        <Link to="/login" className={styles.link}>
-          <ArrowLeft size={14} aria-hidden="true" /> Back to login
-        </Link>
+        <span>
+          Already have an account?{' '}
+          <Link to="/login" className={styles.link}>
+            Log in
+          </Link>
+        </span>
       }
     >
-      <form className={styles.form} onSubmit={handleSubmit}>
+      {error !== null ? (
+        <Alert tone="error" title="Sign-up failed">
+          {error}
+        </Alert>
+      ) : null}
+
+      <form
+        className={styles.form}
+        onSubmit={(event) => {
+          void handleSubmit(event);
+        }}
+      >
         <TextField
-          label="Email"
+          label="Email Address"
           type="email"
           autoComplete="email"
           value={email}
           onChange={(event) => {
             setEmail(event.target.value);
           }}
-          placeholder="you@example.com"
+          placeholder="name@email.com"
           required
         />
-        <Button type="submit" fullWidth disabled={email.trim() === ''}>
+        <TextField
+          label="Password"
+          type="password"
+          autoComplete="new-password"
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+          }}
+          placeholder="Create a password"
+          required
+        />
+        <Button type="submit" isLoading={isBusy} fullWidth disabled={!canSubmit}>
           Sign up
         </Button>
       </form>

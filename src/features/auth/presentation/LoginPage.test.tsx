@@ -13,6 +13,7 @@ import {
   LoginUseCase,
   LogoutUseCase,
   RefreshSessionUseCase,
+  RegisterUseCase,
   RestoreSessionUseCase,
 } from '../application';
 import { FixedClock } from '@core/time';
@@ -26,6 +27,7 @@ const buildStore = (gateway: FakeAuthGateway): AuthStore => {
   const clock = new FixedClock(new Date('2026-01-01T00:00:00.000Z'));
   return createAuthStore({
     loginUseCase: new LoginUseCase({ authGateway: gateway, sessionStore, logger }),
+    registerUseCase: new RegisterUseCase({ authGateway: gateway, sessionStore, logger }),
     logoutUseCase: new LogoutUseCase({ authGateway: gateway, sessionStore, logger }),
     restoreSessionUseCase: new RestoreSessionUseCase({
       authGateway: gateway,

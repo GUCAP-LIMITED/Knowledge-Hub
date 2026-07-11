@@ -20,6 +20,7 @@ export interface UseAuthResult {
   readonly isInitializing: boolean;
   readonly isBusy: boolean;
   readonly login: (email: string, password: string) => Promise<boolean>;
+  readonly register: (email: string, password: string) => Promise<boolean>;
   readonly logout: () => Promise<void>;
   readonly clearError: () => void;
 }
@@ -33,6 +34,7 @@ export const useAuth = (): UseAuthResult => {
   const user = useAuthState((state) => state.session?.user ?? null);
   const error = useAuthState((state) => state.error);
   const login = useAuthState((state) => state.login);
+  const register = useAuthState((state) => state.register);
   const logout = useAuthState((state) => state.logout);
   const clearError = useAuthState((state) => state.clearError);
 
@@ -44,6 +46,7 @@ export const useAuth = (): UseAuthResult => {
     isInitializing: status === 'initializing',
     isBusy: status === 'authenticating',
     login,
+    register,
     logout,
     clearError,
   };

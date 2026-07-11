@@ -5,6 +5,7 @@ import type {
   LoginUseCase,
   LogoutUseCase,
   RefreshSessionUseCase,
+  RegisterUseCase,
   RestoreSessionUseCase,
 } from '../application';
 
@@ -22,6 +23,8 @@ export interface AuthState {
   initialize: () => Promise<void>;
   /** Returns true on success so callers can navigate without subscribing to state. */
   login: (email: string, password: string) => Promise<boolean>;
+  /** Create a new account and sign in. Returns true on success. */
+  register: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   /** Silently refresh the active session. Returns true if a fresh token is now available. */
   refreshSession: () => Promise<boolean>;
@@ -35,6 +38,7 @@ export interface AuthState {
  */
 export interface AuthStoreDeps {
   readonly loginUseCase: LoginUseCase;
+  readonly registerUseCase: RegisterUseCase;
   readonly logoutUseCase: LogoutUseCase;
   readonly restoreSessionUseCase: RestoreSessionUseCase;
   readonly refreshSessionUseCase: RefreshSessionUseCase;
@@ -64,6 +68,18 @@ export const createAuthStore = (deps: AuthStoreDeps): AuthStore =>
     login: async (email: string, password: string): Promise<boolean> => {
       set({ status: 'authenticating', error: null });
       const result = await deps.loginUseCase.execute(email, password);
+      if (isErr(result)) {
+        set({ status: 'unauthenticated', session: null, error: result.error.message });
+        return false;
+      }
+      deps.setAccessToken(result.value.accessToken);
+      set({ status: 'authenticated', session: result.value, error: null });
+      return true;
+    },
+
+    register: async (email: string, password: string): Promise<boolean> => {
+      set({ status: 'authenticating', error: null });
+      const result = await deps.registerUseCase.execute(email, password);
       if (isErr(result)) {
         set({ status: 'unauthenticated', session: null, error: result.error.message });
         return false;

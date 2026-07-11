@@ -13,6 +13,9 @@ export interface AuthGateway {
   /** Exchange an email + password for an authenticated session. */
   authenticate(email: Email, password: Password): Promise<Result<AuthSession, AuthError>>;
 
+  /** Create a new account for the email + password and return its authenticated session. */
+  register(email: Email, password: Password): Promise<Result<AuthSession, AuthError>>;
+
   /** Exchange a refresh token for a fresh session. */
   refresh(refreshToken: string): Promise<Result<AuthSession, AuthError>>;
 

@@ -11,6 +11,7 @@ import {
   LoginUseCase,
   LogoutUseCase,
   RefreshSessionUseCase,
+  RegisterUseCase,
   RestoreSessionUseCase,
 } from '../application';
 import { createAuthStore, type AuthStore } from './auth-store';
@@ -31,6 +32,7 @@ const createHarness = (): Harness => {
 
   const store = createAuthStore({
     loginUseCase: new LoginUseCase({ authGateway: gateway, sessionStore, logger }),
+    registerUseCase: new RegisterUseCase({ authGateway: gateway, sessionStore, logger }),
     logoutUseCase: new LogoutUseCase({ authGateway: gateway, sessionStore, logger }),
     restoreSessionUseCase: new RestoreSessionUseCase({
       authGateway: gateway,
@@ -74,6 +76,22 @@ describe('auth store', () => {
     expect(state.session).toBe(session);
     expect(state.error).toBeNull();
     expect(harness.tokens).toContain('token-xyz');
+  });
+
+  it('creates an account and signs in on successful register', async () => {
+    const session = buildAuthSession({ accessToken: 'token-new' });
+    harness.gateway.registerResult = ok(session);
+
+    const succeeded = await harness.store
+      .getState()
+      .register('new@example.com', 'password');
+
+    expect(succeeded).toBe(true);
+    const state = harness.store.getState();
+    expect(state.status).toBe('authenticated');
+    expect(state.session).toBe(session);
+    expect(harness.gateway.lastRegisteredEmail).toBe('new@example.com');
+    expect(harness.tokens).toContain('token-new');
   });
 
   it('surfaces a friendly error on failed login', async () => {

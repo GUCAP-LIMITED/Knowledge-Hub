@@ -6,6 +6,7 @@ import {
   LoginUseCase,
   LogoutUseCase,
   RefreshSessionUseCase,
+  RegisterUseCase,
   RestoreSessionUseCase,
 } from './application';
 import {
@@ -51,6 +52,12 @@ export const createAuthModule = (deps: AuthModuleDeps): AuthStore => {
     logger: deps.logger,
   });
 
+  const registerUseCase = new RegisterUseCase({
+    authGateway,
+    sessionStore,
+    logger: deps.logger,
+  });
+
   const logoutUseCase = new LogoutUseCase({
     authGateway,
     sessionStore,
@@ -72,6 +79,7 @@ export const createAuthModule = (deps: AuthModuleDeps): AuthStore => {
 
   return createAuthStore({
     loginUseCase,
+    registerUseCase,
     logoutUseCase,
     restoreSessionUseCase,
     refreshSessionUseCase,

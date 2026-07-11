@@ -15,6 +15,7 @@ import { LoginResponseSchema } from './dto/auth-api.dto';
 import { toAuthSession } from './auth-session-mapper';
 
 const LOGIN_ENDPOINT = '/auth/login';
+const REGISTER_ENDPOINT = '/auth/register';
 const REFRESH_ENDPOINT = '/auth/refresh';
 const LOGOUT_ENDPOINT = '/auth/logout';
 
@@ -41,6 +42,16 @@ export class AuthHttpGateway implements AuthGateway {
     password: Password,
   ): Promise<Result<AuthSession, AuthError>> {
     return this.requestSession(LOGIN_ENDPOINT, {
+      email: email.value,
+      password: password.value,
+    });
+  }
+
+  public register(
+    email: Email,
+    password: Password,
+  ): Promise<Result<AuthSession, AuthError>> {
+    return this.requestSession(REGISTER_ENDPOINT, {
       email: email.value,
       password: password.value,
     });

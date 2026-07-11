@@ -59,7 +59,7 @@ export interface InMemoryAuthGatewayDeps {
 export class InMemoryAuthGateway implements AuthGateway {
   private readonly clock: Clock;
   private readonly logger: Logger;
-  private readonly usersByEmail: ReadonlyMap<string, AuthenticatedUser>;
+  private readonly usersByEmail: Map<string, AuthenticatedUser>;
 
   public constructor(deps: InMemoryAuthGatewayDeps) {
     this.clock = deps.clock;
@@ -77,6 +77,30 @@ export class InMemoryAuthGateway implements AuthGateway {
       return Promise.resolve(err(new InvalidCredentialsError()));
     }
     return Promise.resolve(ok(this.issueSession(user)));
+  }
+
+  public register(
+    email: Email,
+    _password: Password,
+  ): Promise<Result<AuthSession, AuthError>> {
+    // Demo: signing up creates a Consultant account (or logs into an existing one) and issues a
+    // session immediately — the single-step flow the SSO uses. Persists for this session only.
+    const existing = this.usersByEmail.get(email.value);
+    const user = existing ?? this.createConsultant(email);
+    this.usersByEmail.set(email.value, user);
+    return Promise.resolve(ok(this.issueSession(user)));
+  }
+
+  private createConsultant(email: Email): AuthenticatedUser {
+    const local = email.value.split('@')[0] ?? 'learner';
+    const fullName = local.charAt(0).toUpperCase() + local.slice(1);
+    return new AuthenticatedUser({
+      id: `user-${local}`,
+      email,
+      fullName,
+      roles: ['consultant'],
+      userType: 'Consultant',
+    });
   }
 
   public refresh(refreshToken: string): Promise<Result<AuthSession, AuthError>> {
@@ -107,7 +131,7 @@ export class InMemoryAuthGateway implements AuthGateway {
   }
 }
 
-const buildUserMap = (): ReadonlyMap<string, AuthenticatedUser> => {
+const buildUserMap = (): Map<string, AuthenticatedUser> => {
   const entries = new Map<string, AuthenticatedUser>();
   for (const seed of DEMO_USERS) {
     const email = Email.create(seed.email);
