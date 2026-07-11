@@ -14,6 +14,7 @@ import { cn } from '@shared/utils';
 import type { TeamMember } from '../domain';
 import { useTeamMembers } from './use-team';
 import { AtRiskPanel, ProgressDistribution } from './TeamInsights';
+import { TeamAnalytics } from './TeamAnalytics';
 import styles from './TeamProgressPage.module.css';
 
 const HEADERS = ['Member', 'Role', 'Progress', 'Courses', 'Last Active'] as const;
@@ -102,6 +103,7 @@ export const TeamProgressPage = (): ReactElement => {
         />
       ) : (
         <>
+          <TeamAnalytics members={members} />
           <div className={styles.insights}>
             <ProgressDistribution members={members} />
             <AtRiskPanel members={members} />
