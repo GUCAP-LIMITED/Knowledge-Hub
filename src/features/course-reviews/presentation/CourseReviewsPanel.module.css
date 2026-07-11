@@ -76,3 +76,17 @@
   text-align: right;
   color: var(--color-text-subtle);
 }
+
+/* Shown in place of the write-review form until the content is finished + any quiz passed. */
+.reviewLocked {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}

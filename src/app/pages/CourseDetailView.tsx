@@ -220,7 +220,11 @@ const CourseMain = ({
     </section>
     <section className={styles.card}>
       <h2 className={styles.cardTitle}>Reviews</h2>
-      <CourseReviewsPanel courseId={course.id} courseName={course.title} />
+      <CourseReviewsPanel
+        courseId={course.id}
+        courseName={course.title}
+        canReview={certReady}
+      />
     </section>
   </div>
 );

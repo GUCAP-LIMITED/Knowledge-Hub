@@ -9,7 +9,7 @@ import {
   demoAsset,
   uploadedAsset,
 } from '@shared/ui';
-import { QuizManagerModal } from '@features/quizzes';
+import { QuizManagerModal, useQuizPassed, useQuizzes } from '@features/quizzes';
 import { ContentReviewsPanel } from '@features/course-reviews';
 import { useContentTypes } from '@features/content-types';
 import { DIFFICULTIES, type Difficulty, type Tutorial } from '../domain';
@@ -85,6 +85,12 @@ export const TutorialsModals = ({
   onCloseQuiz,
 }: TutorialsModalsProps): ReactElement => {
   const categories = useContentTypes('tutorial');
+  const watchingId = watching?.id ?? '';
+  const quizzes = useQuizzes(watchingId);
+  const quizPassed = useQuizPassed(watchingId);
+  // No separate "completed" state for a tutorial: viewing it is the engagement, so the only
+  // gate is passing any attached quiz.
+  const canReview = (quizzes.data ?? []).length === 0 || quizPassed;
   return (
     <>
       <Modal
@@ -105,6 +111,7 @@ export const TutorialsModals = ({
               contentId={watching.id}
               contentName={watching.title}
               heading="Ratings & reviews"
+              canReview={canReview}
             />
           </>
         ) : null}

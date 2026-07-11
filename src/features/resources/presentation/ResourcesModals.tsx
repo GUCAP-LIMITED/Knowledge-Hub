@@ -9,7 +9,7 @@ import {
   demoAsset,
   uploadedAsset,
 } from '@shared/ui';
-import { QuizManagerModal } from '@features/quizzes';
+import { QuizManagerModal, useQuizPassed, useQuizzes } from '@features/quizzes';
 import { ContentReviewsPanel } from '@features/course-reviews';
 import { useContentTypes } from '@features/content-types';
 import type { Resource } from '../domain';
@@ -82,6 +82,12 @@ export const ResourcesModals = ({
   onCloseQuiz,
 }: ResourcesModalsProps): ReactElement => {
   const categories = useContentTypes('resource');
+  const activeId = active?.id ?? '';
+  const quizzes = useQuizzes(activeId);
+  const quizPassed = useQuizPassed(activeId);
+  // No separate "completed" state for a resource: opening it is the engagement, so the only
+  // gate is passing any attached quiz.
+  const canReview = (quizzes.data ?? []).length === 0 || quizPassed;
   return (
     <>
       <Modal
@@ -102,6 +108,7 @@ export const ResourcesModals = ({
               contentId={active.id}
               contentName={active.title}
               heading="Ratings & reviews"
+              canReview={canReview}
             />
           </>
         ) : null}
