@@ -179,3 +179,7 @@ Run `npm run new:feature -- <name> [Entity]`, then perform the 3 wiring steps it
 - [`docs/DEVELOPER_GUIDE.md`](./docs/DEVELOPER_GUIDE.md) — hands-on: build a feature end-to-end, how to
   call the API, the forms convention (§8).
 - [`CONTRIBUTING.md`](./CONTRIBUTING.md) — the concrete rule list, enforced ESLint limits, definition of done.
+- **Design system:** [`docs/design-accents.md`](./docs/design-accents.md) (the orange rule),
+  [`docs/design-motion.md`](./docs/design-motion.md) (motion tokens & principles),
+  [`docs/design-voice.md`](./docs/design-voice.md) (voice & microcopy). The living reference is the
+  `/styleguide` route.
