@@ -22,14 +22,7 @@ import tseslint from 'typescript-eslint';
  */
 export default defineConfig([
   {
-    ignores: [
-      'dist',
-      'coverage',
-      'node_modules',
-      'node_modules/.tmp',
-      'scripts',
-      'legacy',
-    ],
+    ignores: ['dist', 'coverage', 'node_modules', 'node_modules/.tmp', 'scripts'],
   },
 
   // Base + strict, type-aware TypeScript rules for all source files.

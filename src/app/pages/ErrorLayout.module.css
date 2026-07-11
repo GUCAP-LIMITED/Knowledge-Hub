@@ -6,15 +6,6 @@
   padding: 4rem 1.5rem;
   min-height: 55vh;
 }
-.icon {
-  display: grid;
-  place-items: center;
-  width: 60px;
-  height: 60px;
-  border-radius: var(--radius-full);
-  background-color: var(--color-primary-soft);
-  color: var(--color-primary);
-}
 .code {
   margin-top: 0.5rem;
   font-size: 2.5rem;

@@ -12,7 +12,6 @@ export {
   useMyCapabilities,
   type MyCapabilities,
 } from './presentation/use-my-capabilities';
-export { Can, type CanProps } from './presentation/Can';
 export type { CapId } from './presentation/permission-catalog';
 export { UserAccount, type UserAccountProps } from './domain';
 export {

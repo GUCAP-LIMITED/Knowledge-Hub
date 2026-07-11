@@ -2,17 +2,6 @@
   text-align: center;
   padding: 2.5rem 1.25rem;
 }
-.iconWrap {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background-color: var(--color-bg-subtle);
-  color: var(--color-text-subtle);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
 .title {
   margin: 0;
   font-size: 1rem;

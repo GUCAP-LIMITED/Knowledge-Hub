@@ -1,4 +1,3 @@
-export * from './fakes/in-memory-storage';
 export * from './fakes/fake-auth-gateway';
 export * from './fakes/fake-session-store';
 export * from './fakes/silent-logger';
