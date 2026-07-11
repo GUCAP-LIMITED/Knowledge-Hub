@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, type LucideIcon } from 'lucide-react';
+import { Spot } from '@shared/ui';
 import styles from './ErrorLayout.module.css';
 
 export interface ErrorLayoutProps {
@@ -12,15 +13,13 @@ export interface ErrorLayoutProps {
 
 /** Shared, branded empty-route screen for 404 / 403 — rendered inside the app shell. */
 export const ErrorLayout = ({
-  icon: Icon,
+  icon,
   code,
   title,
   message,
 }: ErrorLayoutProps): ReactElement => (
   <section className={styles.wrap}>
-    <span className={styles.icon}>
-      <Icon size={28} aria-hidden="true" />
-    </span>
+    <Spot icon={icon} size="lg" />
     <div className={styles.code}>{code}</div>
     <h1 className={styles.title}>{title}</h1>
     <p className={styles.message}>{message}</p>
