@@ -22,6 +22,15 @@ interface ProfileData {
   bio: string;
 }
 
+/** Seed profile for a user who hasn't saved one yet. */
+const defaultProfile = (user: AuthenticatedUser | null): ProfileData => ({
+  name: user?.fullName ?? '',
+  email: user?.email.value ?? '',
+  phone: '+44 7700 900123',
+  location: 'London, UK',
+  bio: 'Passionate about education and helping learners succeed.',
+});
+
 const FIELDS: readonly { readonly key: keyof ProfileData; readonly label: string }[] = [
   { key: 'name', label: 'Full name' },
   { key: 'email', label: 'Email' },
@@ -122,13 +131,11 @@ const InfoCard = ({
 export const ProfilePage = (): ReactElement => {
   const { user } = useAuth();
   const courses = useCourses();
-  const [profile, setProfile] = useLocalStorage<ProfileData>('uapp:profile', {
-    name: user?.fullName ?? '',
-    email: user?.email.value ?? '',
-    phone: '+44 7700 900123',
-    location: 'London, UK',
-    bio: 'Passionate about education and helping learners succeed.',
-  });
+  // Namespaced per user so each account keeps its own profile (never shared across sign-ins).
+  const [profile, setProfile] = useLocalStorage<ProfileData>(
+    `uapp:profile:${user?.id ?? 'guest'}`,
+    defaultProfile(user),
+  );
   const [edit, setEdit] = useState(false);
   const [draft, setDraft] = useState(profile);
 

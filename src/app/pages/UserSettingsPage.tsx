@@ -1,6 +1,7 @@
 import { useState, type ReactElement } from 'react';
 import { PageHeader, Select, Tabs, TabsPanel, Toggle } from '@shared/ui';
 import { useLocalStorage } from '@shared/utils';
+import { useAuth } from '@features/auth';
 import { useTheme } from '@app/theme/use-theme';
 import styles from './UserSettingsPage.module.css';
 
@@ -131,7 +132,11 @@ const LanguagePanel = ({ prefs, onChange }: PanelProps): ReactElement => (
 
 /** Account preferences: notifications, appearance (dark mode), privacy and language. */
 export const UserSettingsPage = (): ReactElement => {
-  const [prefs, setPrefs] = useLocalStorage<Preferences>('uapp:preferences', DEFAULTS);
+  const { user } = useAuth();
+  const [prefs, setPrefs] = useLocalStorage<Preferences>(
+    `uapp:preferences:${user?.id ?? 'guest'}`,
+    DEFAULTS,
+  );
   const [tab, setTab] = useState<string>('notifications');
 
   return (
