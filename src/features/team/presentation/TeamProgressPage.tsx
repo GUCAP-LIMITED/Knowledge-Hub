@@ -13,6 +13,7 @@ import {
 import { cn } from '@shared/utils';
 import type { TeamMember } from '../domain';
 import { useTeamMembers } from './use-team';
+import { AtRiskPanel, ProgressDistribution } from './TeamInsights';
 import styles from './TeamProgressPage.module.css';
 
 const HEADERS = ['Member', 'Role', 'Progress', 'Courses', 'Last Active'] as const;
@@ -100,24 +101,30 @@ export const TeamProgressPage = (): ReactElement => {
           description="Team members will appear here."
         />
       ) : (
-        <div className={styles.tableCard}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                {HEADERS.map((header) => (
-                  <th key={header} className={styles.th}>
-                    {header}
-                  </th>
+        <>
+          <div className={styles.insights}>
+            <ProgressDistribution members={members} />
+            <AtRiskPanel members={members} />
+          </div>
+          <div className={styles.tableCard}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  {HEADERS.map((header) => (
+                    <th key={header} className={styles.th}>
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {members.map((member) => (
+                  <MemberRow key={member.id} member={member} />
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((member) => (
-                <MemberRow key={member.id} member={member} />
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </section>
   );

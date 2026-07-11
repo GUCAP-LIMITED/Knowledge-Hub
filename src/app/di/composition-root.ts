@@ -87,21 +87,9 @@ const initSentry = (dsn: string | undefined, environment: string): void => {
   sentryInitialized = true;
 };
 
-/**
- * THE composition root. The one place that knows concrete implementations and wires the whole
- * graph. Feature data is served by in-memory gateways seeded from the prototype (no backend yet);
- * binding an HTTP gateway inside a feature module is the only change needed to go live.
- */
-export const createComposition = ({ env, storage }: CompositionInput): AppComposition => {
-  const config = loadConfig(env);
-  const logger = new ConsoleLogger(config.logLevel, 'app');
-  const clock = new SystemClock();
-
-  initSentry(config.sentryDsn, import.meta.env.MODE);
-
-  const errorNotifier = createErrorNotifier();
-
-  const queryClient = new QueryClient({
+/** The shared QueryClient, wired so every failed mutation surfaces through the error notifier. */
+const createAppQueryClient = (errorNotifier: ErrorNotifier): QueryClient =>
+  new QueryClient({
     mutationCache: new MutationCache({
       onError: (error: unknown): void => {
         errorNotifier.notify(
@@ -119,6 +107,21 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
       },
     },
   });
+
+/**
+ * THE composition root. The one place that knows concrete implementations and wires the whole
+ * graph. Feature data is served by in-memory gateways seeded from the prototype (no backend yet);
+ * binding an HTTP gateway inside a feature module is the only change needed to go live.
+ */
+export const createComposition = ({ env, storage }: CompositionInput): AppComposition => {
+  const config = loadConfig(env);
+  const logger = new ConsoleLogger(config.logLevel, 'app');
+  const clock = new SystemClock();
+
+  initSentry(config.sentryDsn, import.meta.env.MODE);
+
+  const errorNotifier = createErrorNotifier();
+  const queryClient = createAppQueryClient(errorNotifier);
 
   let accessToken: string | undefined;
   let refreshSession: () => Promise<boolean> = () => Promise.resolve(false);
