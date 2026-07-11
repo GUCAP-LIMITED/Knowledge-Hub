@@ -60,7 +60,6 @@ const LearningGrid = ({
   if (courses.length === 0) {
     return (
       <EmptyState
-        icon={BookOpen}
         title="Nothing here yet"
         description="Start a course from the catalog to see it here."
         action={

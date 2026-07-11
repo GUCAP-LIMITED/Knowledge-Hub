@@ -97,7 +97,6 @@ export const TeamProgressPage = (): ReactElement => {
       </div>
       {members.length === 0 ? (
         <EmptyState
-          icon={Users}
           title="No team members"
           description="Team members will appear here."
         />

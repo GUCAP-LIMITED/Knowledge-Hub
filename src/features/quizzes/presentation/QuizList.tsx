@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { ClipboardList, Pencil, Play, Plus, Trash2 } from 'lucide-react';
+import { Pencil, Play, Plus, Trash2 } from 'lucide-react';
 import { Button, EmptyState, IconButton } from '@shared/ui';
 import type { Quiz } from '../domain';
 import styles from './QuizSection.module.css';
@@ -27,7 +27,6 @@ export const QuizList = ({
   <div className={styles.list}>
     {quizzes.length === 0 ? (
       <EmptyState
-        icon={ClipboardList}
         title="No quizzes yet"
         description={
           isAdmin

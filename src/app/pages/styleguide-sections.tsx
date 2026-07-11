@@ -1,14 +1,11 @@
 import type { ReactElement } from 'react';
-import { Inbox } from 'lucide-react';
 import {
   Alert,
   Badge,
   Button,
-  EmptyState,
   ProgressBar,
   Skeleton,
   Spinner,
-  Spot,
   StatusBadge,
   Switch,
   TextField,
@@ -119,17 +116,6 @@ export const FeedbackSection = (): ReactElement => (
       <Spinner label="Loading" />
       <Skeleton width={160} height={16} />
     </div>
-  </div>
-);
-
-export const IllustrationSection = (): ReactElement => (
-  <div className={styles.row}>
-    <Spot icon={Inbox} tone="primary" />
-    <Spot icon={Inbox} tone="secondary" />
-    <EmptyState
-      title="Empty state"
-      description="Shown when a list or area has no content."
-    />
   </div>
 );
 

@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react';
-import { SearchX } from 'lucide-react';
 import { Alert, CardGridSkeleton, EmptyState } from '@shared/ui';
 import type { Tutorial } from '../domain';
 import { TutorialCard } from './TutorialCard';
@@ -43,7 +42,6 @@ export const TutorialsResults = ({
   if (tutorials.length === 0) {
     return filtered ? (
       <EmptyState
-        icon={SearchX}
         title="No tutorials match"
         description="Try a different search term or category."
       />

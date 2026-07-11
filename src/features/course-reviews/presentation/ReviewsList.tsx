@@ -1,6 +1,5 @@
 import type { ReactElement, ReactNode } from 'react';
 import type { UseQueryResult } from '@tanstack/react-query';
-import { MessageSquare } from 'lucide-react';
 import { Alert, EmptyState, Spinner } from '@shared/ui';
 import type { Review } from '../domain';
 import { ReviewCard } from './ReviewCard';
@@ -38,7 +37,6 @@ export const ReviewsList = ({
   if (reviews.length === 0) {
     return (
       <EmptyState
-        icon={MessageSquare}
         title="No reviews yet"
         description="Be the first to share your feedback."
       />

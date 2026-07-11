@@ -1,5 +1,4 @@
 import { useMemo, useState, type ReactElement } from 'react';
-import { ClipboardList, SearchX } from 'lucide-react';
 import { Alert, Button, EmptyState } from '@shared/ui';
 import type { Assignment } from '../domain';
 import { AssignmentCard } from './AssignmentCard';
@@ -49,7 +48,6 @@ export const AssignmentList = ({
   if (list.length === 0) {
     return (
       <EmptyState
-        icon={ClipboardList}
         title="No assignments yet"
         description="Create one to keep your team's learning on track."
         action={<Button onClick={onNew}>New assignment</Button>}
@@ -68,7 +66,6 @@ export const AssignmentList = ({
       />
       {filtered.length === 0 ? (
         <EmptyState
-          icon={SearchX}
           title="No matching assignments"
           description="Try another search or switch status tab."
         />

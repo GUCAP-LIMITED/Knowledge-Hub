@@ -55,7 +55,6 @@ export const CertificatesPage = (): ReactElement => {
 
       {visible.length === 0 ? (
         <EmptyState
-          hideIllustration
           title="No certificates yet"
           description="Complete courses to earn certificates."
         />

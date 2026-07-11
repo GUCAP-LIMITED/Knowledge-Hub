@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, FileText, Upload } from 'lucide-react';
+import { CheckCircle, Upload } from 'lucide-react';
 import { Alert, EmptyState, PageHeader, Spinner } from '@shared/ui';
 import { useAuth } from '@features/auth';
 import type { Submission } from '../domain';
@@ -36,7 +36,6 @@ const SubmissionsBody = ({
   if (data.length === 0) {
     return (
       <EmptyState
-        icon={FileText}
         title={isAdmin ? 'No published documents' : 'No submissions yet'}
         description={
           isAdmin

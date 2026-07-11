@@ -6,7 +6,6 @@ import {
   ColorsSection,
   FeedbackSection,
   FormsSection,
-  IllustrationSection,
   MotionSection,
   TypographySection,
 } from './styleguide-sections';
@@ -49,9 +48,6 @@ export const StyleguidePage = (): ReactElement => (
     </Section>
     <Section title="Feedback">
       <FeedbackSection />
-    </Section>
-    <Section title="Illustrations">
-      <IllustrationSection />
     </Section>
     <Section title="Motion">
       <MotionSection />

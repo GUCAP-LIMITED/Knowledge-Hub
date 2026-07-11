@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Bell, PlayCircle } from 'lucide-react';
+import { PlayCircle } from 'lucide-react';
 import { Badge, EmptyState, ProgressBar, StatCard } from '@shared/ui';
 import { cn } from '@shared/utils';
 import type { Course } from '@features/courses';
@@ -80,7 +80,6 @@ export const ContinueLearningCard = ({
     </div>
     {courses.length === 0 ? (
       <EmptyState
-        icon={BookOpen}
         title="No courses in progress"
         description="Start a course from the catalog to see it here."
       />
@@ -132,7 +131,6 @@ export const AnnouncementsCard = ({
     </div>
     {announcements.length === 0 ? (
       <EmptyState
-        icon={Bell}
         title="No announcements"
         description="When something is announced, you'll see it here."
       />
