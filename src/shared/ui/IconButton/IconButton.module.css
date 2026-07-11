@@ -12,8 +12,13 @@
   cursor: pointer;
   line-height: 1;
   transition:
-    background-color 0.15s ease,
-    color 0.15s ease;
+    background-color var(--motion-base) var(--motion-ease-out),
+    transform var(--motion-fast) var(--motion-ease-out),
+    color var(--motion-base) var(--motion-ease-out);
+}
+
+.iconButton:active:not(:disabled) {
+  transform: scale(0.92);
 }
 
 .iconButton:focus-visible {

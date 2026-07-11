@@ -80,9 +80,26 @@ export const useSubmitReview = (): UseMutationResult<
   });
 };
 
-export const useMarkReviewHelpful = (): UseMutationResult<Review, Error, string> => {
+/** Cached review lists keyed under the reviews prefix, captured for optimistic rollback. */
+type ReviewSnapshots = [readonly unknown[], readonly Review[] | undefined][];
+
+const bumpHelpful = (reviews: readonly Review[], id: string): readonly Review[] =>
+  reviews.map((review) =>
+    review.id === id ? review.withHelpful(review.helpful + 1) : review,
+  );
+
+/**
+ * "Helpful" vote with an optimistic update: the count bumps immediately across every cached
+ * review list, then rolls back if the mutation fails.
+ */
+export const useMarkReviewHelpful = (): UseMutationResult<
+  Review,
+  Error,
+  string,
+  ReviewSnapshots
+> => {
   const { markReviewHelpful } = useCourseReviewsModule();
-  const invalidate = useInvalidateReviews();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string): Promise<Review> => {
       const result = await markReviewHelpful.execute(id);
@@ -91,7 +108,26 @@ export const useMarkReviewHelpful = (): UseMutationResult<Review, Error, string>
       }
       return result.value;
     },
-    onSuccess: invalidate,
+    onMutate: async (id: string): Promise<ReviewSnapshots> => {
+      await queryClient.cancelQueries({ queryKey: reviewsQueryKey });
+      const snapshots = queryClient.getQueriesData<readonly Review[]>({
+        queryKey: reviewsQueryKey,
+      });
+      for (const [key, reviews] of snapshots) {
+        if (reviews !== undefined) {
+          queryClient.setQueryData(key, bumpHelpful(reviews, id));
+        }
+      }
+      return snapshots;
+    },
+    onError: (_error, _id, snapshots): void => {
+      snapshots?.forEach(([key, reviews]) => {
+        queryClient.setQueryData(key, reviews);
+      });
+    },
+    onSettled: (): void => {
+      void queryClient.invalidateQueries({ queryKey: reviewsQueryKey });
+    },
   });
 };
 
