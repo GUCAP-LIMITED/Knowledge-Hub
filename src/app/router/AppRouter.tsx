@@ -72,6 +72,9 @@ const AdminSettingsPage = lazy(async () => ({
 const UploadPage = lazy(async () => ({
   default: (await import('@features/submissions/presentation/UploadPage')).UploadPage,
 }));
+const StyleguidePage = lazy(async () => ({
+  default: (await import('@app/pages/StyleguidePage')).StyleguidePage,
+}));
 const ForbiddenPage = lazy(async () => ({
   default: (await import('@app/pages/ForbiddenPage')).ForbiddenPage,
 }));
@@ -105,6 +108,8 @@ export const AppRouter = (): ReactElement => {
             <Route path="/my-learning" element={<MyLearningPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/user-settings" element={<UserSettingsPage />} />
+            {/* Unlisted maintainer route — the living style guide. */}
+            <Route path="/styleguide" element={<StyleguidePage />} />
 
             {/* Content workspace — managers and admins, refined by capability. */}
             <Route element={<ProtectedRoute anyOf={['admin', 'manager']} />}>
