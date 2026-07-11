@@ -8,6 +8,7 @@ import {
   VerifyPage,
 } from '@features/auth';
 import { AppLayout } from '@app/layout/AppLayout';
+import { RequireCapability } from '@app/router/RequireCapability';
 import { Spinner } from '@shared/ui';
 
 // Pages are code-split. Each is imported from its module path (not the feature barrel) so it lands
@@ -105,23 +106,37 @@ export const AppRouter = (): ReactElement => {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/user-settings" element={<UserSettingsPage />} />
 
-            {/* Content workspace — managers and admins. */}
+            {/* Content workspace — managers and admins, refined by capability. */}
             <Route element={<ProtectedRoute anyOf={['admin', 'manager']} />}>
-              <Route path="/upload" element={<UploadPage />} />
-              <Route path="/submissions" element={<SubmissionsPage />} />
+              <Route element={<RequireCapability module="submissions" cap="create" />}>
+                <Route path="/upload" element={<UploadPage />} />
+              </Route>
+              <Route element={<RequireCapability module="submissions" cap="view" />}>
+                <Route path="/submissions" element={<SubmissionsPage />} />
+              </Route>
             </Route>
 
-            {/* Review queue — admins only. */}
+            {/* Admin areas — role backstop, then capability-gated to match the nav. */}
             <Route element={<ProtectedRoute anyOf={['admin']} />}>
-              <Route path="/team-progress" element={<TeamProgressPage />} />
-              <Route path="/assign" element={<AssignTrainingPage />} />
-              <Route path="/approvals" element={<ApprovalsPage />} />
-              <Route path="/course-reviews" element={<CourseReviewsPage />} />
-              <Route
-                path="/settings"
-                element={<Navigate to="/settings/platform" replace />}
-              />
-              <Route path="/settings/:section" element={<AdminSettingsPage />} />
+              <Route element={<RequireCapability module="team" cap="view" />}>
+                <Route path="/team-progress" element={<TeamProgressPage />} />
+              </Route>
+              <Route element={<RequireCapability module="team" cap="assign" />}>
+                <Route path="/assign" element={<AssignTrainingPage />} />
+              </Route>
+              <Route element={<RequireCapability module="approvals" cap="view" />}>
+                <Route path="/approvals" element={<ApprovalsPage />} />
+              </Route>
+              <Route element={<RequireCapability module="reviews" cap="moderate" />}>
+                <Route path="/course-reviews" element={<CourseReviewsPage />} />
+              </Route>
+              <Route element={<RequireCapability module="settings" cap="manage" />}>
+                <Route
+                  path="/settings"
+                  element={<Navigate to="/settings/platform" replace />}
+                />
+                <Route path="/settings/:section" element={<AdminSettingsPage />} />
+              </Route>
             </Route>
 
             {/* 403 / 404 render inside the shell so the user keeps their navigation. */}

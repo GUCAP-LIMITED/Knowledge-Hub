@@ -6,7 +6,6 @@ import {
   PageHeader,
   useDeleteConfirm,
 } from '@shared/ui';
-import { useAuth } from '@features/auth';
 import { useContentTypes } from '@features/content-types';
 import type { Course } from '../domain';
 import type { UpdateCourseInput } from '../application';
@@ -149,8 +148,6 @@ const selectCourses = (
 
 /** Routed course-catalog page with search, category/status/type filters and sort. */
 export const CoursesPage = (): ReactElement => {
-  const { user } = useAuth();
-  const isAdmin = user?.hasAnyRole(['admin']) ?? false;
   const courses = useCourses();
   const updateProgress = useUpdateCourseProgress();
   const update = useUpdateCourse();
@@ -199,7 +196,6 @@ export const CoursesPage = (): ReactElement => {
         courses={visible}
         isLoading={courses.isLoading}
         error={courses.isError ? courses.error : null}
-        isAdmin={isAdmin}
         advancingId={updateProgress.isPending ? updateProgress.variables.id : null}
         removingId={remove.isPending ? remove.variables : null}
         onAdvance={handleAdvance}

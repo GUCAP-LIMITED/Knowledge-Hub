@@ -20,12 +20,18 @@ import {
 } from 'lucide-react';
 import { cn } from '@shared/utils';
 import type { AuthenticatedUser } from '@features/auth';
-import { SETTINGS_SECTIONS } from '@features/users';
+import { SETTINGS_SECTIONS, useMyCapabilities, type CapId } from '@features/users';
 import styles from './AppLayout.module.css';
 
 interface SubLink {
   readonly to: string;
   readonly label: string;
+}
+
+/** A capability that must be held for a nav entry to show (in addition to its role gate). */
+interface NavCap {
+  readonly module: string;
+  readonly cap: CapId;
 }
 
 type NavEntry =
@@ -40,6 +46,7 @@ type NavEntry =
       readonly label: string;
       readonly icon: LucideIcon;
       readonly anyOf?: readonly string[];
+      readonly cap?: NavCap;
       readonly children?: readonly SubLink[];
     };
 
@@ -70,6 +77,7 @@ const NAV: readonly NavEntry[] = [
     label: 'Upload Document',
     icon: Upload,
     anyOf: ['admin', 'manager'],
+    cap: { module: 'submissions', cap: 'create' },
   },
   {
     kind: 'link',
@@ -77,6 +85,7 @@ const NAV: readonly NavEntry[] = [
     label: 'My Submissions',
     icon: FileCheck,
     anyOf: ['admin', 'manager'],
+    cap: { module: 'submissions', cap: 'view' },
   },
   { kind: 'section', label: 'Team', anyOf: ['admin'] },
   {
@@ -85,6 +94,7 @@ const NAV: readonly NavEntry[] = [
     label: 'Team Progress',
     icon: BarChart3,
     anyOf: ['admin'],
+    cap: { module: 'team', cap: 'view' },
   },
   {
     kind: 'link',
@@ -92,6 +102,7 @@ const NAV: readonly NavEntry[] = [
     label: 'Assign Training',
     icon: CalendarCheck,
     anyOf: ['admin'],
+    cap: { module: 'team', cap: 'assign' },
   },
   { kind: 'section', label: 'Administration', anyOf: ['admin'] },
   {
@@ -100,6 +111,7 @@ const NAV: readonly NavEntry[] = [
     label: 'Approvals',
     icon: ClipboardList,
     anyOf: ['admin'],
+    cap: { module: 'approvals', cap: 'view' },
   },
   {
     kind: 'link',
@@ -107,6 +119,7 @@ const NAV: readonly NavEntry[] = [
     label: 'Course Reviews',
     icon: MessageSquare,
     anyOf: ['admin'],
+    cap: { module: 'reviews', cap: 'moderate' },
   },
   {
     kind: 'link',
@@ -114,6 +127,7 @@ const NAV: readonly NavEntry[] = [
     label: 'Settings',
     icon: Settings,
     anyOf: ['admin'],
+    cap: { module: 'settings', cap: 'manage' },
     children: SETTINGS_CHILDREN,
   },
 ];
@@ -241,8 +255,16 @@ export interface AppSidebarProps {
 
 /** Brand + role-aware grouped navigation. Acts as a fixed sidebar on desktop, a drawer on mobile. */
 export const AppSidebar = ({ user, open, onNavigate }: AppSidebarProps): ReactElement => {
-  const visible = (anyOf: readonly string[] | undefined): boolean =>
-    anyOf === undefined || (user?.hasAnyRole(anyOf) ?? false);
+  const { can } = useMyCapabilities();
+
+  // Role is the outer backstop; a capability (when present) refines visibility within it.
+  const visible = (entry: NavEntry): boolean => {
+    const roleOk = entry.anyOf === undefined || (user?.hasAnyRole(entry.anyOf) ?? false);
+    if (!roleOk) return false;
+    return entry.kind === 'link' && entry.cap !== undefined
+      ? can(entry.cap.module, entry.cap.cap)
+      : true;
+  };
 
   return (
     <aside className={cn(styles.sidebar, open && styles.sidebarOpen)}>
@@ -254,9 +276,7 @@ export const AppSidebar = ({ user, open, onNavigate }: AppSidebarProps): ReactEl
         </span>
       </div>
       <nav className={styles.nav}>
-        {NAV.filter((entry) => visible(entry.anyOf)).map((entry) =>
-          renderEntry(entry, onNavigate),
-        )}
+        {NAV.filter(visible).map((entry) => renderEntry(entry, onNavigate))}
       </nav>
     </aside>
   );

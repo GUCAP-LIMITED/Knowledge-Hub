@@ -8,7 +8,6 @@ export interface TutorialsResultsProps {
   readonly tutorials: readonly Tutorial[];
   readonly isLoading: boolean;
   readonly error: Error | null;
-  readonly isAdmin: boolean;
   readonly removingId: string | null;
   readonly onWatch: (tutorial: Tutorial) => void;
   readonly onEdit: (tutorial: Tutorial) => void;
@@ -21,7 +20,6 @@ export const TutorialsResults = ({
   tutorials,
   isLoading,
   error,
-  isAdmin,
   removingId,
   onWatch,
   onEdit,
@@ -53,7 +51,6 @@ export const TutorialsResults = ({
         <TutorialCard
           key={tutorial.id}
           tutorial={tutorial}
-          isAdmin={isAdmin}
           isBusy={tutorial.id === removingId}
           onWatch={onWatch}
           onEdit={onEdit}

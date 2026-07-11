@@ -36,7 +36,6 @@ export const ResourcesPage = (): ReactElement => {
   );
 
   const actions: ArticleActions = {
-    isAdmin,
     onOpen: setActive,
     onEdit: setEditing,
     onDelete: del.request,

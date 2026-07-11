@@ -8,7 +8,6 @@ export interface CoursesResultsProps {
   readonly courses: readonly Course[];
   readonly isLoading: boolean;
   readonly error: Error | null;
-  readonly isAdmin: boolean;
   readonly advancingId: string | null;
   readonly removingId: string | null;
   readonly onAdvance: (course: Course) => void;
@@ -21,7 +20,6 @@ export const CoursesResults = ({
   courses,
   isLoading,
   error,
-  isAdmin,
   advancingId,
   removingId,
   onAdvance,
@@ -57,7 +55,6 @@ export const CoursesResults = ({
           key={course.id}
           course={course}
           isBusy={course.id === advancingId || course.id === removingId}
-          isAdmin={isAdmin}
           onAdvance={onAdvance}
           onEdit={onEdit}
           onDelete={onDelete}

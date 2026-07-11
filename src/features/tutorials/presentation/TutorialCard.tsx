@@ -33,7 +33,6 @@ const relativeUpdated = (date: Date): string => {
 
 export interface TutorialCardProps {
   readonly tutorial: Tutorial;
-  readonly isAdmin: boolean;
   readonly isBusy: boolean;
   readonly onWatch: (tutorial: Tutorial) => void;
   readonly onEdit: (tutorial: Tutorial) => void;
@@ -44,7 +43,6 @@ export interface TutorialCardProps {
 /** Library card for a single tutorial: clickable video-style tile + secondary actions. */
 export const TutorialCard = ({
   tutorial,
-  isAdmin,
   isBusy,
   onWatch,
   onEdit,
@@ -89,7 +87,6 @@ export const TutorialCard = ({
 
     <TutorialCardActions
       tutorial={tutorial}
-      isAdmin={isAdmin}
       isBusy={isBusy}
       onWatch={onWatch}
       onEdit={onEdit}

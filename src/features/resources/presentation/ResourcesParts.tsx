@@ -9,12 +9,12 @@ import {
 } from 'lucide-react';
 import { EmptyState, IconButton } from '@shared/ui';
 import { cn } from '@shared/utils';
+import { useMyCapabilities } from '@features/users';
 import type { Resource } from '../domain';
 import { type CategoryGroup, categoryMeta } from './resources-categories';
 import styles from './ResourcesPage.module.css';
 
 export interface ArticleActions {
-  readonly isAdmin: boolean;
   readonly onOpen: (resource: Resource) => void;
   readonly onEdit: (resource: Resource) => void;
   readonly onDelete: (id: string) => void;
@@ -29,33 +29,34 @@ const ArticleRow = ({
   readonly resource: Resource;
   readonly meta: string;
   readonly actions: ArticleActions;
-}): ReactElement => (
-  <div className={styles.articleRow}>
-    <button
-      type="button"
-      className={styles.articleMain}
-      onClick={() => {
-        actions.onOpen(resource);
-      }}
-    >
-      <FileText size={18} aria-hidden="true" className={styles.articleIcon} />
-      <span className={styles.articleBody}>
-        <span className={styles.articleTitle}>{resource.title}</span>
-        <span className={styles.articleMeta}>{meta}</span>
-      </span>
-      <ChevronRight size={16} aria-hidden="true" className={styles.chevron} />
-    </button>
-    <div className={styles.articleAdmin}>
-      <IconButton
-        label="Resource quizzes"
+}): ReactElement => {
+  const { can } = useMyCapabilities();
+  return (
+    <div className={styles.articleRow}>
+      <button
+        type="button"
+        className={styles.articleMain}
         onClick={() => {
-          actions.onQuiz(resource);
+          actions.onOpen(resource);
         }}
       >
-        <ClipboardList size={15} />
-      </IconButton>
-      {actions.isAdmin ? (
-        <>
+        <FileText size={18} aria-hidden="true" className={styles.articleIcon} />
+        <span className={styles.articleBody}>
+          <span className={styles.articleTitle}>{resource.title}</span>
+          <span className={styles.articleMeta}>{meta}</span>
+        </span>
+        <ChevronRight size={16} aria-hidden="true" className={styles.chevron} />
+      </button>
+      <div className={styles.articleAdmin}>
+        <IconButton
+          label="Resource quizzes"
+          onClick={() => {
+            actions.onQuiz(resource);
+          }}
+        >
+          <ClipboardList size={15} />
+        </IconButton>
+        {can('resources', 'edit') ? (
           <IconButton
             label="Edit resource"
             onClick={() => {
@@ -64,6 +65,8 @@ const ArticleRow = ({
           >
             <Pencil size={15} />
           </IconButton>
+        ) : null}
+        {can('resources', 'delete') ? (
           <IconButton
             label="Delete resource"
             variant="danger"
@@ -73,11 +76,11 @@ const ArticleRow = ({
           >
             <Trash2 size={15} />
           </IconButton>
-        </>
-      ) : null}
+        ) : null}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export interface CategoryCardsProps {
   readonly categories: readonly CategoryGroup[];

@@ -66,7 +66,6 @@ export const TutorialsPage = (): ReactElement => {
         tutorials={visible}
         isLoading={tutorials.isLoading}
         error={tutorials.isError ? tutorials.error : null}
-        isAdmin={isAdmin}
         removingId={remove.isPending ? remove.variables : null}
         onWatch={setWatching}
         onEdit={setEditing}
