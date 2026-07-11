@@ -12,7 +12,7 @@ import {
   Star,
   Users,
 } from 'lucide-react';
-import { Button } from '@shared/ui';
+import { Button, Celebration } from '@shared/ui';
 import { cn } from '@shared/utils';
 import { useUpdateCourseProgress, type Course } from '@features/courses';
 import { useAuth } from '@features/auth';
@@ -238,6 +238,7 @@ export const CourseDetailView = ({
   const isAdmin = user?.hasAnyRole(['admin']) ?? false;
   const [playing, setPlaying] = useState<Lesson | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [celebrate, setCelebrate] = useState(false);
 
   const hasQuiz = (quizzes.data ?? []).length > 0;
   const certReady = course.isCompleted() && (!hasQuiz || quizPassed);
@@ -248,9 +249,12 @@ export const CourseDetailView = ({
       { id: course.id, progress: next },
       {
         onSuccess: () => {
-          // Finishing the lessons surfaces the quiz that gates the certificate.
-          if (next >= 100 && hasQuiz && !quizPassed) {
+          if (next < 100) return;
+          // A gating quiz owns the celebration on pass; otherwise finishing is the moment.
+          if (hasQuiz && !quizPassed) {
             setQuizOpen(true);
+          } else {
+            setCelebrate(true);
           }
         },
       },
@@ -259,6 +263,7 @@ export const CourseDetailView = ({
 
   return (
     <>
+      <Celebration show={celebrate} />
       <div className={styles.layout}>
         <CourseMain
           course={course}

@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { Award, RotateCcw, XCircle } from 'lucide-react';
-import { Button } from '@shared/ui';
+import { Button, Celebration } from '@shared/ui';
 import { cn } from '@shared/utils';
 import type { QuizResult } from '../domain';
 import styles from './QuizSection.module.css';
@@ -47,6 +47,7 @@ export const QuizResultView = ({
   <div
     className={cn(styles.result, result.passed ? styles.resultPass : styles.resultFail)}
   >
+    <Celebration show={result.passed} />
     <div className={styles.resultIcon}>
       {result.passed ? (
         <Award size={28} aria-hidden />

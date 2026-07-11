@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { AlertTriangle, Award, QrCode } from 'lucide-react';
-import { Modal } from '@shared/ui';
+import { Celebration, Modal } from '@shared/ui';
 import { cn } from '@shared/utils';
 import { useAuth } from '@features/auth';
 import { useCertificateTemplate } from '@features/certificate-templates';
@@ -87,6 +87,7 @@ export const CertificateModal = ({
     >
       {certificate !== null ? (
         <div className={styles.modalBody}>
+          <Celebration show={!expiringSoon} />
           {expiringSoon ? (
             <div className={styles.modalExpiry}>
               <AlertTriangle size={18} aria-hidden="true" />
