@@ -273,3 +273,65 @@
   font-size: 0.76rem;
   color: var(--color-text-subtle);
 }
+
+/* Below 640px the directory table collapses into stacked cards, one per user. */
+@media (max-width: 640px) {
+  .tableWrap {
+    overflow-x: visible;
+  }
+  .table thead {
+    display: none;
+  }
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+  .tr {
+    margin-bottom: 0.75rem;
+    padding: 0.35rem 1rem 0.6rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+  .cell,
+  .cellMuted,
+  .cellSubtle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    white-space: normal;
+    text-align: right;
+    border-top: 1px solid var(--color-border);
+  }
+  .cell::before,
+  .cellMuted::before,
+  .cellSubtle::before {
+    content: attr(data-label);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-subtle);
+    text-align: left;
+  }
+  /* First cell (User) is the card header; last cell (Manage) is a full-width action. */
+  .table td:first-child {
+    justify-content: flex-start;
+    padding-top: 0.6rem;
+    border-top: none;
+  }
+  .table td:first-child::before,
+  .table td:last-child::before {
+    display: none;
+  }
+  .table td:last-child {
+    justify-content: flex-end;
+    padding-top: 0.65rem;
+  }
+}

@@ -86,3 +86,65 @@
     overflow-x: auto;
   }
 }
+
+/* Below 640px the member table collapses into stacked cards, one per member. */
+@media (max-width: 640px) {
+  .tableCard {
+    border: none;
+    background-color: transparent;
+    overflow: visible;
+  }
+  .table thead {
+    display: none;
+  }
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+  .row {
+    margin-bottom: 0.75rem;
+    padding: 0.35rem 1rem 0.6rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+  .cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .cell::before {
+    content: attr(data-label);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-subtle);
+  }
+  /* First cell (Member) is the card header: full width, no label, no divider. */
+  .table td:first-child {
+    justify-content: flex-start;
+    padding-top: 0.6rem;
+    border-top: none;
+  }
+  .table td:first-child::before {
+    display: none;
+  }
+  /* Progress stacks under its label so the bar keeps full width. */
+  .progressCell {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+  .progressWrap {
+    width: calc(100% - 3rem);
+  }
+}

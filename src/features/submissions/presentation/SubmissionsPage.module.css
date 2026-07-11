@@ -145,3 +145,61 @@
   color: var(--color-text);
   font-size: 0.9rem;
 }
+
+/* Below 640px the table collapses into stacked cards, one per submission. */
+@media (max-width: 640px) {
+  .tableWrap {
+    border: none;
+    background-color: transparent;
+    box-shadow: none;
+    overflow-x: visible;
+  }
+  .table thead {
+    display: none;
+  }
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+  .tr {
+    margin-bottom: 0.75rem;
+    padding: 0.35rem 1rem 0.6rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-xs);
+  }
+  .cell,
+  .cellMuted {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    white-space: normal;
+    text-align: right;
+    border-top: 1px solid var(--color-border);
+  }
+  .cell::before,
+  .cellMuted::before {
+    content: attr(data-label);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-subtle);
+    text-align: left;
+  }
+  /* First cell (Document) is the card header: full width, no label, no divider. */
+  .table td:first-child {
+    justify-content: flex-start;
+    padding-top: 0.6rem;
+    border-top: none;
+  }
+  .table td:first-child::before {
+    display: none;
+  }
+}

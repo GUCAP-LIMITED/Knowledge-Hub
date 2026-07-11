@@ -34,7 +34,7 @@ const UserRow = ({
   const active = user.isActive();
   return (
     <tr className={styles.tr}>
-      <td className={styles.cell}>
+      <td className={styles.cell} data-label="User">
         <div className={styles.person}>
           <Avatar name={user.name} size={32} online={active} />
           <div className={styles.identity}>
@@ -43,17 +43,21 @@ const UserRow = ({
           </div>
         </div>
       </td>
-      <td className={styles.cell}>
+      <td className={styles.cell} data-label="Role">
         <Badge tone={ROLE_TONE[user.role]}>{ROLE_LABEL[user.role]}</Badge>
       </td>
-      <td className={styles.cell}>
+      <td className={styles.cell} data-label="Status">
         <Badge tone={active ? 'success' : 'neutral'}>
           {active ? 'active' : 'inactive'}
         </Badge>
       </td>
-      <td className={styles.cellMuted}>{user.joined}</td>
-      <td className={styles.cellSubtle}>{user.lastActive}</td>
-      <td className={styles.cell}>
+      <td className={styles.cellMuted} data-label="Joined">
+        {user.joined}
+      </td>
+      <td className={styles.cellSubtle} data-label="Last active">
+        {user.lastActive}
+      </td>
+      <td className={styles.cell} data-label="">
         <Button
           size="sm"
           variant="secondary"

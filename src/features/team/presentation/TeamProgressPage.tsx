@@ -19,7 +19,7 @@ const HEADERS = ['Member', 'Role', 'Progress', 'Courses', 'Last Active'] as cons
 
 const MemberRow = ({ member }: { readonly member: TeamMember }): ReactElement => (
   <tr className={styles.row}>
-    <td className={styles.cell}>
+    <td className={styles.cell} data-label="Member">
       <div className={styles.member}>
         <Avatar name={member.name} size={36} online={member.status === 'online'} />
         <div className={styles.memberText}>
@@ -28,19 +28,21 @@ const MemberRow = ({ member }: { readonly member: TeamMember }): ReactElement =>
         </div>
       </div>
     </td>
-    <td className={styles.cell}>
+    <td className={styles.cell} data-label="Role">
       <Badge>{member.role}</Badge>
     </td>
-    <td className={cn(styles.cell, styles.progressCell)}>
+    <td className={cn(styles.cell, styles.progressCell)} data-label="Progress">
       <div className={styles.progressWrap}>
         <ProgressBar value={member.progress} tone="auto" />
       </div>
       <span className={styles.pct}>{member.progress}%</span>
     </td>
-    <td className={cn(styles.cell, styles.muted)}>
+    <td className={cn(styles.cell, styles.muted)} data-label="Courses">
       {member.completed}/{member.total}
     </td>
-    <td className={cn(styles.cell, styles.muted)}>{member.lastActive}</td>
+    <td className={cn(styles.cell, styles.muted)} data-label="Last active">
+      {member.lastActive}
+    </td>
   </tr>
 );
 

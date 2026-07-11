@@ -9,19 +9,19 @@ const HEADERS: readonly string[] = ['Document', 'Type', 'Date', 'Status'];
 
 const Row = ({ submission }: { readonly submission: Submission }): ReactElement => (
   <tr className={styles.tr}>
-    <td className={styles.cell}>
+    <td className={styles.cell} data-label="Document">
       <div className={styles.docCell}>
         <FileText size={16} aria-hidden="true" className={styles.docIcon} />
         <span className={styles.docTitle}>{submission.title}</span>
       </div>
     </td>
-    <td className={styles.cell}>
+    <td className={styles.cell} data-label="Type">
       <Badge tone="info">{submission.type}</Badge>
     </td>
-    <td className={styles.cellMuted}>
+    <td className={styles.cellMuted} data-label="Date">
       {submission.submittedAt.toLocaleDateString('en-GB')}
     </td>
-    <td className={styles.cell}>
+    <td className={styles.cell} data-label="Status">
       <StatusBadge status={submission.status} />
     </td>
   </tr>
