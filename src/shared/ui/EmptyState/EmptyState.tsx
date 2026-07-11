@@ -8,6 +8,8 @@ export interface EmptyStateProps {
   readonly title: string;
   readonly description?: string;
   readonly action?: ReactNode;
+  /** Hide the branded illustration and show text only. Defaults to showing it. */
+  readonly hideIllustration?: boolean;
 }
 
 /** Friendly placeholder shown when a list or area has no content. */
@@ -16,9 +18,10 @@ export const EmptyState = ({
   title,
   description,
   action,
+  hideIllustration = false,
 }: EmptyStateProps): ReactElement => (
   <div className={styles.empty}>
-    <Spot icon={icon} />
+    {hideIllustration ? null : <Spot icon={icon} />}
     <h3 className={styles.title}>{title}</h3>
     {description !== undefined ? <p className={styles.desc}>{description}</p> : null}
     {action}

@@ -1,5 +1,4 @@
 import { useMemo, useState, type ReactElement } from 'react';
-import { Award } from 'lucide-react';
 import { Alert, EmptyState, PageHeader, Spinner } from '@shared/ui';
 import { useAuth } from '@features/auth';
 import type { Certificate } from '../domain';
@@ -56,7 +55,7 @@ export const CertificatesPage = (): ReactElement => {
 
       {visible.length === 0 ? (
         <EmptyState
-          icon={Award}
+          hideIllustration
           title="No certificates yet"
           description="Complete courses to earn certificates."
         />
