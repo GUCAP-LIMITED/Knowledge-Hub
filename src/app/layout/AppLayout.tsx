@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { cn } from '@shared/utils';
+import { cn, useBodyScrollLock } from '@shared/utils';
 import { useAuth } from '@features/auth';
 import { SearchOverlay } from '@app/search/SearchOverlay';
 import { AppSidebar } from './AppSidebar';
@@ -33,6 +33,9 @@ export const AppLayout = (): ReactElement => {
   useEffect(() => {
     setNavOpen(false);
   }, [location.pathname]);
+
+  // Lock background scroll while the mobile drawer is open.
+  useBodyScrollLock(navOpen);
 
   const handleSignOut = (): void => {
     void logout().then(() => {
