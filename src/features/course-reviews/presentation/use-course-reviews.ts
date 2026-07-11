@@ -5,6 +5,7 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from '@tanstack/react-query';
+import { useToast } from '@shared/ui';
 import { isErr } from '@core/result';
 import type { Review } from '../domain';
 import type { SubmitReviewInput } from '../application';
@@ -63,6 +64,7 @@ export const useSubmitReview = (): UseMutationResult<
 > => {
   const { submitReview } = useCourseReviewsModule();
   const invalidate = useInvalidateReviews();
+  const { success } = useToast();
   return useMutation({
     mutationFn: async (input: SubmitReviewInput): Promise<Review> => {
       const result = await submitReview.execute(input);
@@ -71,7 +73,10 @@ export const useSubmitReview = (): UseMutationResult<
       }
       return result.value;
     },
-    onSuccess: invalidate,
+    onSuccess: () => {
+      success('Thanks — your review was submitted.');
+      invalidate();
+    },
   });
 };
 
@@ -93,6 +98,7 @@ export const useMarkReviewHelpful = (): UseMutationResult<Review, Error, string>
 export const useDeleteReview = (): UseMutationResult<void, Error, string> => {
   const { deleteReview } = useCourseReviewsModule();
   const invalidate = useInvalidateReviews();
+  const { success } = useToast();
   return useMutation({
     mutationFn: async (id: string): Promise<void> => {
       const result = await deleteReview.execute(id);
@@ -100,6 +106,9 @@ export const useDeleteReview = (): UseMutationResult<void, Error, string> => {
         throw result.error;
       }
     },
-    onSuccess: invalidate,
+    onSuccess: () => {
+      success('Review deleted.');
+      invalidate();
+    },
   });
 };

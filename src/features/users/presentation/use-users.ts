@@ -5,6 +5,7 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from '@tanstack/react-query';
+import { useToast } from '@shared/ui';
 import { isErr } from '@core/result';
 import type { UserAccount } from '../domain';
 import type { SetUserStatusInput } from '../application';
@@ -37,6 +38,7 @@ export const useSetUserStatus = (): UseMutationResult<
 > => {
   const { setUserStatus } = useUsersModule();
   const queryClient = useQueryClient();
+  const { success } = useToast();
   return useMutation({
     mutationFn: async (input: SetUserStatusInput): Promise<UserAccount> => {
       const result = await setUserStatus.execute(input);
@@ -45,7 +47,8 @@ export const useSetUserStatus = (): UseMutationResult<
       }
       return result.value;
     },
-    onSuccess: () => {
+    onSuccess: (user: UserAccount) => {
+      success(`${user.name} is now ${user.isActive() ? 'active' : 'inactive'}.`);
       void queryClient.invalidateQueries({ queryKey: usersQueryKey });
     },
   });

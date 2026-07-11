@@ -5,6 +5,7 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from '@tanstack/react-query';
+import { useToast } from '@shared/ui';
 import { isErr } from '@core/result';
 import type { Resource } from '../domain';
 import type { UpdateResourceInput } from '../application';
@@ -64,6 +65,7 @@ export const useUpdateResource = (): UseMutationResult<
 > => {
   const { updateResource } = useResourcesModule();
   const queryClient = useQueryClient();
+  const { success } = useToast();
   return useMutation({
     mutationFn: async (input: UpdateResourceInput): Promise<Resource> => {
       const result = await updateResource.execute(input);
@@ -73,6 +75,7 @@ export const useUpdateResource = (): UseMutationResult<
       return result.value;
     },
     onSuccess: () => {
+      success('Resource updated.');
       void queryClient.invalidateQueries({ queryKey: resourcesQueryKey });
     },
   });
@@ -82,6 +85,7 @@ export const useUpdateResource = (): UseMutationResult<
 export const useDeleteResource = (): UseMutationResult<void, Error, string> => {
   const { deleteResource } = useResourcesModule();
   const queryClient = useQueryClient();
+  const { success } = useToast();
   return useMutation({
     mutationFn: async (id: string): Promise<void> => {
       const result = await deleteResource.execute(id);
@@ -90,6 +94,7 @@ export const useDeleteResource = (): UseMutationResult<void, Error, string> => {
       }
     },
     onSuccess: () => {
+      success('Resource deleted.');
       void queryClient.invalidateQueries({ queryKey: resourcesQueryKey });
     },
   });

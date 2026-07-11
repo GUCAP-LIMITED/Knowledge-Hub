@@ -5,6 +5,7 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from '@tanstack/react-query';
+import { useToast } from '@shared/ui';
 import { isErr } from '@core/result';
 import type { Tutorial } from '../domain';
 import type { UpdateTutorialInput } from '../application';
@@ -37,6 +38,7 @@ export const useUpdateTutorial = (): UseMutationResult<
 > => {
   const { updateTutorial } = useTutorialsModule();
   const queryClient = useQueryClient();
+  const { success } = useToast();
   return useMutation({
     mutationFn: async (input: UpdateTutorialInput): Promise<Tutorial> => {
       const result = await updateTutorial.execute(input);
@@ -46,6 +48,7 @@ export const useUpdateTutorial = (): UseMutationResult<
       return result.value;
     },
     onSuccess: () => {
+      success('Tutorial updated.');
       void queryClient.invalidateQueries({ queryKey: tutorialsQueryKey });
     },
   });
@@ -55,6 +58,7 @@ export const useUpdateTutorial = (): UseMutationResult<
 export const useDeleteTutorial = (): UseMutationResult<void, Error, string> => {
   const { deleteTutorial } = useTutorialsModule();
   const queryClient = useQueryClient();
+  const { success } = useToast();
   return useMutation({
     mutationFn: async (id: string): Promise<void> => {
       const result = await deleteTutorial.execute(id);
@@ -63,6 +67,7 @@ export const useDeleteTutorial = (): UseMutationResult<void, Error, string> => {
       }
     },
     onSuccess: () => {
+      success('Tutorial deleted.');
       void queryClient.invalidateQueries({ queryKey: tutorialsQueryKey });
     },
   });

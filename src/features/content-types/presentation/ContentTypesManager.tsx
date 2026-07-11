@@ -1,5 +1,5 @@
 import { useState, type ReactElement } from 'react';
-import { ToastViewport, useToasts } from '@shared/ui';
+import { useToast } from '@shared/ui';
 import { useAuth } from '@features/auth';
 import {
   CONTENT_KINDS,
@@ -23,7 +23,7 @@ export const ContentTypesManager = (): ReactElement => {
   const removeType = useContentTypesStore((state) => state.removeType);
   const { user } = useAuth();
   const actor = user?.fullName ?? 'Admin';
-  const { toasts, push, dismiss } = useToasts();
+  const { push } = useToast();
 
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<KindFilter>('all');
@@ -88,7 +88,6 @@ export const ContentTypesManager = (): ReactElement => {
         }}
         onConfirm={handleConfirm}
       />
-      <ToastViewport toasts={toasts} onDismiss={dismiss} />
     </div>
   );
 };

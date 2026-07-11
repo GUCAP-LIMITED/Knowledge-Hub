@@ -31,4 +31,7 @@ export * from './Tooltip/Tooltip';
 export * from './Tabs/Tabs';
 export * from './Toast/Toast';
 export * from './Toast/use-toasts';
+export * from './Toast/toast-context';
+export * from './Toast/ToastProvider';
+export * from './Toast/use-toast';
 export * from './motion';

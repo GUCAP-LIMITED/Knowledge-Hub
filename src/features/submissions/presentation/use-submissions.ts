@@ -5,6 +5,7 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from '@tanstack/react-query';
+import { useToast } from '@shared/ui';
 import { isErr } from '@core/result';
 import type { Submission } from '../domain';
 import type { SubmitContentInput } from '../application';
@@ -73,6 +74,7 @@ export const useSubmitContent = (): UseMutationResult<
 > => {
   const { submitContent } = useSubmissionsModule();
   const invalidate = useInvalidateSubmissions();
+  const { success } = useToast();
   return useMutation({
     mutationFn: async (input: SubmitContentInput): Promise<Submission> => {
       const result = await submitContent.execute(input);
@@ -81,7 +83,10 @@ export const useSubmitContent = (): UseMutationResult<
       }
       return result.value;
     },
-    onSuccess: invalidate,
+    onSuccess: () => {
+      success('Document submitted.');
+      invalidate();
+    },
   });
 };
 
@@ -92,6 +97,7 @@ export const useApproveSubmission = (): UseMutationResult<
 > => {
   const { approveSubmission } = useSubmissionsModule();
   const invalidate = useInvalidateSubmissions();
+  const { success } = useToast();
   return useMutation({
     mutationFn: async ({ id, note }: ApproveInput): Promise<Submission> => {
       const result = await approveSubmission.execute(id, note);
@@ -100,7 +106,10 @@ export const useApproveSubmission = (): UseMutationResult<
       }
       return result.value;
     },
-    onSuccess: invalidate,
+    onSuccess: () => {
+      success('Submission approved.');
+      invalidate();
+    },
   });
 };
 
@@ -111,6 +120,7 @@ export const useRejectSubmission = (): UseMutationResult<
 > => {
   const { rejectSubmission } = useSubmissionsModule();
   const invalidate = useInvalidateSubmissions();
+  const { success } = useToast();
   return useMutation({
     mutationFn: async ({ id, reason }: RejectInput): Promise<Submission> => {
       const result = await rejectSubmission.execute(id, reason);
@@ -119,7 +129,10 @@ export const useRejectSubmission = (): UseMutationResult<
       }
       return result.value;
     },
-    onSuccess: invalidate,
+    onSuccess: () => {
+      success('Submission rejected.');
+      invalidate();
+    },
   });
 };
 
@@ -141,6 +154,7 @@ export const useFlagSubmission = (): UseMutationResult<Submission, Error, string
 export const usePublishSubmission = (): UseMutationResult<Submission, Error, string> => {
   const { publishSubmission } = useSubmissionsModule();
   const invalidate = useInvalidateSubmissions();
+  const { success } = useToast();
   return useMutation({
     mutationFn: async (id: string): Promise<Submission> => {
       const result = await publishSubmission.execute(id);
@@ -149,6 +163,9 @@ export const usePublishSubmission = (): UseMutationResult<Submission, Error, str
       }
       return result.value;
     },
-    onSuccess: invalidate,
+    onSuccess: () => {
+      success('Submission published.');
+      invalidate();
+    },
   });
 };

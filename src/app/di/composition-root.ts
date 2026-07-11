@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query';
+import { MutationCache, QueryClient } from '@tanstack/react-query';
 import * as Sentry from '@sentry/react';
 import { loadConfig } from '@core/config';
 import { ConsoleLogger, type Logger } from '@core/logger';
@@ -33,8 +33,30 @@ import {
 import { createUsersModule, type UsersModule } from '@features/users';
 import { createQuizzesModule, type QuizzesModule } from '@features/quizzes';
 
+/**
+ * A late-bound sink for surfacing mutation failures as UI toasts. The QueryClient is built before
+ * React mounts, so `ToastErrorBridge` binds the real toast handler once the provider is live.
+ */
+export interface ErrorNotifier {
+  readonly notify: (message: string) => void;
+  readonly bind: (sink: (message: string) => void) => void;
+}
+
+const createErrorNotifier = (): ErrorNotifier => {
+  let sink: (message: string) => void = () => undefined;
+  return {
+    notify: (message: string): void => {
+      sink(message);
+    },
+    bind: (next: (message: string) => void): void => {
+      sink = next;
+    },
+  };
+};
+
 export interface AppComposition {
   readonly logger: Logger;
+  readonly errorNotifier: ErrorNotifier;
   readonly authStore: AuthStore;
   readonly coursesModule: CoursesModule;
   readonly tutorialsModule: TutorialsModule;
@@ -77,7 +99,18 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
 
   initSentry(config.sentryDsn, import.meta.env.MODE);
 
+  const errorNotifier = createErrorNotifier();
+
   const queryClient = new QueryClient({
+    mutationCache: new MutationCache({
+      onError: (error: unknown): void => {
+        errorNotifier.notify(
+          error instanceof Error
+            ? error.message
+            : 'Something went wrong. Please try again.',
+        );
+      },
+    }),
     defaultOptions: {
       queries: {
         staleTime: 30_000,
@@ -135,6 +168,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
 
   return {
     logger,
+    errorNotifier,
     authStore,
     coursesModule,
     tutorialsModule,

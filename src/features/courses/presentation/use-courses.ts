@@ -5,6 +5,7 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from '@tanstack/react-query';
+import { useToast } from '@shared/ui';
 import { isErr } from '@core/result';
 import type { Course } from '../domain';
 import type { UpdateCourseInput } from '../application';
@@ -82,6 +83,7 @@ export const useUpdateCourse = (): UseMutationResult<
 > => {
   const { updateCourse } = useCoursesModule();
   const queryClient = useQueryClient();
+  const { success } = useToast();
   return useMutation({
     mutationFn: async (input: UpdateCourseInput): Promise<Course> => {
       const result = await updateCourse.execute(input);
@@ -91,6 +93,7 @@ export const useUpdateCourse = (): UseMutationResult<
       return result.value;
     },
     onSuccess: () => {
+      success('Course updated.');
       void queryClient.invalidateQueries({ queryKey: coursesQueryKey });
     },
   });
@@ -100,6 +103,7 @@ export const useUpdateCourse = (): UseMutationResult<
 export const useDeleteCourse = (): UseMutationResult<void, Error, string> => {
   const { deleteCourse } = useCoursesModule();
   const queryClient = useQueryClient();
+  const { success } = useToast();
   return useMutation({
     mutationFn: async (id: string): Promise<void> => {
       const result = await deleteCourse.execute(id);
@@ -108,6 +112,7 @@ export const useDeleteCourse = (): UseMutationResult<void, Error, string> => {
       }
     },
     onSuccess: () => {
+      success('Course deleted.');
       void queryClient.invalidateQueries({ queryKey: coursesQueryKey });
     },
   });

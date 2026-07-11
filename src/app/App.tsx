@@ -14,8 +14,9 @@ import { AssignmentsModuleProvider } from '@features/assignments';
 import { NotificationsModuleProvider } from '@features/notifications';
 import { UsersModuleProvider } from '@features/users';
 import { QuizzesModuleProvider } from '@features/quizzes';
-import { TooltipProvider } from '@shared/ui';
+import { TooltipProvider, ToastProvider } from '@shared/ui';
 import { AppErrorBoundary } from '@app/AppErrorBoundary';
+import { ToastErrorBridge } from '@app/ToastErrorBridge';
 import { AppRouter } from '@app/router/AppRouter';
 import { createComposition } from '@app/di/composition-root';
 import { ThemeProvider } from '@app/theme/ThemeProvider';
@@ -40,46 +41,53 @@ export const App = (): ReactElement => {
         <QueryClientProvider client={composition.queryClient}>
           <MotionConfig reducedMotion="user">
             <TooltipProvider>
-              <AuthStoreProvider store={composition.authStore}>
-                <CoursesModuleProvider module={composition.coursesModule}>
-                  <TutorialsModuleProvider module={composition.tutorialsModule}>
-                    <ResourcesModuleProvider module={composition.resourcesModule}>
-                      <CertificatesModuleProvider module={composition.certificatesModule}>
-                        <SubmissionsModuleProvider module={composition.submissionsModule}>
-                          <CourseReviewsModuleProvider
-                            module={composition.courseReviewsModule}
+              <ToastProvider>
+                <ToastErrorBridge notifier={composition.errorNotifier} />
+                <AuthStoreProvider store={composition.authStore}>
+                  <CoursesModuleProvider module={composition.coursesModule}>
+                    <TutorialsModuleProvider module={composition.tutorialsModule}>
+                      <ResourcesModuleProvider module={composition.resourcesModule}>
+                        <CertificatesModuleProvider
+                          module={composition.certificatesModule}
+                        >
+                          <SubmissionsModuleProvider
+                            module={composition.submissionsModule}
                           >
-                            <TeamModuleProvider module={composition.teamModule}>
-                              <AssignmentsModuleProvider
-                                module={composition.assignmentsModule}
-                              >
-                                <NotificationsModuleProvider
-                                  module={composition.notificationsModule}
+                            <CourseReviewsModuleProvider
+                              module={composition.courseReviewsModule}
+                            >
+                              <TeamModuleProvider module={composition.teamModule}>
+                                <AssignmentsModuleProvider
+                                  module={composition.assignmentsModule}
                                 >
-                                  <UsersModuleProvider module={composition.usersModule}>
-                                    <QuizzesModuleProvider
-                                      module={composition.quizzesModule}
-                                    >
-                                      <BrowserRouter
-                                        future={{
-                                          v7_startTransition: true,
-                                          v7_relativeSplatPath: true,
-                                        }}
+                                  <NotificationsModuleProvider
+                                    module={composition.notificationsModule}
+                                  >
+                                    <UsersModuleProvider module={composition.usersModule}>
+                                      <QuizzesModuleProvider
+                                        module={composition.quizzesModule}
                                       >
-                                        <AppRouter />
-                                      </BrowserRouter>
-                                    </QuizzesModuleProvider>
-                                  </UsersModuleProvider>
-                                </NotificationsModuleProvider>
-                              </AssignmentsModuleProvider>
-                            </TeamModuleProvider>
-                          </CourseReviewsModuleProvider>
-                        </SubmissionsModuleProvider>
-                      </CertificatesModuleProvider>
-                    </ResourcesModuleProvider>
-                  </TutorialsModuleProvider>
-                </CoursesModuleProvider>
-              </AuthStoreProvider>
+                                        <BrowserRouter
+                                          future={{
+                                            v7_startTransition: true,
+                                            v7_relativeSplatPath: true,
+                                          }}
+                                        >
+                                          <AppRouter />
+                                        </BrowserRouter>
+                                      </QuizzesModuleProvider>
+                                    </UsersModuleProvider>
+                                  </NotificationsModuleProvider>
+                                </AssignmentsModuleProvider>
+                              </TeamModuleProvider>
+                            </CourseReviewsModuleProvider>
+                          </SubmissionsModuleProvider>
+                        </CertificatesModuleProvider>
+                      </ResourcesModuleProvider>
+                    </TutorialsModuleProvider>
+                  </CoursesModuleProvider>
+                </AuthStoreProvider>
+              </ToastProvider>
             </TooltipProvider>
           </MotionConfig>
         </QueryClientProvider>
