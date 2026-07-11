@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactElement } from 'react';
-import { AlertTriangle, Award } from 'lucide-react';
+import { AlertTriangle, Award, QrCode } from 'lucide-react';
 import { Modal } from '@shared/ui';
 import { cn } from '@shared/utils';
 import { useAuth } from '@features/auth';
@@ -15,16 +15,53 @@ export interface CertificateModalProps {
   readonly onClose: () => void;
 }
 
-const buildFacts = (certificate: Certificate): readonly (readonly [string, string])[] => [
-  ['Credential ID', certificate.credentialId],
-  ['Issued', certificate.issuedDate.toLocaleDateString('en-GB')],
-  ['Expires', certificate.expiryDate.toLocaleDateString('en-GB')],
-  ['Category', certificate.category],
-  ['Recipient', `${certificate.userName} • ${certificate.userRole}`],
-  ['Verify online', verifyUrl(certificate)],
-];
+const fmt = (date: Date): string => date.toLocaleDateString('en-GB');
 
-/** Full certificate detail: expiry alert, branded certificate, metadata, and export actions. */
+const CertificateArt = ({
+  certificate,
+  accent,
+}: {
+  readonly certificate: Certificate;
+  readonly accent: string;
+}): ReactElement => (
+  <div
+    className={styles.certificate}
+    style={{ '--cert-accent': accent } as CSSProperties}
+  >
+    <Award className={styles.certWatermark} aria-hidden="true" />
+    <div className={styles.certSeal}>
+      <Award size={30} aria-hidden="true" />
+    </div>
+    <div className={styles.certTitle}>Certificate of Achievement</div>
+    <div className={styles.certRule} aria-hidden="true" />
+    <div className={styles.certKick}>This is to certify that</div>
+    <div className={styles.certName}>{certificate.userName}</div>
+    <div className={styles.certSub}>has successfully completed</div>
+    <div className={styles.certCourse}>{certificate.courseName}</div>
+    <span className={cn(styles.grade, styles[`grade_${gradeTone(certificate.grade)}`])}>
+      {certificate.grade.toUpperCase()}
+    </span>
+    <div className={styles.certFooter}>
+      <div className={styles.certSignBlock}>
+        <div className={styles.certSignature}>UAPP Academy</div>
+        <div className={styles.certSignLine} />
+        <div className={styles.certFootLabel}>
+          Issued {fmt(certificate.issuedDate)} · Valid until {fmt(certificate.expiryDate)}
+        </div>
+      </div>
+      <div className={styles.certVerify}>
+        <QrCode size={38} className={styles.certQr} aria-hidden="true" />
+        <div className={styles.certVerifyText}>
+          <div className={styles.certFootLabel}>Verify online</div>
+          <div className={styles.certVerifyUrl}>{verifyUrl(certificate)}</div>
+          <div className={styles.certFootLabel}>ID {certificate.credentialId}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+/** Full certificate detail: expiry alert, the branded certificate, and export actions. */
 export const CertificateModal = ({
   certificate,
   now,
@@ -34,17 +71,6 @@ export const CertificateModal = ({
   const template = useCertificateTemplate(user?.roleNames ?? [], 'course');
   const daysLeft = certificate?.daysUntilExpiry(now) ?? 0;
   const expiringSoon = certificate?.isExpiringSoon(now) ?? false;
-  // A light background image (if the template has one) reads with the accent colour; otherwise the
-  // hero uses the teal gradient from CSS, where text must stay white to remain legible.
-  const heroStyle: CSSProperties =
-    template.backgroundImage !== undefined
-      ? {
-          color: template.accentColor,
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url(${template.backgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }
-      : { color: '#fff' };
   return (
     <Modal
       open={certificate !== null}
@@ -70,29 +96,7 @@ export const CertificateModal = ({
               </span>
             </div>
           ) : null}
-          <div className={styles.certHero} style={heroStyle}>
-            <Award size={48} aria-hidden="true" />
-            <div className={styles.certKicker}>This is to certify that</div>
-            <div className={styles.certName}>{certificate.userName}</div>
-            <div className={styles.certSub}>has successfully completed</div>
-            <div className={styles.certCourse}>{certificate.courseName}</div>
-            <span
-              className={cn(
-                styles.grade,
-                styles[`grade_${gradeTone(certificate.grade)}`],
-              )}
-            >
-              GRADE: {certificate.grade.toUpperCase()}
-            </span>
-          </div>
-          <div className={styles.factGrid}>
-            {buildFacts(certificate).map(([label, value]) => (
-              <div key={label} className={styles.fact}>
-                <div className={styles.factLabel}>{label}</div>
-                <div className={styles.factValue}>{value}</div>
-              </div>
-            ))}
-          </div>
+          <CertificateArt certificate={certificate} accent={template.accentColor} />
         </div>
       ) : null}
     </Modal>

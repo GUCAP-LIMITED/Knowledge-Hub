@@ -169,54 +169,153 @@
   font-size: 0.85rem;
   font-weight: 600;
 }
-.certHero {
+/* --- The certificate artifact --- */
+.certificate {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   text-align: center;
-  padding: 1.75rem 1.25rem;
+  padding: 2.75rem 2rem 1.6rem;
   border-radius: var(--radius-lg);
-  color: var(--color-on-primary);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  background:
+    radial-gradient(130% 90% at 50% 0%, var(--color-primary-soft), transparent 55%),
+    var(--color-surface);
 }
-.certName {
-  font-size: 1.5rem;
-  font-weight: 800;
-  margin: 0.4rem 0;
+.certificate::before {
+  content: '';
+  position: absolute;
+  inset: 0.6rem;
+  border: 1.5px solid var(--cert-accent, var(--color-primary));
+  border-radius: calc(var(--radius-lg) - 3px);
+  opacity: 0.5;
+  pointer-events: none;
 }
-.certSub {
-  font-size: 0.78rem;
-  opacity: 0.85;
+.certWatermark {
+  position: absolute;
+  width: 15rem;
+  height: 15rem;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -46%);
+  color: var(--cert-accent, var(--color-primary));
+  opacity: 0.04;
+  z-index: -1;
 }
-.certCourse {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0.25rem 0 0.75rem;
-}
-.factGrid {
+.certSeal {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 0.9rem;
+  border-radius: 50%;
+  color: var(--color-on-primary);
+  background: linear-gradient(
+    135deg,
+    var(--cert-accent, var(--color-primary)),
+    var(--color-primary-strong)
+  );
+  box-shadow: 0 0 0 4px var(--color-primary-soft);
 }
-.fact {
-  padding: 0.75rem 0.85rem;
-  border-radius: var(--radius-md);
-  background-color: var(--color-bg-subtle);
-}
-.factLabel {
-  font-size: 0.62rem;
+.certTitle {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.35rem;
   font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+}
+.certRule {
+  width: 44px;
+  height: 3px;
+  margin: 0.6rem auto 1rem;
+  border-radius: var(--radius-full);
+  background: var(--cert-accent, var(--color-primary));
+}
+.certKick {
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: var(--color-text-subtle);
 }
-.factValue {
-  margin-top: 0.2rem;
-  font-size: 0.82rem;
-  font-weight: 600;
+.certName {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0.35rem 0;
   color: var(--color-text);
-  word-break: break-word;
+}
+.certSub {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+.certCourse {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0.3rem 0 0.9rem;
+  color: var(--color-text);
+}
+.certFooter {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed var(--color-border-strong);
+  text-align: left;
+}
+.certSignBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.certSignature {
+  font-family: 'Segoe Script', 'Brush Script MT', cursive;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--cert-accent, var(--color-primary));
+}
+.certSignLine {
+  width: 9rem;
+  height: 1px;
+  margin: 0.4rem 0 0.35rem;
+  background: var(--color-border-strong);
+}
+.certFootLabel {
+  font-size: 0.64rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+.certVerify {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.certQr {
+  flex-shrink: 0;
+  color: var(--color-text);
+}
+.certVerifyText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.certVerifyUrl {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  word-break: break-all;
 }
 
-@media (max-width: 640px) {
-  .factGrid {
-    grid-template-columns: 1fr;
+@media (max-width: 560px) {
+  .certFooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .certName {
+    font-size: 1.6rem;
   }
 }
