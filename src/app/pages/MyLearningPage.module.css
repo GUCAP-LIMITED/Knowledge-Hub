@@ -60,7 +60,7 @@
   height: 26px;
   border-radius: 50%;
   background-color: var(--color-success);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 .cardBody {
   display: flex;

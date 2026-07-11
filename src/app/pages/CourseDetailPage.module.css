@@ -35,7 +35,7 @@
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
   border-radius: var(--radius-xl);
   padding: 2rem;
-  color: #fff;
+  color: var(--color-on-primary);
 }
 .heroBadges {
   display: flex;
@@ -130,7 +130,7 @@
 }
 .heroPrimary {
   background: var(--color-secondary);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 .heroPrimary:disabled {
   opacity: 0.7;
@@ -138,7 +138,7 @@
 }
 .heroSecondary {
   background: rgba(255, 255, 255, 0.18);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 .card {
   background-color: var(--color-surface);
@@ -234,7 +234,7 @@
 }
 .lessonDone {
   background: var(--color-success);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 .lessonCurrent {
   background: var(--color-primary-soft);

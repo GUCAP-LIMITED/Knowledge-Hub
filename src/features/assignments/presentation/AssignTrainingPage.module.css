@@ -68,7 +68,7 @@
 }
 .tabActive .tabCount {
   background-color: rgba(255, 255, 255, 0.22);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .grid {

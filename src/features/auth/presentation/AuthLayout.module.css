@@ -30,7 +30,7 @@
   height: 38px;
   border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  color: #fff;
+  color: var(--color-on-primary);
   font-weight: 800;
   font-size: 0.85rem;
 }
@@ -104,7 +104,7 @@
   align-items: center;
   padding: 3rem;
   background: linear-gradient(150deg, var(--color-primary), var(--color-primary-strong));
-  color: #fff;
+  color: var(--color-on-primary);
 }
 
 .map {
@@ -203,7 +203,7 @@
   height: 24px;
   border-radius: 50%;
   background-color: var(--color-secondary);
-  color: #fff;
+  color: var(--color-on-primary);
   font-size: 0.78rem;
   font-weight: 700;
 }

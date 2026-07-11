@@ -12,7 +12,7 @@
   padding: 1.75rem;
   border-radius: var(--radius-xl);
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
-  color: #fff;
+  color: var(--color-on-primary);
 }
 .heroBlob {
   position: absolute;

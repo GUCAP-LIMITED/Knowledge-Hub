@@ -171,7 +171,7 @@
   flex-shrink: 0;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
-  color: #fff;
+  color: var(--color-on-primary);
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease;
@@ -368,7 +368,7 @@
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
-  color: #fff;
+  color: var(--color-on-primary);
   cursor: pointer;
 }
 .answerCheck:disabled {

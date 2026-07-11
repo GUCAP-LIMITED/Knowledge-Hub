@@ -93,7 +93,7 @@
 }
 .stepDone {
   background-color: var(--color-primary);
-  color: #fff;
+  color: var(--color-on-primary);
 }
 .stepLabel {
   font-weight: 600;
