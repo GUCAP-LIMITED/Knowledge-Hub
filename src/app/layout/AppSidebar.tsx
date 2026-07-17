@@ -103,18 +103,24 @@ const NavGroup = ({
   );
 };
 
-/** Settings' submenu is frontend-defined (its sub-pages aren't permission modules); others nest from the API. */
+/**
+ * Sub-menu links for a module. Backend children (from the registry, e.g. User Types / Hierarchy under
+ * Settings) always render; Settings additionally prepends its frontend sub-pages (`SETTINGS_SECTIONS`),
+ * which aren't permission modules so can't come from the API.
+ */
 const childrenFor = (module: SidebarModule): readonly SubLink[] => {
-  if (module.id === 'settings') {
-    return SETTINGS_SECTIONS.map((section) => ({
-      to: `/settings/${section.key}`,
-      label: section.label,
-    }));
-  }
-  return module.children.map((child) => ({
+  const fromModule = module.children.map((child) => ({
     to: child.href,
     label: child.sidebarMenu.length > 0 ? child.sidebarMenu : child.name,
   }));
+  if (module.id === 'settings') {
+    const sections = SETTINGS_SECTIONS.map((section) => ({
+      to: `/settings/${section.key}`,
+      label: section.label,
+    }));
+    return [...sections, ...fromModule];
+  }
+  return fromModule;
 };
 
 const renderModule = (module: SidebarModule, onNavigate: () => void): ReactElement => {

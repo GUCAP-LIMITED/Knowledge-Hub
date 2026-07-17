@@ -1,5 +1,5 @@
 import { type ReactElement, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { type FieldErrors, type UseFormRegister, useForm } from 'react-hook-form';
 import { Alert, Button, Select, Switch, TextField } from '@shared/ui';
 import { domainResolver } from '@shared/forms';
 import { type DataAccessScope, UserTypeName } from '../domain';
@@ -18,6 +18,35 @@ function toScope(value: number): DataAccessScope {
   if (value === 5) return 5;
   return 0;
 }
+
+const FormFields = ({
+  register,
+  errors,
+}: {
+  readonly register: UseFormRegister<AddUserTypeFormValues>;
+  readonly errors: FieldErrors<AddUserTypeFormValues>;
+}): ReactElement => (
+  <div className={styles.formGrid}>
+    <TextField
+      label="Name"
+      placeholder="e.g. Regional Lead"
+      {...(errors.name?.message !== undefined ? { error: errors.name.message } : {})}
+      {...register('name')}
+    />
+    <TextField label="Description" placeholder="Optional" {...register('description')} />
+    <TextField
+      label="Hierarchy level"
+      type="number"
+      min={0}
+      {...register('hierarchyLevel', { valueAsNumber: true })}
+    />
+    <Select label="Data access scope" {...register('dataAccessScope')}>
+      <option value="0">Self</option>
+      <option value="5">Team</option>
+      <option value="10">Branch — all</option>
+    </Select>
+  </div>
+);
 
 /**
  * Create form for a custom user type. The name delegates validation to the UserTypeName value object
@@ -65,30 +94,7 @@ export const AddUserTypeForm = (): ReactElement => {
         void onSubmit(event);
       }}
     >
-      <div className={styles.formGrid}>
-        <TextField
-          label="Name"
-          placeholder="e.g. Regional Lead"
-          {...(errors.name?.message !== undefined ? { error: errors.name.message } : {})}
-          {...register('name')}
-        />
-        <TextField
-          label="Description"
-          placeholder="Optional"
-          {...register('description')}
-        />
-        <TextField
-          label="Hierarchy level"
-          type="number"
-          min={0}
-          {...register('hierarchyLevel', { valueAsNumber: true })}
-        />
-        <Select label="Data access scope" {...register('dataAccessScope')}>
-          <option value="0">Self</option>
-          <option value="5">Team</option>
-          <option value="10">Branch — all</option>
-        </Select>
-      </div>
+      <FormFields register={register} errors={errors} />
 
       <div className={styles.formFooter}>
         <Switch

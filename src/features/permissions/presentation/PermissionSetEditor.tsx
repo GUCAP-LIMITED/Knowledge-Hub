@@ -175,6 +175,64 @@ const GranularPane = ({
   );
 };
 
+const EditorHead = ({
+  name,
+  description,
+  enabled,
+  saving,
+  onSave,
+}: {
+  readonly name: string;
+  readonly description: string | null;
+  readonly enabled: number;
+  readonly saving: boolean;
+  readonly onSave: () => void;
+}): ReactElement => (
+  <div className={styles.editorHead}>
+    <span className={styles.editorIcon}>
+      <Shield size={18} aria-hidden />
+    </span>
+    <div className={styles.editorTitleWrap}>
+      <h3 className={styles.editorTitle}>{name}</h3>
+      <p className={styles.editorDesc}>
+        {description !== null ? `${description} · ` : ''}
+        {enabled} permissions enabled
+      </p>
+    </div>
+    <Button size="sm" onClick={onSave} isLoading={saving}>
+      <Save size={14} aria-hidden /> Save changes
+    </Button>
+  </div>
+);
+
+const ModuleRail = ({
+  modules,
+  selectedId,
+  grants,
+  onSelect,
+  onToggleBase,
+}: {
+  readonly modules: readonly PermissionModule[];
+  readonly selectedId: string;
+  readonly grants: Grants;
+  readonly onSelect: (id: string) => void;
+  readonly onToggleBase: (module: PermissionModule, on: boolean) => void;
+}): ReactElement => (
+  <div className={styles.moduleList}>
+    <span className={styles.railHead}>Module access (sidebar menu)</span>
+    {modules.map((module) => (
+      <RailItem
+        key={module.moduleId}
+        module={module}
+        active={module.moduleId === selectedId}
+        grants={grants}
+        onSelect={onSelect}
+        onToggleBase={onToggleBase}
+      />
+    ))}
+  </div>
+);
+
 /** Two-pane editor for one permission set: module rail (left) + granular grid (right). */
 export const PermissionSetEditor = ({
   detail,
@@ -217,21 +275,13 @@ export const PermissionSetEditor = ({
 
   return (
     <div className={styles.editor}>
-      <div className={styles.editorHead}>
-        <span className={styles.editorIcon}>
-          <Shield size={18} aria-hidden />
-        </span>
-        <div className={styles.editorTitleWrap}>
-          <h3 className={styles.editorTitle}>{detail.name}</h3>
-          <p className={styles.editorDesc}>
-            {detail.description !== null ? `${detail.description} · ` : ''}
-            {enabled} permissions enabled
-          </p>
-        </div>
-        <Button size="sm" onClick={onSave} isLoading={updateSet.isPending}>
-          <Save size={14} aria-hidden /> Save changes
-        </Button>
-      </div>
+      <EditorHead
+        name={detail.name}
+        description={detail.description}
+        enabled={enabled}
+        saving={updateSet.isPending}
+        onSave={onSave}
+      />
 
       {updateSet.isError ? (
         <Alert tone="error" title="Could not save">
@@ -240,19 +290,13 @@ export const PermissionSetEditor = ({
       ) : null}
 
       <div className={styles.editorBody}>
-        <div className={styles.moduleList}>
-          <span className={styles.railHead}>Module access (sidebar menu)</span>
-          {modules.map((module) => (
-            <RailItem
-              key={module.moduleId}
-              module={module}
-              active={module.moduleId === selected?.moduleId}
-              grants={grants}
-              onSelect={setSelectedId}
-              onToggleBase={setBase}
-            />
-          ))}
-        </div>
+        <ModuleRail
+          modules={modules}
+          selectedId={selected?.moduleId ?? ''}
+          grants={grants}
+          onSelect={setSelectedId}
+          onToggleBase={setBase}
+        />
 
         {selected !== undefined ? (
           <GranularPane
