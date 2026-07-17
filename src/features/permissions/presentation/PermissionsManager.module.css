@@ -1,0 +1,553 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* --- Section header --- */
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.9rem;
+}
+.sectionTitle {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+.pageTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.pageSub {
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+.center {
+  display: grid;
+  place-items: center;
+  padding: 2.5rem 0;
+}
+
+/* --- Permission-set cards --- */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.card {
+  position: relative;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.card:hover {
+  border-color: var(--color-primary);
+}
+.cardActive {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+  box-shadow: var(--ring);
+}
+.cardSelect {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cardIcon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+}
+.cardCheck {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  border: 2px solid var(--color-surface);
+}
+.cardName {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+.cardDesc {
+  font-size: 0.78rem;
+  color: var(--color-text-subtle);
+  min-height: 2.1rem;
+}
+.cardCount {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--color-border);
+}
+.cardEdit {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+.cardEdit:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.addCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 120px;
+  padding: 1rem;
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  text-align: center;
+}
+.addCard:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.addIcon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-subtle);
+}
+.addTitle {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.addSub {
+  font-size: 0.74rem;
+}
+
+/* --- User-type cards --- */
+.typeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+.typeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.15rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-muted);
+}
+.typeHead {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.typeIcon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+.typeText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.typeName {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+.typeMeta {
+  font-size: 0.76rem;
+  color: var(--color-text-subtle);
+}
+.typeSelect {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.typeSelectName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.typePill {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-md);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+.dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+.applyText {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* --- Editor shell --- */
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+}
+.editorHead {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.editorIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+.editorTitleWrap {
+  margin-right: auto;
+  min-width: 0;
+}
+.editorTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+.editorDesc {
+  margin: 0.1rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-text-subtle);
+}
+.editorBody {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+/* --- Module access rail --- */
+.moduleList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-height: 460px;
+  overflow-y: auto;
+}
+.railHead {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+  padding: 0 0.2rem 0.3rem;
+}
+.moduleItem {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid transparent;
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-md);
+}
+.moduleItemActive {
+  border-color: var(--color-primary);
+  border-left-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+}
+.moduleSelect {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+.moduleGlyph {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+.moduleText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.moduleName {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.moduleMeta {
+  font-size: 0.72rem;
+  color: var(--color-text-subtle);
+}
+
+/* --- Granular grid pane --- */
+.gridPane {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.gridEmpty {
+  display: grid;
+  place-items: center;
+  gap: 0.3rem;
+  padding: 3rem 0;
+  color: var(--color-text-subtle);
+  text-align: center;
+}
+.gridHead {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.gridIcon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.gridTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.gridSub {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--color-text-subtle);
+}
+.detailLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+  margin-top: 0.35rem;
+}
+.baseCard {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-muted);
+}
+.baseCardOn {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+}
+.baseIcon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+.requiredPill {
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.granGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 0.6rem;
+}
+.granCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-subtle);
+}
+.granCardOn {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  background-color: var(--color-primary-soft);
+}
+.granCardOff {
+  opacity: 0.55;
+}
+.granText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+}
+.granName {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+.granDesc {
+  font-size: 0.74rem;
+  color: var(--color-text-subtle);
+}
+.requires {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+  margin-top: 0.15rem;
+}
+.requiresChip {
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-weight: 600;
+}
+
+/* --- Form modal (create / rename) --- */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.swatchField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.swatchLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.swatchRow {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.swatch {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+.swatchActive {
+  border-color: var(--color-text);
+  transform: scale(1.1);
+}
+.swatchInner {
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--radius-full);
+}
+.formFooter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.formSpacer {
+  flex: 1;
+}
+
+@media (max-width: 860px) {
+  .editorBody {
+    grid-template-columns: 1fr;
+  }
+}

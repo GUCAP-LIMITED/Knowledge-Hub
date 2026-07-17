@@ -1,12 +1,6 @@
 import { Suspense, lazy, type ReactElement } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import {
-  ForgotPasswordPage,
-  LoginPage,
-  ProtectedRoute,
-  SignupPage,
-  VerifyPage,
-} from '@features/auth';
+import { LoginPage, ProtectedRoute } from '@features/auth';
 import { AppLayout } from '@app/layout/AppLayout';
 import { RequireCapability } from '@app/router/RequireCapability';
 import { Spinner } from '@shared/ui';
@@ -69,6 +63,20 @@ const AdminSettingsPage = lazy(async () => ({
   default: (await import('@features/users/presentation/AdminSettingsPage'))
     .AdminSettingsPage,
 }));
+const UserTypesPage = lazy(async () => ({
+  default: (await import('@features/user-types/presentation/UserTypesPage'))
+    .UserTypesPage,
+}));
+const HierarchyPage = lazy(async () => ({
+  default: (await import('@features/hierarchy/presentation/HierarchyPage')).HierarchyPage,
+}));
+const PermissionsPage = lazy(async () => ({
+  default: (await import('@features/permissions/presentation/PermissionsPage'))
+    .PermissionsPage,
+}));
+const ConfigurableDashboardPage = lazy(async () => ({
+  default: (await import('@features/dashboard/presentation/DashboardPage')).DashboardPage,
+}));
 const UploadPage = lazy(async () => ({
   default: (await import('@features/submissions/presentation/UploadPage')).UploadPage,
 }));
@@ -92,9 +100,6 @@ export const AppRouter = (): ReactElement => {
     <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/verify" element={<VerifyPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
@@ -135,6 +140,10 @@ export const AppRouter = (): ReactElement => {
               <Route element={<RequireCapability module="reviews" cap="moderate" />}>
                 <Route path="/course-reviews" element={<CourseReviewsPage />} />
               </Route>
+              <Route path="/user-types" element={<UserTypesPage />} />
+              <Route path="/hierarchy" element={<HierarchyPage />} />
+              <Route path="/permissions" element={<PermissionsPage />} />
+              <Route path="/dashboard" element={<ConfigurableDashboardPage />} />
               <Route element={<RequireCapability module="settings" cap="manage" />}>
                 <Route
                   path="/settings"

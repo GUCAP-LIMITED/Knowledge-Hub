@@ -11,6 +11,10 @@
 }
 
 .sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -63,9 +67,14 @@
 }
 
 .nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
 }
 
 .section {
@@ -75,6 +84,25 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-text-subtle);
+}
+
+.navBadge {
+  margin-left: auto;
+  min-width: 1.25rem;
+  padding: 0 0.35rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.navSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .navLink {

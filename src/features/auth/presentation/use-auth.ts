@@ -19,8 +19,8 @@ export interface UseAuthResult {
   readonly isAuthenticated: boolean;
   readonly isInitializing: boolean;
   readonly isBusy: boolean;
-  readonly login: (email: string, password: string) => Promise<boolean>;
-  readonly register: (email: string, password: string) => Promise<boolean>;
+  /** Redirect to the Uapp Portal to begin SSO sign-in. */
+  readonly beginSso: () => void;
   readonly logout: () => Promise<void>;
   readonly clearError: () => void;
 }
@@ -33,8 +33,7 @@ export const useAuth = (): UseAuthResult => {
   const status = useAuthState((state) => state.status);
   const user = useAuthState((state) => state.session?.user ?? null);
   const error = useAuthState((state) => state.error);
-  const login = useAuthState((state) => state.login);
-  const register = useAuthState((state) => state.register);
+  const beginSso = useAuthState((state) => state.beginSso);
   const logout = useAuthState((state) => state.logout);
   const clearError = useAuthState((state) => state.clearError);
 
@@ -45,8 +44,7 @@ export const useAuth = (): UseAuthResult => {
     isAuthenticated: status === 'authenticated',
     isInitializing: status === 'initializing',
     isBusy: status === 'authenticating',
-    login,
-    register,
+    beginSso,
     logout,
     clearError,
   };

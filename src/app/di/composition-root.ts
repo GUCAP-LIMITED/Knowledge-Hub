@@ -32,6 +32,10 @@ import {
 } from '@features/notifications';
 import { createUsersModule, type UsersModule } from '@features/users';
 import { createQuizzesModule, type QuizzesModule } from '@features/quizzes';
+import { createUserTypesModule, type UserTypesModule } from '@features/user-types';
+import { createHierarchyModule, type HierarchyModule } from '@features/hierarchy';
+import { createPermissionsModule, type PermissionsModule } from '@features/permissions';
+import { createDashboardModule, type DashboardModule } from '@features/dashboard';
 
 /**
  * A late-bound sink for surfacing mutation failures as UI toasts. The QueryClient is built before
@@ -69,6 +73,10 @@ export interface AppComposition {
   readonly notificationsModule: NotificationsModule;
   readonly usersModule: UsersModule;
   readonly quizzesModule: QuizzesModule;
+  readonly userTypesModule: UserTypesModule;
+  readonly hierarchyModule: HierarchyModule;
+  readonly permissionsModule: PermissionsModule;
+  readonly dashboardModule: DashboardModule;
   readonly queryClient: QueryClient;
 }
 
@@ -141,13 +149,15 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
     { refresh: () => refreshSession(), logger },
   );
 
-  // Demo auth: the in-memory directory authenticates the seeded UAPP accounts offline.
+  // Auth: SSO only — redirect to the Uapp Portal, exchange the returned `?token=` secret at the
+  // OpenIddict `/connect/token` endpoint, and decode identity from the JWT.
   const authStore = createAuthModule({
     httpClient,
     clock,
     logger,
     storage,
-    demoAuth: true,
+    portal: { loginUrl: config.auth.portalLoginUrl, key: config.auth.portalKey },
+    oauth: { clientId: config.auth.clientId, scope: config.auth.scope },
     setAccessToken: (token) => {
       accessToken = token ?? undefined;
     },
@@ -166,6 +176,10 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
   const notificationsModule = createNotificationsModule({ logger });
   const usersModule = createUsersModule({ logger });
   const quizzesModule = createQuizzesModule({ logger });
+  const userTypesModule = createUserTypesModule({ httpClient, logger });
+  const hierarchyModule = createHierarchyModule({ httpClient, logger });
+  const permissionsModule = createPermissionsModule({ httpClient, logger });
+  const dashboardModule = createDashboardModule({ httpClient, logger });
 
   logger.info('Application composition complete');
 
@@ -184,6 +198,10 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
     notificationsModule,
     usersModule,
     quizzesModule,
+    userTypesModule,
+    hierarchyModule,
+    permissionsModule,
+    dashboardModule,
     queryClient,
   };
 };

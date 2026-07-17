@@ -11,9 +11,6 @@ export {
   useAuth,
   ProtectedRoute,
   LoginPage,
-  SignupPage,
-  VerifyPage,
-  ForgotPasswordPage,
   type UseAuthResult,
 } from './presentation';
 export type { AuthenticatedUser, AuthSession } from './domain';

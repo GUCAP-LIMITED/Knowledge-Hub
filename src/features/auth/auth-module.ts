@@ -1,19 +1,18 @@
 import type { HttpClient } from '@core/http';
 import type { Logger } from '@core/logger';
 import type { Clock } from '@core/time';
-import type { AuthGateway } from './domain';
 import {
-  LoginUseCase,
+  ExchangeSsoSecretUseCase,
   LogoutUseCase,
   RefreshSessionUseCase,
-  RegisterUseCase,
   RestoreSessionUseCase,
 } from './application';
 import {
-  AuthHttpGateway,
-  InMemoryAuthGateway,
+  AcademyAuthGateway,
+  type AcademyOAuthConfig,
   LocalSessionStore,
   type KeyValueStorage,
+  type PortalConfig,
 } from './infrastructure';
 import { createAuthStore, type AuthStore } from './store';
 
@@ -24,65 +23,45 @@ export interface AuthModuleDeps {
   readonly storage: KeyValueStorage;
   /** Bridges the active token into the HTTP layer (set by the composition root). */
   readonly setAccessToken: (token: string | null) => void;
-  /** When true, authenticate against the in-memory demo directory instead of the HTTP API. */
-  readonly demoAuth?: boolean;
+  /** Uapp Portal SSO redirect config. */
+  readonly portal: PortalConfig;
+  /** OpenIddict client id + scope for the token exchange. */
+  readonly oauth: AcademyOAuthConfig;
 }
 
 /**
- * Composition root *for the auth feature*. Wires concrete infrastructure to the use cases and
- * returns a ready-to-use store. This is the only place inside the feature where layers are joined;
- * everything else depends on abstractions. `demoAuth` swaps the gateway adapter — nothing in the
- * domain/application/presentation changes, which is the whole point of the port.
+ * Composition root *for the auth feature*. Wires the concrete SSO gateway to the use cases and
+ * returns a ready-to-use store. This is the only place inside the feature where layers are joined.
  */
 export const createAuthModule = (deps: AuthModuleDeps): AuthStore => {
-  const authGateway: AuthGateway =
-    deps.demoAuth === true
-      ? new InMemoryAuthGateway({ clock: deps.clock, logger: deps.logger })
-      : new AuthHttpGateway({
-          httpClient: deps.httpClient,
-          clock: deps.clock,
-          logger: deps.logger,
-        });
+  const authGateway = new AcademyAuthGateway({
+    httpClient: deps.httpClient,
+    clock: deps.clock,
+    logger: deps.logger,
+    oauth: deps.oauth,
+  });
 
   const sessionStore = new LocalSessionStore(deps.storage, deps.logger);
 
-  const loginUseCase = new LoginUseCase({
-    authGateway,
-    sessionStore,
-    logger: deps.logger,
-  });
-
-  const registerUseCase = new RegisterUseCase({
-    authGateway,
-    sessionStore,
-    logger: deps.logger,
-  });
-
-  const logoutUseCase = new LogoutUseCase({
-    authGateway,
-    sessionStore,
-    logger: deps.logger,
-  });
-
-  const restoreSessionUseCase = new RestoreSessionUseCase({
-    authGateway,
-    sessionStore,
-    clock: deps.clock,
-    logger: deps.logger,
-  });
-
-  const refreshSessionUseCase = new RefreshSessionUseCase({
-    authGateway,
-    sessionStore,
-    logger: deps.logger,
-  });
-
   return createAuthStore({
-    loginUseCase,
-    registerUseCase,
-    logoutUseCase,
-    restoreSessionUseCase,
-    refreshSessionUseCase,
+    exchangeSsoUseCase: new ExchangeSsoSecretUseCase({
+      authGateway,
+      sessionStore,
+      logger: deps.logger,
+    }),
+    logoutUseCase: new LogoutUseCase({ authGateway, sessionStore, logger: deps.logger }),
+    restoreSessionUseCase: new RestoreSessionUseCase({
+      authGateway,
+      sessionStore,
+      clock: deps.clock,
+      logger: deps.logger,
+    }),
+    refreshSessionUseCase: new RefreshSessionUseCase({
+      authGateway,
+      sessionStore,
+      logger: deps.logger,
+    }),
     setAccessToken: deps.setAccessToken,
+    portal: deps.portal,
   });
 };

@@ -46,7 +46,6 @@ export const AppLayout = (): ReactElement => {
   return (
     <div className={cn(styles.shell, collapsed && styles.shellCollapsed)}>
       <AppSidebar
-        user={user}
         open={navOpen}
         onNavigate={() => {
           setNavOpen(false);

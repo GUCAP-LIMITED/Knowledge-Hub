@@ -1,26 +1,14 @@
-import { useState, type ReactElement } from 'react';
+import { Fragment, useState, type ReactElement } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import {
-  LayoutDashboard,
-  PlayCircle,
-  Lightbulb,
-  FolderOpen,
-  Award,
-  BookOpen,
-  Star,
-  ChevronDown,
-  FileCheck,
-  ClipboardList,
-  MessageSquare,
-  BarChart3,
-  CalendarCheck,
-  Upload,
-  type LucideIcon,
-  Settings,
-} from 'lucide-react';
+import { ChevronDown, type LucideIcon } from 'lucide-react';
 import { cn } from '@shared/utils';
-import type { AuthenticatedUser } from '@features/auth';
-import { SETTINGS_SECTIONS, useMyCapabilities, type CapId } from '@features/users';
+import { Skeleton } from '@shared/ui';
+import {
+  iconFor,
+  useMyPermissionModules,
+  type SidebarModule,
+} from '@features/permissions';
+import { SETTINGS_SECTIONS } from '@features/users';
 import styles from './AppLayout.module.css';
 
 interface SubLink {
@@ -28,120 +16,18 @@ interface SubLink {
   readonly label: string;
 }
 
-/** A capability that must be held for a nav entry to show (in addition to its role gate). */
-interface NavCap {
-  readonly module: string;
-  readonly cap: CapId;
-}
-
-type NavEntry =
-  | {
-      readonly kind: 'section';
-      readonly label: string;
-      readonly anyOf?: readonly string[];
-    }
-  | {
-      readonly kind: 'link';
-      readonly to: string;
-      readonly label: string;
-      readonly icon: LucideIcon;
-      readonly anyOf?: readonly string[];
-      readonly cap?: NavCap;
-      readonly children?: readonly SubLink[];
-    };
-
-const SETTINGS_CHILDREN: readonly SubLink[] = SETTINGS_SECTIONS.map((section) => ({
-  to: `/settings/${section.key}`,
-  label: section.label,
-}));
-
-const NAV: readonly NavEntry[] = [
-  { kind: 'section', label: 'Learn' },
-  { kind: 'link', to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  {
-    kind: 'link',
-    to: '/my-learning',
-    label: 'My Learning',
-    icon: BookOpen,
-    anyOf: ['manager', 'consultant'],
-  },
-  { kind: 'link', to: '/courses', label: 'Courses', icon: PlayCircle },
-  { kind: 'link', to: '/tutorials', label: 'Tutorials', icon: Lightbulb },
-  { kind: 'link', to: '/resources', label: 'Resources', icon: FolderOpen },
-  { kind: 'link', to: '/certificates', label: 'Certificates', icon: Award },
-  { kind: 'link', to: '/reviews', label: 'Reviews', icon: Star },
-  { kind: 'section', label: 'Workspace', anyOf: ['admin', 'manager'] },
-  {
-    kind: 'link',
-    to: '/upload',
-    label: 'Upload Document',
-    icon: Upload,
-    anyOf: ['admin', 'manager'],
-    cap: { module: 'submissions', cap: 'create' },
-  },
-  {
-    kind: 'link',
-    to: '/submissions',
-    label: 'My Submissions',
-    icon: FileCheck,
-    anyOf: ['admin', 'manager'],
-    cap: { module: 'submissions', cap: 'view' },
-  },
-  { kind: 'section', label: 'Team', anyOf: ['admin'] },
-  {
-    kind: 'link',
-    to: '/team-progress',
-    label: 'Team Progress',
-    icon: BarChart3,
-    anyOf: ['admin'],
-    cap: { module: 'team', cap: 'view' },
-  },
-  {
-    kind: 'link',
-    to: '/assign',
-    label: 'Assign Training',
-    icon: CalendarCheck,
-    anyOf: ['admin'],
-    cap: { module: 'team', cap: 'assign' },
-  },
-  { kind: 'section', label: 'Administration', anyOf: ['admin'] },
-  {
-    kind: 'link',
-    to: '/approvals',
-    label: 'Approvals',
-    icon: ClipboardList,
-    anyOf: ['admin'],
-    cap: { module: 'approvals', cap: 'view' },
-  },
-  {
-    kind: 'link',
-    to: '/course-reviews',
-    label: 'Course Reviews',
-    icon: MessageSquare,
-    anyOf: ['admin'],
-    cap: { module: 'reviews', cap: 'moderate' },
-  },
-  {
-    kind: 'link',
-    to: '/settings/platform',
-    label: 'Settings',
-    icon: Settings,
-    anyOf: ['admin'],
-    cap: { module: 'settings', cap: 'manage' },
-    children: SETTINGS_CHILDREN,
-  },
-];
-
 const NavItem = ({
   to,
   label,
   icon: Icon,
+  count,
   onNavigate,
 }: {
-  to: string;
-  label: string;
-  icon: LucideIcon;
-  onNavigate: () => void;
+  readonly to: string;
+  readonly label: string;
+  readonly icon: LucideIcon;
+  readonly count: number | null;
+  readonly onNavigate: () => void;
 }): ReactElement => (
   <NavLink
     to={to}
@@ -151,6 +37,9 @@ const NavItem = ({
   >
     <Icon size={18} aria-hidden="true" />
     {label}
+    {count !== null && count > 0 ? (
+      <span className={styles.navBadge}>{count}</span>
+    ) : null}
   </NavLink>
 );
 
@@ -161,11 +50,11 @@ const NavGroup = ({
   items,
   onNavigate,
 }: {
-  to: string;
-  label: string;
-  icon: LucideIcon;
-  items: readonly SubLink[];
-  onNavigate: () => void;
+  readonly to: string;
+  readonly label: string;
+  readonly icon: LucideIcon;
+  readonly items: readonly SubLink[];
+  readonly onNavigate: () => void;
 }): ReactElement => {
   const location = useLocation();
   const base = `/${to.split('/')[1] ?? ''}`;
@@ -214,57 +103,66 @@ const NavGroup = ({
   );
 };
 
-const renderEntry = (entry: NavEntry, onNavigate: () => void): ReactElement => {
-  if (entry.kind === 'section') {
-    return (
-      <div key={`section-${entry.label}`} className={styles.section}>
-        {entry.label}
-      </div>
-    );
+/** Settings' submenu is frontend-defined (its sub-pages aren't permission modules); others nest from the API. */
+const childrenFor = (module: SidebarModule): readonly SubLink[] => {
+  if (module.id === 'settings') {
+    return SETTINGS_SECTIONS.map((section) => ({
+      to: `/settings/${section.key}`,
+      label: section.label,
+    }));
   }
-  if (entry.children !== undefined) {
-    return (
-      <NavGroup
-        key={entry.to}
-        to={entry.to}
-        label={entry.label}
-        icon={entry.icon}
-        items={entry.children}
-        onNavigate={onNavigate}
-      />
-    );
-  }
-  return (
+  return module.children.map((child) => ({
+    to: child.href,
+    label: child.sidebarMenu.length > 0 ? child.sidebarMenu : child.name,
+  }));
+};
+
+const renderModule = (module: SidebarModule, onNavigate: () => void): ReactElement => {
+  const Icon = iconFor(module.icon);
+  const label = module.sidebarMenu.length > 0 ? module.sidebarMenu : module.name;
+  const children = childrenFor(module);
+  return children.length > 0 ? (
+    <NavGroup
+      key={module.id}
+      to={module.href}
+      label={label}
+      icon={Icon}
+      items={children}
+      onNavigate={onNavigate}
+    />
+  ) : (
     <NavItem
-      key={entry.to}
-      to={entry.to}
-      label={entry.label}
-      icon={entry.icon}
+      key={module.id}
+      to={module.href}
+      label={label}
+      icon={Icon}
+      count={module.count}
       onNavigate={onNavigate}
     />
   );
 };
 
+const SidebarSkeleton = (): ReactElement => (
+  <div className={styles.navSkeleton}>
+    {['a', 'b', 'c', 'd', 'e', 'f', 'g'].map((key) => (
+      <Skeleton key={key} height={32} />
+    ))}
+  </div>
+);
+
 export interface AppSidebarProps {
-  readonly user: AuthenticatedUser | null;
   /** Whether the mobile drawer is open (ignored on desktop, where it is always visible). */
   readonly open: boolean;
   /** Called when a nav item is chosen, to dismiss the mobile drawer. */
   readonly onNavigate: () => void;
 }
 
-/** Brand + role-aware grouped navigation. Acts as a fixed sidebar on desktop, a drawer on mobile. */
-export const AppSidebar = ({ user, open, onNavigate }: AppSidebarProps): ReactElement => {
-  const { can } = useMyCapabilities();
-
-  // Role is the outer backstop; a capability (when present) refines visibility within it.
-  const visible = (entry: NavEntry): boolean => {
-    const roleOk = entry.anyOf === undefined || (user?.hasAnyRole(entry.anyOf) ?? false);
-    if (!roleOk) return false;
-    return entry.kind === 'link' && entry.cap !== undefined
-      ? can(entry.cap.module, entry.cap.cap)
-      : true;
-  };
+/**
+ * Brand + permission-driven grouped navigation, rendered from `GET /api/app/my/permission-modules`
+ * (the backend registry is the single source of truth). Fixed sidebar on desktop, drawer on mobile.
+ */
+export const AppSidebar = ({ open, onNavigate }: AppSidebarProps): ReactElement => {
+  const { data: groups, isPending } = useMyPermissionModules();
 
   return (
     <aside className={cn(styles.sidebar, open && styles.sidebarOpen)}>
@@ -276,7 +174,16 @@ export const AppSidebar = ({ user, open, onNavigate }: AppSidebarProps): ReactEl
         </span>
       </div>
       <nav className={styles.nav}>
-        {NAV.filter(visible).map((entry) => renderEntry(entry, onNavigate))}
+        {isPending ? (
+          <SidebarSkeleton />
+        ) : (
+          (groups ?? []).map((group) => (
+            <Fragment key={group.id}>
+              <div className={styles.section}>{group.label}</div>
+              {group.items.map((module) => renderModule(module, onNavigate))}
+            </Fragment>
+          ))
+        )}
       </nav>
     </aside>
   );

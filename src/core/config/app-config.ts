@@ -12,22 +12,37 @@ export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'silent';
  */
 export interface AppConfig {
   readonly api: {
+    /** API host root (no `/api` suffix); data calls use absolute `/api/app/...`. */
     readonly baseUrl: string;
   };
   readonly logLevel: LogLevel;
+  /** Uapp Portal SSO redirect + OpenIddict token-exchange configuration. */
+  readonly auth: {
+    readonly portalLoginUrl: string;
+    readonly portalKey: string;
+    readonly clientId: string;
+    readonly scope: string;
+  };
   /** Optional Sentry DSN. When absent, error reporting stays disabled. */
   readonly sentryDsn?: string;
 }
 
 const EnvSchema = z.object({
-  // Defaulted so the demo runs with zero setup: this build serves all data from in-memory
-  // gateways, so the HTTP base URL is never actually called. Set VITE_API_BASE_URL in .env.local
-  // (and bind an HTTP gateway) to point at a real backend.
+  // API host root (e.g. http://localhost:5080). `/connect/token` sits off the root; data endpoints
+  // are absolute `/api/app/...`.
   VITE_API_BASE_URL: z
     .string()
     .url('VITE_API_BASE_URL must be a valid URL')
-    .default('http://localhost/api'),
+    .default('http://localhost:5080'),
   VITE_LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error', 'silent']).default('info'),
+  // Uapp Portal SSO login page the app redirects to; it returns with `?token=<secret>`.
+  VITE_PORTAL_LOGIN_URL: z
+    .string()
+    .url('VITE_PORTAL_LOGIN_URL must be a valid URL')
+    .optional(),
+  VITE_PORTAL_KEY: z.string().default(''),
+  VITE_OAUTH_CLIENT_ID: z.string().default('UappAcademy_App'),
+  VITE_OAUTH_SCOPE: z.string().default('UappAcademy offline_access'),
   VITE_SENTRY_DSN: z.string().optional(),
 });
 
@@ -53,6 +68,12 @@ export const loadConfig = (rawEnv: Record<string, unknown>): AppConfig => {
       baseUrl: env.VITE_API_BASE_URL.replace(/\/+$/, ''),
     }),
     logLevel: env.VITE_LOG_LEVEL,
+    auth: Object.freeze({
+      portalLoginUrl: env.VITE_PORTAL_LOGIN_URL ?? '',
+      portalKey: env.VITE_PORTAL_KEY,
+      clientId: env.VITE_OAUTH_CLIENT_ID,
+      scope: env.VITE_OAUTH_SCOPE,
+    }),
     // Only present when actually configured, so `=== undefined` checks stay meaningful.
     ...(sentryDsn !== undefined && sentryDsn.length > 0 ? { sentryDsn } : {}),
   });

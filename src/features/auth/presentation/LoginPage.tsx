@@ -1,84 +1,44 @@
-import { useState, type FormEvent, type ReactElement } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Lock, Mail } from 'lucide-react';
+import type { ReactElement } from 'react';
+import { Navigate } from 'react-router-dom';
+import { LogIn } from 'lucide-react';
 import { Alert, Spinner } from '@shared/ui';
 import { useAuth } from './use-auth';
 import { AuthLayout } from './AuthLayout';
-import { AuthField } from './AuthField';
 import styles from './AuthLayout.module.css';
 
-/** Sign-in screen. Collects an email + password and authenticates against the demo directory. */
+/** Sign-in screen. A single button hands off to the Uapp Portal for SSO. */
 export const LoginPage = (): ReactElement => {
-  // Prefilled for the offline demo directory. Try manager@uapp.com or consultant@uapp.com too.
-  const [email, setEmail] = useState('admin@uapp.com');
-  const [password, setPassword] = useState('password');
-  const { login, error, isBusy } = useAuth();
-  const navigate = useNavigate();
+  const { beginSso, status, error, isAuthenticated, isBusy } = useAuth();
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();
-    const succeeded = await login(email, password);
-    if (succeeded) {
-      navigate('/', { replace: true });
-    }
-  };
-
-  const canSubmit = email.trim() !== '' && password.trim() !== '';
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
-    <AuthLayout
-      title="Welcome back"
-      subtitle="Sign in to continue your journey"
-      footer={
-        <span>
-          Don&apos;t have an account?{' '}
-          <Link to="/signup" className={styles.link}>
-            Sign up
-          </Link>
-        </span>
-      }
-    >
+    <AuthLayout subtitle="Sign in with your UAPP account to continue.">
       {error !== null ? (
         <Alert tone="error" title="Sign-in failed">
           {error}
         </Alert>
       ) : null}
 
-      <form
-        className={styles.form}
-        onSubmit={(event) => {
-          void handleSubmit(event);
-        }}
-      >
-        <AuthField
-          label="Email Address"
-          icon={Mail}
-          type="email"
-          autoComplete="email"
-          value={email}
-          onChange={setEmail}
-          placeholder="name@email.com"
-          required
-        />
-        <AuthField
-          label="Password"
-          icon={Lock}
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={setPassword}
-          placeholder="Password"
-          required
-        />
-        <div className={styles.formRowEnd}>
-          <Link to="/forgot-password" className={styles.link}>
-            Forgot password?
-          </Link>
+      {status === 'authenticating' ? (
+        <div className={styles.form}>
+          <Spinner size="lg" label="Signing you in" />
         </div>
-        <button type="submit" className={styles.submit} disabled={!canSubmit || isBusy}>
-          {isBusy ? <Spinner size="sm" /> : 'Log in'}
-        </button>
-      </form>
+      ) : (
+        <div className={styles.form}>
+          <button
+            type="button"
+            className={styles.submit}
+            onClick={beginSso}
+            disabled={isBusy}
+          >
+            <LogIn size={18} aria-hidden />
+            Sign in with UAPP
+          </button>
+        </div>
+      )}
     </AuthLayout>
   );
 };

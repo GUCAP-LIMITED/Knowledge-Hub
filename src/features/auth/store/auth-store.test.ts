@@ -8,10 +8,9 @@ import {
   silentLogger,
 } from '@testing';
 import {
-  LoginUseCase,
+  ExchangeSsoSecretUseCase,
   LogoutUseCase,
   RefreshSessionUseCase,
-  RegisterUseCase,
   RestoreSessionUseCase,
 } from '../application';
 import { createAuthStore, type AuthStore } from './auth-store';
@@ -31,8 +30,11 @@ const createHarness = (): Harness => {
   const tokens: (string | null)[] = [];
 
   const store = createAuthStore({
-    loginUseCase: new LoginUseCase({ authGateway: gateway, sessionStore, logger }),
-    registerUseCase: new RegisterUseCase({ authGateway: gateway, sessionStore, logger }),
+    exchangeSsoUseCase: new ExchangeSsoSecretUseCase({
+      authGateway: gateway,
+      sessionStore,
+      logger,
+    }),
     logoutUseCase: new LogoutUseCase({ authGateway: gateway, sessionStore, logger }),
     restoreSessionUseCase: new RestoreSessionUseCase({
       authGateway: gateway,
@@ -46,6 +48,7 @@ const createHarness = (): Harness => {
       logger,
     }),
     setAccessToken: (token) => tokens.push(token),
+    portal: { loginUrl: 'https://portal.example/login', key: 'k' },
   });
 
   return { store, gateway, sessionStore, tokens };
@@ -62,42 +65,23 @@ describe('auth store', () => {
     expect(harness.store.getState().status).toBe('initializing');
   });
 
-  it('authenticates and exposes the user on successful login', async () => {
+  it('authenticates and exposes the user on a successful SSO exchange', async () => {
     const session = buildAuthSession({ accessToken: 'token-xyz' });
-    harness.gateway.authenticateResult = ok(session);
+    harness.gateway.exchangeResult = ok(session);
 
-    const succeeded = await harness.store
-      .getState()
-      .login('user@example.com', 'password');
+    const succeeded = await harness.store.getState().exchangeSso('sso-secret');
 
     expect(succeeded).toBe(true);
     const state = harness.store.getState();
     expect(state.status).toBe('authenticated');
     expect(state.session).toBe(session);
     expect(state.error).toBeNull();
+    expect(harness.gateway.lastSecret).toBe('sso-secret');
     expect(harness.tokens).toContain('token-xyz');
   });
 
-  it('creates an account and signs in on successful register', async () => {
-    const session = buildAuthSession({ accessToken: 'token-new' });
-    harness.gateway.registerResult = ok(session);
-
-    const succeeded = await harness.store
-      .getState()
-      .register('new@example.com', 'password');
-
-    expect(succeeded).toBe(true);
-    const state = harness.store.getState();
-    expect(state.status).toBe('authenticated');
-    expect(state.session).toBe(session);
-    expect(harness.gateway.lastRegisteredEmail).toBe('new@example.com');
-    expect(harness.tokens).toContain('token-new');
-  });
-
-  it('surfaces a friendly error on failed login', async () => {
-    const succeeded = await harness.store
-      .getState()
-      .login('user@example.com', 'bad-password');
+  it('surfaces a friendly error on a failed SSO exchange', async () => {
+    const succeeded = await harness.store.getState().exchangeSso('bad-secret');
 
     expect(succeeded).toBe(false);
     const state = harness.store.getState();
@@ -106,8 +90,8 @@ describe('auth store', () => {
   });
 
   it('clears state and revokes on logout', async () => {
-    harness.gateway.authenticateResult = ok(buildAuthSession());
-    await harness.store.getState().login('user@example.com', 'password');
+    harness.gateway.exchangeResult = ok(buildAuthSession());
+    await harness.store.getState().exchangeSso('sso-secret');
 
     await harness.store.getState().logout();
 

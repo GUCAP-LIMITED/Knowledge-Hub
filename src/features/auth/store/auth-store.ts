@@ -1,11 +1,11 @@
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import { isErr } from '@core/result';
 import type { AuthSession } from '../domain';
+import { buildPortalLoginUrl, type PortalConfig } from '../infrastructure';
 import type {
-  LoginUseCase,
+  ExchangeSsoSecretUseCase,
   LogoutUseCase,
   RefreshSessionUseCase,
-  RegisterUseCase,
   RestoreSessionUseCase,
 } from '../application';
 
@@ -21,10 +21,10 @@ export interface AuthState {
   readonly error: string | null;
   /** Restore a persisted session on app start. Safe to call once. */
   initialize: () => Promise<void>;
-  /** Returns true on success so callers can navigate without subscribing to state. */
-  login: (email: string, password: string) => Promise<boolean>;
-  /** Create a new account and sign in. Returns true on success. */
-  register: (email: string, password: string) => Promise<boolean>;
+  /** Exchange a Portal SSO secret (the `?token=` value) for a session. Returns true on success. */
+  exchangeSso: (secret: string) => Promise<boolean>;
+  /** Redirect the browser to the Uapp Portal login screen. */
+  beginSso: () => void;
   logout: () => Promise<void>;
   /** Silently refresh the active session. Returns true if a fresh token is now available. */
   refreshSession: () => Promise<boolean>;
@@ -33,17 +33,17 @@ export interface AuthState {
 
 /**
  * Dependencies the store delegates to. The store holds NO business logic — it owns UI state and
- * forwards intent to use cases. This keeps it thin (no "fat store" smell) and makes it trivial to
- * test with fake use cases.
+ * forwards intent to use cases. This keeps it thin and trivial to test with fake use cases.
  */
 export interface AuthStoreDeps {
-  readonly loginUseCase: LoginUseCase;
-  readonly registerUseCase: RegisterUseCase;
+  readonly exchangeSsoUseCase: ExchangeSsoSecretUseCase;
   readonly logoutUseCase: LogoutUseCase;
   readonly restoreSessionUseCase: RestoreSessionUseCase;
   readonly refreshSessionUseCase: RefreshSessionUseCase;
   /** Bridge to the HTTP layer so authorized requests carry the current bearer token. */
   readonly setAccessToken: (token: string | null) => void;
+  /** Uapp Portal SSO configuration for `beginSso`. */
+  readonly portal: PortalConfig;
 }
 
 export type AuthStore = StoreApi<AuthState>;
@@ -65,9 +65,9 @@ export const createAuthStore = (deps: AuthStoreDeps): AuthStore =>
       });
     },
 
-    login: async (email: string, password: string): Promise<boolean> => {
+    exchangeSso: async (secret: string): Promise<boolean> => {
       set({ status: 'authenticating', error: null });
-      const result = await deps.loginUseCase.execute(email, password);
+      const result = await deps.exchangeSsoUseCase.execute(secret);
       if (isErr(result)) {
         set({ status: 'unauthenticated', session: null, error: result.error.message });
         return false;
@@ -77,16 +77,15 @@ export const createAuthStore = (deps: AuthStoreDeps): AuthStore =>
       return true;
     },
 
-    register: async (email: string, password: string): Promise<boolean> => {
-      set({ status: 'authenticating', error: null });
-      const result = await deps.registerUseCase.execute(email, password);
-      if (isErr(result)) {
-        set({ status: 'unauthenticated', session: null, error: result.error.message });
-        return false;
+    beginSso: (): void => {
+      if (typeof window === 'undefined') {
+        return;
       }
-      deps.setAccessToken(result.value.accessToken);
-      set({ status: 'authenticated', session: result.value, error: null });
-      return true;
+      const url = buildPortalLoginUrl(deps.portal, {
+        origin: window.location.origin,
+        pathname: window.location.pathname,
+      });
+      window.location.assign(url);
     },
 
     logout: async (): Promise<void> => {
