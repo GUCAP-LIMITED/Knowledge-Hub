@@ -12,7 +12,7 @@ export interface TextareaProps extends Omit<
 
 /** Labelled textarea with an inline error slot. Forwards its ref for react-hook-form. */
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ label, error, className, rows = 4, ...rest }, ref): ReactElement => {
+  ({ label, error, required, className, rows = 4, ...rest }, ref): ReactElement => {
     const id = useId();
     const errorId = `${id}-error`;
     const hasError = error !== undefined && error.length > 0;
@@ -20,6 +20,12 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       <div className={styles.field}>
         <label className={styles.label} htmlFor={id}>
           {label}
+          {required === true ? (
+            <span className={styles.req} aria-hidden="true">
+              {' '}
+              *
+            </span>
+          ) : null}
         </label>
         <textarea
           id={id}

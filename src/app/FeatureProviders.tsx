@@ -14,6 +14,7 @@ import { QuizzesModuleProvider } from '@features/quizzes';
 import { UserTypesModuleProvider } from '@features/user-types';
 import { HierarchyModuleProvider } from '@features/hierarchy';
 import { PermissionsModuleProvider } from '@features/permissions';
+import { ContentModuleProvider } from '@features/content';
 import { DashboardModuleProvider } from '@features/dashboard';
 import type { AppComposition } from '@app/di/composition-root';
 
@@ -50,7 +51,11 @@ export const FeatureProviders = ({
                                 <DashboardModuleProvider
                                   module={composition.dashboardModule}
                                 >
-                                  {children}
+                                  <ContentModuleProvider
+                                    module={composition.contentModule}
+                                  >
+                                    {children}
+                                  </ContentModuleProvider>
                                 </DashboardModuleProvider>
                               </PermissionsModuleProvider>
                             </HierarchyModuleProvider>

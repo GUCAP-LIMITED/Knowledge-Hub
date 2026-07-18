@@ -1,8 +1,13 @@
 import type { ReactElement, ReactNode } from 'react';
+import type { UseQueryResult } from '@tanstack/react-query';
 import type { FieldErrors, UseFormRegister } from 'react-hook-form';
 import { Image, Info, Search, Tags } from 'lucide-react';
 import { Select, TextField, Textarea } from '@shared/ui';
-import { type ContentKind, useContentTypes } from '@features/content-types';
+import {
+  type CategoryKind,
+  type ContentCategory,
+  useContentCategories,
+} from '@features/content';
 import {
   DIFFICULTIES,
   type Details,
@@ -12,6 +17,38 @@ import {
 import styles from './UploadPage.module.css';
 
 type Register = UseFormRegister<Details>;
+
+/** Category `<option>`s for the current type — value is the category id (what the backend persists). */
+const CategoryOptions = ({
+  query,
+}: {
+  readonly query: UseQueryResult<readonly ContentCategory[]>;
+}): ReactElement => {
+  if (query.isLoading) {
+    return (
+      <option value="" disabled>
+        Loading…
+      </option>
+    );
+  }
+  const categories = query.data ?? [];
+  if (categories.length === 0) {
+    return (
+      <option value="" disabled>
+        No categories yet
+      </option>
+    );
+  }
+  return (
+    <>
+      {categories.map((cat) => (
+        <option key={cat.id} value={cat.id}>
+          {cat.name}
+        </option>
+      ))}
+    </>
+  );
+};
 
 export const DetailsSection = ({
   icon: Icon,
@@ -40,14 +77,15 @@ export const GeneralSection = ({
 }: {
   readonly register: Register;
   readonly errors: FieldErrors<Details>;
-  readonly kind: ContentKind | null;
+  readonly kind: CategoryKind | null;
 }): ReactElement => {
-  const categories = useContentTypes(kind ?? 'course');
+  const categories = useContentCategories(kind ?? 'course');
   return (
     <DetailsSection icon={Info} title="General information">
       <div className={styles.form}>
         <TextField
           label="Title"
+          required
           placeholder="e.g. Mastering the UAPP Sales Pipeline"
           error={errors.title?.message ?? ''}
           {...register('title')}
@@ -59,6 +97,7 @@ export const GeneralSection = ({
         />
         <Textarea
           label="Description"
+          required
           rows={4}
           placeholder="What will learners take away? Who is it for?"
           error={errors.description?.message ?? ''}
@@ -67,22 +106,25 @@ export const GeneralSection = ({
         <div className={styles.formRow}>
           <Select
             label="Category"
+            required
             error={errors.category?.message ?? ''}
             {...register('category')}
           >
             <option value="">Select…</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
+            <CategoryOptions query={categories} />
           </Select>
           <TextField
             label="Topic"
             placeholder="e.g. Objection handling"
             {...register('topic')}
           />
-          <Select label="Difficulty" {...register('difficulty')}>
+          <Select
+            label="Difficulty"
+            required
+            error={errors.difficulty?.message ?? ''}
+            {...register('difficulty')}
+          >
+            <option value="">Select…</option>
             {DIFFICULTIES.map((level) => (
               <option key={level} value={level}>
                 {level}

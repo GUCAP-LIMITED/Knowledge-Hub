@@ -35,6 +35,7 @@ import { createQuizzesModule, type QuizzesModule } from '@features/quizzes';
 import { createUserTypesModule, type UserTypesModule } from '@features/user-types';
 import { createHierarchyModule, type HierarchyModule } from '@features/hierarchy';
 import { createPermissionsModule, type PermissionsModule } from '@features/permissions';
+import { createContentModule, type ContentModule } from '@features/content';
 import { createDashboardModule, type DashboardModule } from '@features/dashboard';
 
 /**
@@ -76,6 +77,7 @@ export interface AppComposition {
   readonly userTypesModule: UserTypesModule;
   readonly hierarchyModule: HierarchyModule;
   readonly permissionsModule: PermissionsModule;
+  readonly contentModule: ContentModule;
   readonly dashboardModule: DashboardModule;
   readonly queryClient: QueryClient;
 }
@@ -169,7 +171,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
   const tutorialsModule = createTutorialsModule({ logger });
   const resourcesModule = createResourcesModule({ logger });
   const certificatesModule = createCertificatesModule({ logger, clock });
-  const submissionsModule = createSubmissionsModule({ logger, clock });
+  const submissionsModule = createSubmissionsModule({ httpClient, logger });
   const courseReviewsModule = createCourseReviewsModule({ logger, clock });
   const teamModule = createTeamModule({ logger });
   const assignmentsModule = createAssignmentsModule({ logger });
@@ -179,6 +181,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
   const userTypesModule = createUserTypesModule({ httpClient, logger });
   const hierarchyModule = createHierarchyModule({ httpClient, logger });
   const permissionsModule = createPermissionsModule({ httpClient, logger });
+  const contentModule = createContentModule({ httpClient, logger });
   const dashboardModule = createDashboardModule({ httpClient, logger });
 
   logger.info('Application composition complete');
@@ -201,6 +204,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
     userTypesModule,
     hierarchyModule,
     permissionsModule,
+    contentModule,
     dashboardModule,
     queryClient,
   };

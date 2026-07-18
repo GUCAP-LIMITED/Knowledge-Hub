@@ -1,12 +1,7 @@
 import { useState, type ReactElement } from 'react';
 import { FileText, UploadCloud } from 'lucide-react';
 import { cn } from '@shared/utils';
-import {
-  ACCEPT_LABEL,
-  type PickedFile,
-  type SlotFiles,
-  type UploadSlot,
-} from './upload-content-types';
+import { ACCEPT_LABEL, type SlotFiles, type UploadSlot } from './upload-content-types';
 import styles from './UploadPage.module.css';
 
 const formatSize = (bytes: number): string =>
@@ -14,8 +9,7 @@ const formatSize = (bytes: number): string =>
     ? `${(bytes / 1024).toFixed(0)} KB`
     : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
-const toPicked = (list: FileList | null): readonly PickedFile[] =>
-  [...(list ?? [])].map((file) => ({ name: file.name, size: file.size }));
+const toFiles = (list: FileList | null): readonly File[] => [...(list ?? [])];
 
 const SlotCard = ({
   slot,
@@ -23,12 +17,12 @@ const SlotCard = ({
   onChange,
 }: {
   readonly slot: UploadSlot;
-  readonly files: readonly PickedFile[];
-  readonly onChange: (files: readonly PickedFile[]) => void;
+  readonly files: readonly File[];
+  readonly onChange: (files: readonly File[]) => void;
 }): ReactElement => {
   const [drag, setDrag] = useState(false);
   const add = (list: FileList | null): void => {
-    const picked = toPicked(list);
+    const picked = toFiles(list);
     if (picked.length === 0) {
       return;
     }

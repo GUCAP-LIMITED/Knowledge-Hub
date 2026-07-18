@@ -16,7 +16,7 @@ export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement
 
 /** Labelled native select with an inline error slot. Forwards its ref for react-hook-form. */
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, className, children, ...rest }, ref): ReactElement => {
+  ({ label, error, required, className, children, ...rest }, ref): ReactElement => {
     const id = useId();
     const errorId = `${id}-error`;
     const hasError = error !== undefined && error.length > 0;
@@ -24,6 +24,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
       <div className={styles.field}>
         <label className={styles.label} htmlFor={id}>
           {label}
+          {required === true ? (
+            <span className={styles.req} aria-hidden="true">
+              {' '}
+              *
+            </span>
+          ) : null}
         </label>
         <select
           id={id}

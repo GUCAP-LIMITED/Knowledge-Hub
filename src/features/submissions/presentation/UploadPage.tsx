@@ -17,7 +17,7 @@ export const UploadPage = (): ReactElement => {
     return (
       <section className={styles.screen}>
         <PageHeader title="Upload Document" />
-        <DoneCard isAdmin={flow.isAdmin} onReset={flow.reset} />
+        <DoneCard isAdmin={flow.publishesDirectly} onReset={flow.reset} />
       </section>
     );
   }
@@ -31,7 +31,7 @@ export const UploadPage = (): ReactElement => {
       <PageHeader
         title="Upload Document"
         subtitle={
-          flow.isAdmin
+          flow.publishesDirectly
             ? 'Publish content directly to the platform.'
             : 'Submit content for admin review.'
         }
@@ -58,7 +58,7 @@ export const UploadPage = (): ReactElement => {
         onSections={flow.setSections}
         missing={flow.missing}
         author={flow.author}
-        isAdmin={flow.isAdmin}
+        isAdmin={flow.publishesDirectly}
         submitError={flow.submitError}
         footer={
           <UploadFooter
@@ -66,7 +66,7 @@ export const UploadPage = (): ReactElement => {
             isFirst={flow.current === 0}
             fileReady={flow.fileReady}
             canPublish={flow.missing.length === 0}
-            isAdmin={flow.isAdmin}
+            isAdmin={flow.publishesDirectly}
             isSubmitting={flow.isSubmitting}
             selectedTypeLabel={
               flow.contentType === null ? null : typeLabel(flow.contentType)

@@ -14,6 +14,18 @@ export class SubmissionsUnavailableError extends SubmissionError {
   }
 }
 
+/**
+ * The submissions service reached the server, which refused the request with a readable reason
+ * (e.g. an illegal workflow transition or a missing permission). Carries that server message through.
+ */
+export class SubmissionRequestRejectedError extends SubmissionError {
+  public readonly code = 'SUBMISSIONS_REQUEST_REJECTED';
+
+  public constructor(message: string, cause?: unknown) {
+    super(message, { cause });
+  }
+}
+
 /** No submission exists for the given id. */
 export class SubmissionNotFoundError extends SubmissionError {
   public readonly code = 'SUBMISSIONS_NOT_FOUND';
@@ -29,6 +41,15 @@ export class InvalidSubmissionTitleError extends SubmissionError {
 
   public constructor(reason: string) {
     super(`Invalid submission title: ${reason}`, { context: { reason } });
+  }
+}
+
+/** A mandatory Details-step field was left empty. Carries the field label for the inline message. */
+export class RequiredFieldError extends SubmissionError {
+  public readonly code = 'SUBMISSIONS_REQUIRED_FIELD';
+
+  public constructor(field: string) {
+    super(`${field} is required.`, { context: { field } });
   }
 }
 

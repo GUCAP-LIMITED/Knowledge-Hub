@@ -12,6 +12,8 @@ const SnapshotSchema = z.object({
     fullName: z.string(),
     roles: z.array(z.string()),
     userType: z.string().nullable(),
+    // default [] so sessions persisted before this field still restore (and aren't stripped on load)
+    branchIds: z.array(z.string()).default([]),
   }),
   accessToken: z.string(),
   refreshToken: z.string().nullable(),

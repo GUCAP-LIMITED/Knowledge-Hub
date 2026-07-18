@@ -61,7 +61,9 @@ export const useUploadDraft = (params: {
     const id = setTimeout(() => {
       try {
         const snapshot = JSON.parse(serialized) as UploadDraft;
-        const payload: UploadDraft = { ...snapshot, savedAt: Date.now() };
+        // Files are real File objects (not serializable) — persist metadata only; the user re-attaches
+        // files if they resume a draft.
+        const payload: UploadDraft = { ...snapshot, files: {}, savedAt: Date.now() };
         localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
       } catch {
         /* private mode / quota — draft simply isn't cached */

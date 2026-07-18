@@ -6,6 +6,7 @@ export interface AuthenticatedUserProps {
   readonly fullName: string;
   readonly roles: readonly string[];
   readonly userType: string | null;
+  readonly branchIds: readonly string[];
 }
 
 /**
@@ -17,6 +18,8 @@ export class AuthenticatedUser {
   public readonly email: Email;
   public readonly fullName: string;
   public readonly userType: string | null;
+  /** Branches this user is assigned to; empty for host/global users. Drives the upload branch picker. */
+  public readonly branchIds: readonly string[];
   private readonly roles: ReadonlySet<string>;
 
   public constructor(props: AuthenticatedUserProps) {
@@ -27,6 +30,7 @@ export class AuthenticatedUser {
     this.email = props.email;
     this.fullName = props.fullName.trim().length > 0 ? props.fullName : props.email.value;
     this.userType = props.userType;
+    this.branchIds = props.branchIds;
     this.roles = new Set(props.roles.map((role) => role.toLowerCase()));
   }
 

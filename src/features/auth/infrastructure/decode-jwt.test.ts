@@ -59,6 +59,31 @@ describe('toSessionFromClaims', () => {
     }
   });
 
+  it('parses the branch_ids CSV claim into the user, and defaults to empty when absent', () => {
+    const withBranches = toSessionFromClaims({
+      claims: { sub: 's1', email: 'a@b.com', branch_ids: 'b1, b2 ,b3' },
+      accessToken: 'at',
+      refreshToken: null,
+      expiresIn: 60,
+      now,
+    });
+    expect(isOk(withBranches)).toBe(true);
+    if (isOk(withBranches)) {
+      expect(withBranches.value.user.branchIds).toEqual(['b1', 'b2', 'b3']);
+    }
+
+    const noBranches = toSessionFromClaims({
+      claims: { sub: 's2', email: 'a@b.com' },
+      accessToken: 'at',
+      refreshToken: null,
+      expiresIn: 60,
+      now,
+    });
+    if (isOk(noBranches)) {
+      expect(noBranches.value.user.branchIds).toEqual([]);
+    }
+  });
+
   it('synthesizes a valid email when the claim is missing', () => {
     const result = toSessionFromClaims({
       claims: { sub: 'abc' },

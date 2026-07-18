@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react';
-import type { ContentKind } from '../store/content-types-store';
-import type { KindMeta } from './content-types-model';
+import type { ContentKind, KindMeta } from './content-types-model';
 import { TypeChip } from './TypeChip';
 import { AddTypeRow } from './AddTypeRow';
 import styles from './ContentTypesManager.module.css';

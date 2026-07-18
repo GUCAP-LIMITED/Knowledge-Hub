@@ -1,5 +1,5 @@
+import type { HttpClient } from '@core/http';
 import type { Logger } from '@core/logger';
-import type { Clock } from '@core/time';
 import {
   ApproveSubmissionUseCase,
   FlagSubmissionUseCase,
@@ -9,11 +9,11 @@ import {
   RejectSubmissionUseCase,
   SubmitContentUseCase,
 } from './application';
-import { InMemorySubmissionGateway } from './infrastructure';
+import { HttpSubmissionGateway } from './infrastructure';
 
 export interface SubmissionsModuleDeps {
   readonly logger: Logger;
-  readonly clock: Clock;
+  readonly httpClient: HttpClient;
 }
 
 /** The use cases exposed by the submissions feature, consumed via a context provider. */
@@ -27,12 +27,12 @@ export interface SubmissionsModule {
   readonly publishSubmission: PublishSubmissionUseCase;
 }
 
-/** Composition root for the submissions feature: wires the in-memory gateway to the use cases. */
+/** Composition root for the submissions feature: wires the Content API gateway to the use cases. */
 export const createSubmissionsModule = (
   deps: SubmissionsModuleDeps,
 ): SubmissionsModule => {
-  const submissionGateway = new InMemorySubmissionGateway({
-    clock: deps.clock,
+  const submissionGateway = new HttpSubmissionGateway({
+    httpClient: deps.httpClient,
     logger: deps.logger,
   });
   const shared = { submissionGateway, logger: deps.logger };

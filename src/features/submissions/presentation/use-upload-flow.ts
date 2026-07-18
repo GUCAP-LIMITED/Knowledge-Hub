@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@features/auth';
-import { useSubmitContent } from './use-submissions';
+import { useUploadContent, type UploadWizardInput } from '@features/content';
+import { usePublishesDirectly } from './use-publishes-directly';
 import { type Details, EMPTY_DETAILS, missingRequired } from './upload-details';
 import {
   type UseUploadDraftResult,
@@ -20,7 +21,8 @@ import {
 } from './upload-content-types';
 
 export interface UploadFlow {
-  readonly isAdmin: boolean;
+  /** True when the user may publish directly (skips review) — drives the wizard's publish messaging. */
+  readonly publishesDirectly: boolean;
   readonly done: boolean;
   readonly steps: readonly StepKey[];
   readonly current: number;
@@ -86,23 +88,53 @@ const useFlowState = (): FlowState & FlowSetters => {
   };
 };
 
+const toWizardDetails = (d: Details): UploadWizardInput['details'] => ({
+  title: d.title,
+  subtitle: d.subtitle,
+  description: d.description,
+  categoryId: d.category, // the RHForm `category` field holds the category id
+  restrictToBranch: d.restrictToBranch,
+  branchId: d.branch, // the chosen branch id (multi-branch authors); '' otherwise
+  topic: d.topic,
+  difficulty: d.difficulty,
+  language: d.language,
+  duration: d.duration,
+  visibility: d.visibility,
+  keywords: d.keywords,
+  tags: d.tags,
+  thumbnailAlt: d.thumbnailAlt,
+});
+
+const toWizardSections = (sections: readonly Section[]): UploadWizardInput['sections'] =>
+  sections.map((section) => ({
+    title: section.title,
+    lessons: section.lessons.map((lesson) => ({
+      title: lesson.title,
+      kind: lesson.kind,
+    })),
+  }));
+
+const resetFlow = (s: FlowSetters): void => {
+  clearDraft();
+  s.setDone(false);
+  s.setContentType(null);
+  s.setCurrent(0);
+  s.setFiles({});
+  s.setDetails(EMPTY_DETAILS);
+  s.setSections([]);
+};
+
 /** All state and transitions for the upload wizard, kept out of the view component. */
 export const useUploadFlow = (): UploadFlow => {
   const { user } = useAuth();
-  const submit = useSubmitContent();
-  const isAdmin = user?.hasRole('admin') ?? false;
+  const upload = useUploadContent();
+  const publishesDirectly = usePublishesDirectly();
   const author = user?.fullName ?? 'You';
   const s = useFlowState();
   const { contentType, current, files, details, sections, done } = s;
 
   const reset = (): void => {
-    clearDraft();
-    s.setDone(false);
-    s.setContentType(null);
-    s.setCurrent(0);
-    s.setFiles({});
-    s.setDetails(EMPTY_DETAILS);
-    s.setSections([]);
+    resetFlow(s);
   };
 
   const draft = useUploadDraft({
@@ -112,13 +144,13 @@ export const useUploadFlow = (): UploadFlow => {
       s.setContentType(d.contentType);
       s.setDetails(d.details);
       s.setSections(d.sections);
-      s.setFiles(d.files);
+      s.setFiles({}); // files aren't persisted — the user re-attaches after resuming
       s.setCurrent(1);
     },
   });
 
   return {
-    isAdmin,
+    publishesDirectly,
     done,
     steps: stepsFor(contentType),
     current,
@@ -131,8 +163,8 @@ export const useUploadFlow = (): UploadFlow => {
     missing: missingRequired(details),
     author,
     draft,
-    submitError: submit.isError ? submit.error.message : undefined,
-    isSubmitting: submit.isPending,
+    submitError: upload.isError ? upload.error.message : undefined,
+    isSubmitting: upload.isPending,
     setFiles: s.setFiles,
     setSections: s.setSections,
     chooseType: (key) => {
@@ -151,12 +183,15 @@ export const useUploadFlow = (): UploadFlow => {
       s.setCurrent(current + 1);
     },
     publish: () => {
-      submit.mutate(
+      if (contentType === null) {
+        return;
+      }
+      upload.mutate(
         {
-          title: details.title,
-          type: details.type,
-          submittedBy: author,
-          publishDirectly: isAdmin,
+          contentType,
+          details: toWizardDetails(details),
+          files,
+          sections: toWizardSections(sections),
         },
         {
           onSuccess: () => {

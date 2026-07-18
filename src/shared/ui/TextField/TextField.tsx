@@ -15,7 +15,7 @@ export interface TextFieldProps extends Omit<
  * it drops straight into react-hook-form (`{...register('field')}`).
  */
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
-  ({ label, error, className, ...rest }, ref): ReactElement => {
+  ({ label, error, required, className, ...rest }, ref): ReactElement => {
     const id = useId();
     const errorId = `${id}-error`;
     const hasError = error !== undefined && error.length > 0;
@@ -24,6 +24,12 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
       <div className={styles.field}>
         <label className={styles.label} htmlFor={id}>
           {label}
+          {required === true ? (
+            <span className={styles.req} aria-hidden="true">
+              {' '}
+              *
+            </span>
+          ) : null}
         </label>
         <input
           id={id}

@@ -17,7 +17,16 @@ export interface JwtClaims {
   readonly active_user_type_id?: string;
   readonly active_user_type?: string;
   readonly data_scope?: string; // "0" Self · "5" Team · "10" BranchAll
+  readonly branch_ids?: string; // CSV of the branches this user is assigned to
   readonly exp?: number;
+}
+
+/** The branch ids the user can access (CSV claim → list; empty for host/global users). */
+function parseBranchIds(claim: string | undefined): string[] {
+  return (claim ?? '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter((id) => id.length > 0);
 }
 
 function base64UrlDecode(input: string): string {
@@ -96,6 +105,7 @@ function buildSession(input: {
     fullName: fullName.trim().length > 0 ? fullName : input.email.value,
     roles: deriveRoles(claims),
     userType: claims.active_user_type ?? null,
+    branchIds: parseBranchIds(claims.branch_ids),
   });
 
   return new AuthSession({

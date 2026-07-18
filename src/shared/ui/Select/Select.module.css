@@ -32,3 +32,6 @@
   font-size: 0.8rem;
   color: var(--color-danger);
 }
+.req {
+  color: var(--color-danger-strong);
+}

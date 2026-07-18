@@ -5,6 +5,8 @@ export interface Details {
   subtitle: string;
   description: string;
   category: string;
+  restrictToBranch: boolean; // toggle: off = all branches, on = restrict to a branch
+  branch: string; // the chosen branch id (multi-branch authors); '' otherwise
   topic: string;
   difficulty: string;
   thumbnailAlt: string;
@@ -49,8 +51,10 @@ export const EMPTY_DETAILS: Details = {
   subtitle: '',
   description: '',
   category: '',
+  restrictToBranch: false,
+  branch: '',
   topic: '',
-  difficulty: 'Beginner',
+  difficulty: '', // unselected — the Details step requires an explicit choice
   thumbnailAlt: '',
   coverAlt: '',
   tags: '',
@@ -71,6 +75,9 @@ export const missingRequired = (details: Details): readonly string[] => {
   }
   if (details.category.trim().length === 0) {
     missing.push('Category');
+  }
+  if (details.difficulty.trim().length === 0) {
+    missing.push('Difficulty');
   }
   return missing;
 };

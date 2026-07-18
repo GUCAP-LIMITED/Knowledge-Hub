@@ -18,6 +18,7 @@ export interface AuthSessionSnapshot {
     readonly fullName: string;
     readonly roles: readonly string[];
     readonly userType: string | null;
+    readonly branchIds?: readonly string[]; // optional: absent in sessions persisted before this field existed
   };
   readonly accessToken: string;
   readonly refreshToken: string | null;
@@ -72,6 +73,7 @@ export class AuthSession {
         fullName: this.user.fullName,
         roles: this.user.roleNames,
         userType: this.user.userType,
+        branchIds: this.user.branchIds,
       },
       accessToken: this.accessToken,
       refreshToken: this.refreshToken,
@@ -94,6 +96,7 @@ export class AuthSession {
       fullName: snapshot.user.fullName,
       roles: snapshot.user.roles,
       userType: snapshot.user.userType,
+      branchIds: snapshot.user.branchIds ?? [],
     });
 
     return ok(

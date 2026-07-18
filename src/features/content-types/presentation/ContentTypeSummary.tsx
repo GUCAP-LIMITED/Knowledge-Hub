@@ -1,19 +1,15 @@
 import type { ReactElement } from 'react';
-import { BookOpen, Clock, FolderOpen, Lightbulb, Tags } from 'lucide-react';
+import { BookOpen, FolderOpen, Lightbulb, Tags } from 'lucide-react';
 import { StatCard } from '@shared/ui';
-import type { ContentKind } from '../store/content-types-store';
+import type { ContentKind } from './content-types-model';
 import styles from './ContentTypesManager.module.css';
 
 export interface ContentTypeSummaryProps {
   readonly types: Record<ContentKind, readonly string[]>;
-  readonly lastUpdated: string;
 }
 
-/** Enterprise summary row: totals per kind plus a last-updated indicator. */
-export const ContentTypeSummary = ({
-  types,
-  lastUpdated,
-}: ContentTypeSummaryProps): ReactElement => {
+/** Summary row: total categories plus the per-kind counts. */
+export const ContentTypeSummary = ({ types }: ContentTypeSummaryProps): ReactElement => {
   const total = types.course.length + types.tutorial.length + types.resource.length;
   return (
     <div className={styles.summary}>
@@ -36,7 +32,6 @@ export const ContentTypeSummary = ({
         icon={FolderOpen}
         tone="success"
       />
-      <StatCard label="Last Updated" value={lastUpdated} icon={Clock} tone="warning" />
     </div>
   );
 };

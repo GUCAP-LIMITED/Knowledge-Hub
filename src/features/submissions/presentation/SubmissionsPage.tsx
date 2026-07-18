@@ -5,6 +5,7 @@ import { Alert, EmptyState, PageHeader, Spinner } from '@shared/ui';
 import { useAuth } from '@features/auth';
 import type { Submission } from '../domain';
 import { SubmissionsTable } from './SubmissionsTable';
+import { usePublishesDirectly } from './use-publishes-directly';
 import { useMySubmissions, useSubmissions } from './use-submissions';
 import styles from './SubmissionsPage.module.css';
 
@@ -52,8 +53,10 @@ const SubmissionsBody = ({
 export const SubmissionsPage = (): ReactElement => {
   const { user } = useAuth();
   const isAdmin = user?.hasAnyRole(['admin']) ?? false;
+  const publishesDirectly = usePublishesDirectly();
   const all = useSubmissions();
-  const mine = useMySubmissions(user?.fullName ?? '');
+  // Identity is the owner GUID — the Content API scopes/labels submissions by user id, not name.
+  const mine = useMySubmissions(user?.id ?? '');
   const active = isAdmin ? all : mine;
   const data = isAdmin
     ? (all.data ?? []).filter((submission) => submission.status === 'published')
@@ -74,7 +77,7 @@ export const SubmissionsPage = (): ReactElement => {
         </Link>
       </PageHeader>
 
-      {isAdmin ? (
+      {publishesDirectly ? (
         <div className={styles.adminNote}>
           <CheckCircle size={18} aria-hidden="true" />
           <span>As an admin, your uploads are published directly without review.</span>

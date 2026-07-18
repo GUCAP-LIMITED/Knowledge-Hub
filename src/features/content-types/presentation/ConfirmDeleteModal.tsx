@@ -1,7 +1,6 @@
 import type { ReactElement } from 'react';
 import { Button, Modal } from '@shared/ui';
-import type { ContentKind } from '../store/content-types-store';
-import { KIND_META } from './content-types-model';
+import { type ContentKind, KIND_META } from './content-types-model';
 import styles from './ContentTypesManager.module.css';
 
 export interface DeleteTarget {

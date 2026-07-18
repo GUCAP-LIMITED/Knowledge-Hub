@@ -141,14 +141,8 @@ export const UPLOAD_CONTENT_TYPES: readonly UploadContentType[] = [
   },
 ];
 
-/** A file the user has attached to a slot. */
-export interface PickedFile {
-  readonly name: string;
-  readonly size: number;
-}
-
-/** slotId → attached files. */
-export type SlotFiles = Record<string, readonly PickedFile[]>;
+/** slotId → the real files the user has attached (kept in memory; not persisted in the draft). */
+export type SlotFiles = Record<string, readonly File[]>;
 
 /** The ordered step keys for a chosen content type (defaults to the course flow). */
 export const stepsFor = (key: ContentTypeKey | null): readonly StepKey[] =>
