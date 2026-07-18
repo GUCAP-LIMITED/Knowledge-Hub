@@ -12,6 +12,7 @@ import { NotificationsModuleProvider } from '@features/notifications';
 import { UsersModuleProvider } from '@features/users';
 import { QuizzesModuleProvider } from '@features/quizzes';
 import { UserTypesModuleProvider } from '@features/user-types';
+import { TeamsModuleProvider } from '@features/teams';
 import { HierarchyModuleProvider } from '@features/hierarchy';
 import { PermissionsModuleProvider } from '@features/permissions';
 import { ContentModuleProvider } from '@features/content';
@@ -44,21 +45,25 @@ export const FeatureProviders = ({
                       <UsersModuleProvider module={composition.usersModule}>
                         <QuizzesModuleProvider module={composition.quizzesModule}>
                           <UserTypesModuleProvider module={composition.userTypesModule}>
-                            <HierarchyModuleProvider module={composition.hierarchyModule}>
-                              <PermissionsModuleProvider
-                                module={composition.permissionsModule}
+                            <TeamsModuleProvider module={composition.teamsModule}>
+                              <HierarchyModuleProvider
+                                module={composition.hierarchyModule}
                               >
-                                <DashboardModuleProvider
-                                  module={composition.dashboardModule}
+                                <PermissionsModuleProvider
+                                  module={composition.permissionsModule}
                                 >
-                                  <ContentModuleProvider
-                                    module={composition.contentModule}
+                                  <DashboardModuleProvider
+                                    module={composition.dashboardModule}
                                   >
-                                    {children}
-                                  </ContentModuleProvider>
-                                </DashboardModuleProvider>
-                              </PermissionsModuleProvider>
-                            </HierarchyModuleProvider>
+                                    <ContentModuleProvider
+                                      module={composition.contentModule}
+                                    >
+                                      {children}
+                                    </ContentModuleProvider>
+                                  </DashboardModuleProvider>
+                                </PermissionsModuleProvider>
+                              </HierarchyModuleProvider>
+                            </TeamsModuleProvider>
                           </UserTypesModuleProvider>
                         </QuizzesModuleProvider>
                       </UsersModuleProvider>

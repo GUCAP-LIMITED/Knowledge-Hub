@@ -1,5 +1,5 @@
 /** Row-level data-access scope a user gets from a type. Mirrors the backend `DataAccessScope`. */
-export type DataAccessScope = 0 | 5 | 10; // 0 Self · 5 Team · 10 BranchAll
+export type DataAccessScope = 0 | 5 | 10 | 15; // 0 Self · 5 Team · 10 BranchAll · 15 FullAccess
 
 export interface UserTypeRoleRef {
   readonly roleId: string;

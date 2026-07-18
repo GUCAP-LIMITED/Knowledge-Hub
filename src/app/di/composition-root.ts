@@ -33,6 +33,7 @@ import {
 import { createUsersModule, type UsersModule } from '@features/users';
 import { createQuizzesModule, type QuizzesModule } from '@features/quizzes';
 import { createUserTypesModule, type UserTypesModule } from '@features/user-types';
+import { createTeamsModule, type TeamsModule } from '@features/teams';
 import { createHierarchyModule, type HierarchyModule } from '@features/hierarchy';
 import { createPermissionsModule, type PermissionsModule } from '@features/permissions';
 import { createContentModule, type ContentModule } from '@features/content';
@@ -75,6 +76,7 @@ export interface AppComposition {
   readonly usersModule: UsersModule;
   readonly quizzesModule: QuizzesModule;
   readonly userTypesModule: UserTypesModule;
+  readonly teamsModule: TeamsModule;
   readonly hierarchyModule: HierarchyModule;
   readonly permissionsModule: PermissionsModule;
   readonly contentModule: ContentModule;
@@ -179,6 +181,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
   const usersModule = createUsersModule({ logger });
   const quizzesModule = createQuizzesModule({ logger });
   const userTypesModule = createUserTypesModule({ httpClient, logger });
+  const teamsModule = createTeamsModule({ httpClient, logger });
   const hierarchyModule = createHierarchyModule({ httpClient, logger });
   const permissionsModule = createPermissionsModule({ httpClient, logger });
   const contentModule = createContentModule({ httpClient, logger });
@@ -202,6 +205,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
     usersModule,
     quizzesModule,
     userTypesModule,
+    teamsModule,
     hierarchyModule,
     permissionsModule,
     contentModule,

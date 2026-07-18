@@ -5,6 +5,7 @@ import type { DataAccessScope, UserType } from '../domain';
 import styles from './UserTypesPage.module.css';
 
 function scopeLabel(scope: DataAccessScope): string {
+  if (scope === 15) return 'Full access';
   if (scope === 10) return 'Branch — all';
   if (scope === 5) return 'Team';
   return 'Self';

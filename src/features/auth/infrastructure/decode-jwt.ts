@@ -16,7 +16,7 @@ export interface JwtClaims {
   readonly is_global?: string;
   readonly active_user_type_id?: string;
   readonly active_user_type?: string;
-  readonly data_scope?: string; // "0" Self · "5" Team · "10" BranchAll
+  readonly data_scope?: string; // "0" Self · "5" Team · "10" BranchAll · "15" FullAccess
   readonly branch_ids?: string; // CSV of the branches this user is assigned to
   readonly exp?: number;
 }
@@ -56,7 +56,12 @@ export function decodeAccessToken(token: string): JwtClaims {
  * gating uses the permissions slice (`useHasPermission`), not these roles.
  */
 export function deriveRoles(claims: JwtClaims): string[] {
-  if (claims.is_global === 'true' || claims.data_scope === '10') {
+  // FullAccess (15) and BranchAll (10) are admin-tier; Team (5) is manager; Self (0) is consultant.
+  if (
+    claims.is_global === 'true' ||
+    claims.data_scope === '15' ||
+    claims.data_scope === '10'
+  ) {
     return ['admin'];
   }
   if (claims.data_scope === '5') {

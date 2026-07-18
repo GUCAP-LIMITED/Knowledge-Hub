@@ -14,6 +14,7 @@ interface AddUserTypeFormValues {
 }
 
 function toScope(value: number): DataAccessScope {
+  if (value === 15) return 15;
   if (value === 10) return 10;
   if (value === 5) return 5;
   return 0;
@@ -44,6 +45,7 @@ const FormFields = ({
       <option value="0">Self</option>
       <option value="5">Team</option>
       <option value="10">Branch — all</option>
+      <option value="15">Full access</option>
     </Select>
   </div>
 );

@@ -22,8 +22,9 @@ describe('decodeAccessToken', () => {
 });
 
 describe('deriveRoles', () => {
-  it('maps global/branch-all → admin, team → manager, else consultant', () => {
+  it('maps full-access/global/branch-all → admin, team → manager, else consultant', () => {
     expect(deriveRoles({ is_global: 'true' })).toEqual(['admin']);
+    expect(deriveRoles({ data_scope: '15' })).toEqual(['admin']);
     expect(deriveRoles({ data_scope: '10' })).toEqual(['admin']);
     expect(deriveRoles({ data_scope: '5' })).toEqual(['manager']);
     expect(deriveRoles({ data_scope: '0' })).toEqual(['consultant']);

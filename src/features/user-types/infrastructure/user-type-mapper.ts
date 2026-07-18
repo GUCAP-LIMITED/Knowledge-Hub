@@ -4,6 +4,7 @@ import type { SelectableUserTypeDto, UserTypeDto } from './dto/user-type-api.dto
 
 /** Narrow the wire integer to the domain scope union without a cast. */
 function toDataAccessScope(value: number): DataAccessScope {
+  if (value === 15) return 15;
   if (value === 10) return 10;
   if (value === 5) return 5;
   return 0;

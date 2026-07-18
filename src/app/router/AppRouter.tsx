@@ -67,6 +67,9 @@ const UserTypesPage = lazy(async () => ({
   default: (await import('@features/user-types/presentation/UserTypesPage'))
     .UserTypesPage,
 }));
+const TeamsPage = lazy(async () => ({
+  default: (await import('@features/teams/presentation/TeamsPage')).TeamsPage,
+}));
 const HierarchyPage = lazy(async () => ({
   default: (await import('@features/hierarchy/presentation/HierarchyPage')).HierarchyPage,
 }));
@@ -133,6 +136,9 @@ export const AppRouter = (): ReactElement => {
               </Route>
               <Route element={<RequireCapability module="team" cap="assign" />}>
                 <Route path="/assign" element={<AssignTrainingPage />} />
+              </Route>
+              <Route element={<RequireCapability module="team" cap="manage" />}>
+                <Route path="/teams" element={<TeamsPage />} />
               </Route>
               <Route element={<RequireCapability module="approvals" cap="view" />}>
                 <Route path="/approvals" element={<ApprovalsPage />} />
