@@ -20,8 +20,6 @@ export * from './fakes/fake-assignment-gateway';
 export * from './builders/assignment.builder';
 export * from './fakes/fake-notification-gateway';
 export * from './builders/announcement.builder';
-export * from './fakes/fake-user-gateway';
-export * from './builders/user-account.builder';
 export * from './fakes/fake-quiz-gateway';
 export * from './fakes/fake-user-type-gateway';
 export * from './builders/user-type.builder';

@@ -11,8 +11,10 @@ import type {
   PermissionMap,
   PermissionSetDetail,
   PermissionSetSummary,
+  PermissionUpdateResult,
   SidebarGroup,
   UpdatePermissionSetInput,
+  UserEffectivePermissions,
   UserTypeDefault,
 } from '../domain';
 import type { SetTypeDefaultInput } from '../application';
@@ -24,6 +26,7 @@ export const permissionKeys = {
   sets: ['permission-sets'] as const,
   set: (id: string) => ['permission-sets', id] as const,
   typeDefaults: ['permission-type-defaults'] as const,
+  user: (userId: string) => ['user-permissions', userId] as const,
 };
 
 /** The caller's effective permission map — the API-backed source of capability gating. */
@@ -170,6 +173,78 @@ export const useSetTypeDefault = (): UseMutationResult<
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: permissionKeys.typeDefaults });
+    },
+  });
+};
+
+/** One user's effective permission tree plus their direct grants and denies. */
+export const useUserPermissions = (
+  userId: string,
+): UseQueryResult<UserEffectivePermissions> => {
+  const { getUserPermissions } = usePermissionsModule();
+  return useQuery({
+    queryKey: permissionKeys.user(userId),
+    enabled: userId.length > 0,
+    queryFn: async (): Promise<UserEffectivePermissions> => {
+      const result = await getUserPermissions.execute(userId);
+      if (isErr(result)) throw result.error;
+      return result.value;
+    },
+  });
+};
+
+export interface UpdateUserGrantsVars {
+  readonly userId: string;
+  readonly permissions: PermissionMap;
+}
+
+/** Add or remove a user's direct ("U") grants (send only the toggled keys). */
+export const useUpdateUserGrants = (): UseMutationResult<
+  PermissionUpdateResult,
+  Error,
+  UpdateUserGrantsVars
+> => {
+  const { updateUserGrants } = usePermissionsModule();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      userId,
+      permissions,
+    }: UpdateUserGrantsVars): Promise<PermissionUpdateResult> => {
+      const result = await updateUserGrants.execute(userId, permissions);
+      if (isErr(result)) throw result.error;
+      return result.value;
+    },
+    onSuccess: (_result, { userId }) => {
+      void queryClient.invalidateQueries({ queryKey: permissionKeys.user(userId) });
+    },
+  });
+};
+
+export interface ReplaceUserDeniesVars {
+  readonly userId: string;
+  readonly deniedPermissions: readonly string[];
+}
+
+/** Replace a user's full deny set (an empty list clears every deny). */
+export const useReplaceUserDenies = (): UseMutationResult<
+  PermissionUpdateResult,
+  Error,
+  ReplaceUserDeniesVars
+> => {
+  const { replaceUserDenies } = usePermissionsModule();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      userId,
+      deniedPermissions,
+    }: ReplaceUserDeniesVars): Promise<PermissionUpdateResult> => {
+      const result = await replaceUserDenies.execute(userId, deniedPermissions);
+      if (isErr(result)) throw result.error;
+      return result.value;
+    },
+    onSuccess: (_result, { userId }) => {
+      void queryClient.invalidateQueries({ queryKey: permissionKeys.user(userId) });
     },
   });
 };

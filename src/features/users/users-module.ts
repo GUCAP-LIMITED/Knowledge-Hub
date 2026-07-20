@@ -1,27 +1,22 @@
+import type { HttpClient } from '@core/http';
 import type { Logger } from '@core/logger';
-import { ListUsersUseCase, SetUserStatusUseCase } from './application';
-import { InMemoryUserGateway } from './infrastructure';
+import type { UserDirectoryGateway } from './domain';
+import { UserDirectoryHttpGateway } from './infrastructure';
 
 export interface UsersModuleDeps {
+  readonly httpClient: HttpClient;
   readonly logger: Logger;
 }
 
-/** The use cases exposed by the users feature, consumed via a context provider. */
+/** The users feature module — the API-backed user directory gateway. */
 export interface UsersModule {
-  readonly listUsers: ListUsersUseCase;
-  readonly setUserStatus: SetUserStatusUseCase;
+  readonly gateway: UserDirectoryGateway;
 }
 
-/**
- * Composition root *for the users feature*. Wires the in-memory gateway to the use cases. The
- * only place inside the feature where layers are joined. Bind an HTTP gateway here to go live.
- */
-export const createUsersModule = (deps: UsersModuleDeps): UsersModule => {
-  const userGateway = new InMemoryUserGateway({ logger: deps.logger });
-  const shared = { userGateway, logger: deps.logger };
-
-  return {
-    listUsers: new ListUsersUseCase(shared),
-    setUserStatus: new SetUserStatusUseCase(shared),
-  };
-};
+/** Composition root for the users feature. Wires the HTTP gateway to the port. */
+export const createUsersModule = (deps: UsersModuleDeps): UsersModule => ({
+  gateway: new UserDirectoryHttpGateway({
+    httpClient: deps.httpClient,
+    logger: deps.logger,
+  }),
+});

@@ -3,7 +3,7 @@ import { useAuth, type AuthenticatedUser } from '@features/auth';
 import { useCourses } from '@features/courses';
 import { useCertificates } from '@features/certificates';
 import { useSubmissions } from '@features/submissions';
-import { useUsers } from '@features/users';
+import { useBranchUsers } from '@features/users';
 import { useAnnouncements, useMarkAllRead } from '@features/notifications';
 import {
   AnnouncementsCard,
@@ -50,14 +50,14 @@ const renderOnboarding = (
 /** Role-aware home dashboard: hero, quick actions, stats, continue-learning + announcements. */
 export const DashboardPage = (): ReactElement => {
   const { user } = useAuth();
+  const role = roleOf(user);
   const courses = useCourses();
   const certificates = useCertificates();
   const submissions = useSubmissions();
-  const users = useUsers();
+  // The user count is an admin-only stat; only admins may list branch users, so gate the fetch.
+  const users = useBranchUsers(null, role === 'admin');
   const announcements = useAnnouncements();
   const markAll = useMarkAllRead();
-
-  const role = roleOf(user);
   const list = courses.data ?? [];
   const inProgress = list.filter(
     (course) => course.hasStarted() && !course.isCompleted(),

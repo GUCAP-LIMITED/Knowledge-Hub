@@ -7,3 +7,6 @@ export * from './use-cases/update-permission-set';
 export * from './use-cases/delete-permission-set';
 export * from './use-cases/list-type-defaults';
 export * from './use-cases/set-type-default';
+export * from './use-cases/get-user-permissions';
+export * from './use-cases/update-user-grants';
+export * from './use-cases/replace-user-denies';

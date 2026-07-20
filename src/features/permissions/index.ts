@@ -9,6 +9,8 @@ export {
 export {
   PermissionsModuleProvider,
   PermissionsManager,
+  UserPermissionsEditor,
+  type UserPermissionsEditorProps,
   useMyPermissions,
   useMyPermissionModules,
   useHasPermission,
@@ -19,6 +21,9 @@ export {
   useUpdatePermissionSet,
   useDeletePermissionSet,
   useSetTypeDefault,
+  useUserPermissions,
+  useUpdateUserGrants,
+  useReplaceUserDenies,
   permissionKeys,
   iconFor,
 } from './presentation';

@@ -1,19 +1,25 @@
 /**
  * Public API of the `users` feature. The app shell and other features import ONLY from here.
- * Backed by an in-memory gateway seeded from the prototype directory (swap for HTTP to go live).
+ * The user directory is backed by the real API (`BranchAppService` + block/unblock endpoints).
  */
 export {
   createUsersModule,
   type UsersModule,
   type UsersModuleDeps,
 } from './users-module';
-export { UsersModuleProvider, useUsers, usersQueryKey } from './presentation';
+export {
+  UsersModuleProvider,
+  useBranchUsers,
+  useBranches,
+  useBlockUser,
+  useUnblockUser,
+} from './presentation';
+export type { BranchUser, BranchListItem, UserRole } from './domain';
 export {
   useMyCapabilities,
   type MyCapabilities,
 } from './presentation/use-my-capabilities';
 export type { CapId } from './presentation/permission-catalog';
-export { UserAccount, type UserAccountProps } from './domain';
 export {
   SETTINGS_SECTIONS,
   type SettingsSectionKey,

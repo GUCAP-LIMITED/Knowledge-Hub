@@ -6,10 +6,13 @@ import {
   GetMyPermissionModulesUseCase,
   GetMyPermissionsUseCase,
   GetPermissionSetUseCase,
+  GetUserPermissionsUseCase,
   ListPermissionSetsUseCase,
   ListTypeDefaultsUseCase,
+  ReplaceUserDeniesUseCase,
   SetTypeDefaultUseCase,
   UpdatePermissionSetUseCase,
+  UpdateUserGrantsUseCase,
 } from './application';
 import { PermissionSetHttpGateway } from './infrastructure';
 
@@ -29,6 +32,9 @@ export interface PermissionsModule {
   readonly deletePermissionSet: DeletePermissionSetUseCase;
   readonly listTypeDefaults: ListTypeDefaultsUseCase;
   readonly setTypeDefault: SetTypeDefaultUseCase;
+  readonly getUserPermissions: GetUserPermissionsUseCase;
+  readonly updateUserGrants: UpdateUserGrantsUseCase;
+  readonly replaceUserDenies: ReplaceUserDeniesUseCase;
 }
 
 /**
@@ -54,5 +60,8 @@ export const createPermissionsModule = (
     deletePermissionSet: new DeletePermissionSetUseCase(shared),
     listTypeDefaults: new ListTypeDefaultsUseCase(shared),
     setTypeDefault: new SetTypeDefaultUseCase(shared),
+    getUserPermissions: new GetUserPermissionsUseCase(shared),
+    updateUserGrants: new UpdateUserGrantsUseCase(shared),
+    replaceUserDenies: new ReplaceUserDeniesUseCase(shared),
   };
 };

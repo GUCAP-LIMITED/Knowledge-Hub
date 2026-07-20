@@ -45,6 +45,12 @@
   font-weight: 800;
   color: var(--color-text);
 }
+.typeBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  justify-content: center;
+}
 .info {
   display: flex;
   flex-direction: column;

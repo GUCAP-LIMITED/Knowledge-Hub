@@ -1,29 +1,30 @@
 import type { ReactElement } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Calendar, Clock, Mail, Shield, X } from 'lucide-react';
-import { Avatar, Badge, Button, IconButton, type BadgeTone } from '@shared/ui';
-import type { UserAccount, UserRole } from '../domain';
+import { Building2, Mail, Shield, Users, X } from 'lucide-react';
+import { Avatar, Badge, Button, IconButton } from '@shared/ui';
+import type { BranchUser } from '../domain';
+import { userDisplayName } from './user-display-name';
 import styles from './MemberDetails.module.css';
 
-const ROLE_TONE: Record<UserRole, BadgeTone> = {
-  admin: 'danger',
-  manager: 'info',
-  consultant: 'primary',
-};
-
-const ROLE_LABEL: Record<UserRole, string> = {
-  admin: 'Admin',
-  manager: 'Manager',
-  consultant: 'Consultant',
-};
-
 export interface MemberDetailsDrawerProps {
-  readonly user: UserAccount | null;
+  readonly user: BranchUser | null;
   readonly isBusy: boolean;
   readonly onClose: () => void;
-  readonly onEditPermissions: (user: UserAccount) => void;
-  readonly onToggleStatus: (user: UserAccount) => void;
+  readonly onEditPermissions: (user: BranchUser) => void;
+  readonly onToggleStatus: (user: BranchUser) => void;
 }
+
+const branchesLabel = (user: BranchUser): string =>
+  user.branches.length === 0
+    ? '—'
+    : user.branches
+        .map((branch) =>
+          branch.isPrimary ? `${branch.branchName} (primary)` : branch.branchName,
+        )
+        .join(', ');
+
+const typesLabel = (user: BranchUser): string =>
+  user.userTypes.length === 0 ? '—' : user.userTypes.map((type) => type.name).join(', ');
 
 const InfoRow = ({
   icon: Icon,
@@ -51,50 +52,57 @@ const Panel = ({
   onEditPermissions,
   onToggleStatus,
 }: {
-  readonly user: UserAccount;
+  readonly user: BranchUser;
   readonly isBusy: boolean;
-  readonly onEditPermissions: (user: UserAccount) => void;
-  readonly onToggleStatus: (user: UserAccount) => void;
-}): ReactElement => {
-  const active = user.isActive();
-  return (
-    <>
-      <div className={styles.identity}>
-        <Avatar name={user.name} size={72} online={active} />
-        <Dialog.Title className={styles.name}>{user.name}</Dialog.Title>
-        <Badge tone={ROLE_TONE[user.role]} icon={Shield}>
-          {ROLE_LABEL[user.role]}
-        </Badge>
-      </div>
-      <div className={styles.info}>
-        <InfoRow icon={Mail} label="Email" value={user.email} />
-        <InfoRow icon={Shield} label="Status" value={active ? 'Active' : 'Inactive'} />
-        <InfoRow icon={Calendar} label="Joined" value={user.joined} />
-        <InfoRow icon={Clock} label="Last active" value={user.lastActive} />
-      </div>
-      <div className={styles.actions}>
-        <Button
-          onClick={() => {
-            onEditPermissions(user);
-          }}
-        >
-          <Shield size={15} aria-hidden="true" /> Edit permissions
-        </Button>
-        <Button
-          variant="secondary"
-          isLoading={isBusy}
-          onClick={() => {
-            onToggleStatus(user);
-          }}
-        >
-          {active ? 'Deactivate account' : 'Activate account'}
-        </Button>
-      </div>
-    </>
-  );
-};
+  readonly onEditPermissions: (user: BranchUser) => void;
+  readonly onToggleStatus: (user: BranchUser) => void;
+}): ReactElement => (
+  <>
+    <div className={styles.identity}>
+      <Avatar name={userDisplayName(user)} size={72} online={user.isActive} />
+      <Dialog.Title className={styles.name}>{userDisplayName(user)}</Dialog.Title>
+      {user.userTypes.length > 0 ? (
+        <div className={styles.typeBadges}>
+          {user.userTypes.map((type) => (
+            <Badge key={type.id} tone="info" size="sm">
+              {type.name}
+            </Badge>
+          ))}
+        </div>
+      ) : null}
+    </div>
+    <div className={styles.info}>
+      <InfoRow icon={Mail} label="Email" value={user.email ?? '—'} />
+      <InfoRow
+        icon={Shield}
+        label="Status"
+        value={user.isActive ? 'Active' : 'Blocked'}
+      />
+      <InfoRow icon={Building2} label="Branches" value={branchesLabel(user)} />
+      <InfoRow icon={Users} label="User types" value={typesLabel(user)} />
+    </div>
+    <div className={styles.actions}>
+      <Button
+        onClick={() => {
+          onEditPermissions(user);
+        }}
+      >
+        <Shield size={15} aria-hidden="true" /> Edit permissions
+      </Button>
+      <Button
+        variant="secondary"
+        isLoading={isBusy}
+        onClick={() => {
+          onToggleStatus(user);
+        }}
+      >
+        {user.isActive ? 'Block account' : 'Unblock account'}
+      </Button>
+    </div>
+  </>
+);
 
-/** Right-hand sheet showing a member's details with entry points to edit permissions or status. */
+/** Right-hand sheet showing a member's details with entry points to edit permissions or block them. */
 export const MemberDetailsDrawer = ({
   user,
   isBusy,
@@ -105,9 +113,7 @@ export const MemberDetailsDrawer = ({
   <Dialog.Root
     open={user !== null}
     onOpenChange={(next) => {
-      if (!next) {
-        onClose();
-      }
+      if (!next) onClose();
     }}
   >
     <Dialog.Portal>
