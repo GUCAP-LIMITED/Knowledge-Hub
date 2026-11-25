@@ -12,7 +12,6 @@ interface Hit {
   readonly type: number;
 }
 
-/** Other content kinds (tutorials, resources) register their searchable rows here. */
 export type SearchSource = (state: MockState) => readonly Hit[];
 
 const courseSource: SearchSource = (state) =>
@@ -25,10 +24,27 @@ const courseSource: SearchSource = (state) =>
     type: 0,
   }));
 
-export const searchHandlers = (
-  state: MockState,
-  extraSources: readonly SearchSource[] = [],
-): readonly MockRoute[] => [
+const tutorialSource: SearchSource = (state) =>
+  state.tutorials.map((t) => ({
+    id: t.id,
+    title: t.title,
+    subtitle: t.subtitle,
+    categoryName: t.category,
+    slug: t.slug,
+    type: 5,
+  }));
+
+const resourceSource: SearchSource = (state) =>
+  state.resources.map((r) => ({
+    id: r.id,
+    title: r.title,
+    subtitle: r.subtitle,
+    categoryName: r.category,
+    slug: r.slug,
+    type: 10,
+  }));
+
+export const searchHandlers = (state: MockState): readonly MockRoute[] => [
   {
     method: 'GET',
     pattern: '/api/app/search',
@@ -36,7 +52,7 @@ export const searchHandlers = (
       const needle = (query.query ?? '').trim().toLowerCase();
       const max = Number(query.maxPerCategory ?? 5);
       const type = query.type === undefined ? undefined : Number(query.type);
-      const hits = [courseSource, ...extraSources]
+      const hits = [courseSource, tutorialSource, resourceSource]
         .flatMap((source) => source(state))
         .filter(
           (hit) =>

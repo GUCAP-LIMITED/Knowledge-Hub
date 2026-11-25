@@ -3,6 +3,7 @@ import { grantsOf, notFound, requireUser } from '../mock-context';
 import type { MockRequest, MockRoute } from '../mock-types';
 import {
   GROUP_LABELS,
+  allPermissionKeys,
   PERMISSION_CATALOG,
   type CatalogModule,
 } from '../seed/permission-catalog';
@@ -34,7 +35,7 @@ const toNavItem = (
   };
 };
 
-const toDetailModule = (
+export const toDetailModule = (
   module: CatalogModule,
   grants: ReadonlySet<string>,
 ): Record<string, unknown> => ({
@@ -48,7 +49,7 @@ const toDetailModule = (
   children: (module.children ?? []).map((child) => toDetailModule(child, grants)),
 });
 
-const toSummary = (set: MockPermissionSet): Record<string, unknown> => ({
+export const toSummary = (set: MockPermissionSet): Record<string, unknown> => ({
   id: set.id,
   name: set.name,
   description: set.description,
@@ -56,7 +57,7 @@ const toSummary = (set: MockPermissionSet): Record<string, unknown> => ({
   bgColor: set.bgColor,
   isSystemDefault: set.isSystemDefault,
   enabledCount: set.grants.size,
-  totalCount: 0,
+  totalCount: allPermissionKeys().length,
 });
 
 const navGroups = (grants: ReadonlySet<string>): unknown[] =>

@@ -1,3 +1,4 @@
+import { ratingOf } from './content-index';
 import type { MockState } from './mock-state';
 import { can } from './mock-context';
 import { courseCategoryId, type CourseSeed, type LessonSeed } from './seed/course-seed';
@@ -103,6 +104,7 @@ export const toCourseRow = (
   const done = enrollment?.completedLessons.size ?? 0;
   const completed = enrollment?.status === 15;
   const helpful = state.helpfulVotes.has(`${user.id}:${course.id}`);
+  const rating = ratingOf(state, course.id);
   return {
     id: course.id,
     slug: course.slug,
@@ -135,9 +137,9 @@ export const toCourseRow = (
     lastModificationTime: course.createdAt,
     helpfulCount: course.helpfulCount + (helpful ? 1 : 0),
     isHelpful: helpful,
-    averageRating: course.rating,
-    rating: course.rating,
-    totalReviews: course.totalReviews,
+    averageRating: rating.average,
+    rating: rating.average,
+    totalReviews: rating.total,
     categoryId: courseCategoryId(course),
     categoryName: categoryNameOf(state, course),
     difficulty: course.difficulty,

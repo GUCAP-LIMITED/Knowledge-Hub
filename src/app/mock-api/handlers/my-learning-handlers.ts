@@ -1,5 +1,12 @@
+import {
+  catalogRefs,
+  categoryName,
+  certificateIdFor,
+  ratingOf,
+  type CatalogRef,
+} from '../content-index';
 import { paginate, requireUser, sortBy } from '../mock-context';
-import type { MockState } from '../mock-state';
+import type { MockCompletion, MockState } from '../mock-state';
 import type { MockRoute } from '../mock-types';
 import {
   allLessons,
@@ -45,6 +52,7 @@ const toItem = (
   course: CourseSeed,
 ): Record<string, unknown> => {
   const lessons = allLessons(course);
+  const rating = ratingOf(state, course.id);
   const done = enrollment.completedLessons.size;
   const dueMs = enrollment.dueDate === null ? null : Date.parse(enrollment.dueDate);
   const overdue =
@@ -87,14 +95,91 @@ const toItem = (
     isPublished: true,
     helpfulCount: course.helpfulCount,
     isHelpful: false,
-    averageRating: course.rating,
-    rating: course.rating,
-    totalReviews: course.totalReviews,
+    averageRating: rating.average,
+    rating: rating.average,
+    totalReviews: rating.total,
     actionLabel: ACTION_LABELS[status],
   };
 };
 
-const itemsFor = (state: MockState, userId: string): Record<string, unknown>[] =>
+interface CompletionContext {
+  readonly state: MockState;
+  readonly userId: string;
+  readonly ref: CatalogRef;
+  readonly completion: MockCompletion;
+}
+
+const toCompletionItem = ({
+  state,
+  userId,
+  ref,
+  completion,
+}: CompletionContext): Record<string, unknown> => {
+  const done = completion.at !== null;
+  const total = state.tutorials.find((t) => t.id === ref.id)?.videos.length ?? 1;
+  const rating = ratingOf(state, ref.id);
+  const when = completion.at ?? state.now.toISOString();
+  return {
+    id: ref.id,
+    slug: ref.slug,
+    assignmentId: null,
+    enrollmentId: null,
+    title: ref.title,
+    subtitle: ref.subtitle,
+    description: ref.subtitle,
+    contentType: ref.type,
+    contentTypeName: ref.typeName,
+    origin: 1,
+    originName: 'Self',
+    assignedScope: null,
+    assignedScopeName: null,
+    status: done ? 2 : 1,
+    statusName: done ? 'Completed' : 'In Progress',
+    progress: done ? 100 : Math.round((completion.videos.size / total) * 100),
+    dueDate: null,
+    isOverdue: false,
+    daysRemaining: null,
+    enrolledOrAssignedAt: when,
+    lastAccessedAt: when,
+    completedAt: completion.at,
+    totalLessons: total,
+    completedLessons: done ? total : completion.videos.size,
+    durationSeconds: 0,
+    difficultyName: 'Beginner',
+    categoryName: categoryName(state, ref.categoryId),
+    topic: null,
+    thumbnailUrl: ref.thumbnailUrl,
+    certificateId: done ? certificateIdFor(userId, ref.id) : null,
+    certificateUrl: null,
+    isAccessible: true,
+    isPublished: true,
+    helpfulCount: 0,
+    isHelpful: false,
+    averageRating: rating.average,
+    rating: rating.average,
+    totalReviews: rating.total,
+    actionLabel: done ? 'View' : 'Continue',
+  };
+};
+
+/** Tutorials and resources the learner has started or finished (they have no enrolment record). */
+const completionItems = (state: MockState, userId: string): Record<string, unknown>[] => {
+  const refs = catalogRefs(state);
+  return [...state.completions].flatMap(([key, completion]) => {
+    const [owner = '', contentId = ''] = key.split(':');
+    const ref = refs.find((r) => r.id === contentId);
+    return owner === userId && ref !== undefined && ref.type !== 0
+      ? [toCompletionItem({ state, userId, ref, completion })]
+      : [];
+  });
+};
+
+const itemsFor = (state: MockState, userId: string): Record<string, unknown>[] => [
+  ...courseItems(state, userId),
+  ...completionItems(state, userId),
+];
+
+const courseItems = (state: MockState, userId: string): Record<string, unknown>[] =>
   state.enrollments
     .filter((e) => e.userId === userId)
     .flatMap((enrollment) => {
@@ -106,6 +191,22 @@ const numberQuery = (value: string | undefined): number | undefined =>
   value === undefined || value === '' ? undefined : Number(value);
 
 const text = (value: unknown): string => (typeof value === 'string' ? value : '');
+
+interface LearningFilters {
+  readonly filter: string;
+  readonly origin: number | undefined;
+  readonly status: number | undefined;
+  readonly contentType: number | undefined;
+}
+
+const matchesLearningFilters = (
+  item: Record<string, unknown>,
+  f: LearningFilters,
+): boolean =>
+  text(item.title).toLowerCase().includes(f.filter.toLowerCase()) &&
+  (f.origin === undefined || item.origin === f.origin) &&
+  (f.status === undefined || item.status === f.status) &&
+  (f.contentType === undefined || item.contentType === f.contentType);
 
 const SORTERS = {
   title: (i: Record<string, unknown>): string => text(i.title),
@@ -122,15 +223,13 @@ export const myLearningHandlers = (state: MockState): readonly MockRoute[] => [
     pattern: `${BASE}/my-learning`,
     handler: (request) => {
       const { filter = '', sorting } = request.query;
-      const origin = numberQuery(request.query.origin);
-      const status = numberQuery(request.query.status);
-      const contentType = numberQuery(request.query.contentType);
-      const matches = itemsFor(state, requireUser(request).id).filter(
-        (item) =>
-          String(item.title).toLowerCase().includes(filter.toLowerCase()) &&
-          (origin === undefined || item.origin === origin) &&
-          (status === undefined || item.status === status) &&
-          (contentType === undefined || item.contentType === contentType),
+      const matches = itemsFor(state, requireUser(request).id).filter((item) =>
+        matchesLearningFilters(item, {
+          filter,
+          origin: numberQuery(request.query.origin),
+          status: numberQuery(request.query.status),
+          contentType: numberQuery(request.query.contentType),
+        }),
       );
       return paginate(sortBy(matches, sorting, SORTERS), request.query);
     },

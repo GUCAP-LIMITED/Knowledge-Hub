@@ -1,3 +1,4 @@
+import { ratingOf } from './content-index';
 import { categoryNameOf } from './course-view';
 import type { MockState } from './mock-state';
 import type { MockUser } from './seed/mock-users';
@@ -44,17 +45,19 @@ const completionByCategory = (
 
 const topRated = (state: MockState): Point[] =>
   [...state.courses]
-    .sort((a, b) => b.rating - a.rating)
+    .map((course) => ({ course, rating: ratingOf(state, course.id) }))
+    .filter(({ rating }) => rating.total > 0)
+    .sort((a, b) => b.rating.average - a.rating.average)
     .slice(0, 5)
-    .map((course) => ({
+    .map(({ course, rating }) => ({
       label: course.title,
-      value: course.rating,
+      value: rating.average,
       meta: JSON.stringify({
         courseId: course.id,
         title: course.title,
         slug: course.slug,
-        rating: course.rating.toFixed(1),
-        reviewsCount: String(course.totalReviews),
+        rating: rating.average.toFixed(1),
+        reviewsCount: String(rating.total),
       }),
     }));
 

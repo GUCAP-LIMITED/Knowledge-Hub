@@ -44,5 +44,36 @@ export const MOCK_MEDIA_ASSETS: readonly MockMediaAsset[] = [
   pdf('asset-pdf-3', 'reference-guide.pdf'),
 ];
 
+/**
+ * Files "uploaded" through the mock API get ids like `upload-vid-7`; the prefix decides which demo
+ * file stands in for them, so no per-session asset table is needed.
+ */
+const uploadedAsset = (id: string): MockMediaAsset | undefined => {
+  const kind = /^upload-(vid|pdf|img)-/.exec(id)?.[1];
+  if (kind === 'vid') return video(id, 'uploaded-video.mp4', VIDEO_A);
+  if (kind === 'pdf') return pdf(id, 'uploaded-document.pdf');
+  if (kind === 'img') {
+    return {
+      id,
+      kind: 10,
+      fileName: 'uploaded-image.png',
+      mimeType: 'image/png',
+      sizeBytes: 90_000,
+      url: '/favicon.svg',
+    };
+  }
+  return undefined;
+};
+
 export const findMediaAsset = (id: string): MockMediaAsset | undefined =>
-  MOCK_MEDIA_ASSETS.find((asset) => asset.id === id);
+  MOCK_MEDIA_ASSETS.find((asset) => asset.id === id) ?? uploadedAsset(id);
+
+/** The id prefix for an uploaded file, chosen from its MIME type. */
+export const uploadedAssetId = (mimeType: string | null, sequence: number): string => {
+  const kind = mimeType?.startsWith('video')
+    ? 'vid'
+    : mimeType?.startsWith('image')
+      ? 'img'
+      : 'pdf';
+  return `upload-${kind}-${String(sequence)}`;
+};

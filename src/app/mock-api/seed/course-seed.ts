@@ -29,8 +29,6 @@ export interface CourseSeed {
   readonly mandatory: boolean;
   readonly hue: number;
   readonly createdAt: string;
-  readonly rating: number;
-  readonly totalReviews: number;
   readonly enrollmentCount: number;
   readonly helpfulCount: number;
   readonly introAssetId: string | null;
@@ -90,8 +88,6 @@ export const COURSE_SEEDS: readonly CourseSeed[] = [
     mandatory: true,
     hue: 178,
     createdAt: '2026-01-12T09:00:00Z',
-    rating: 4.8,
-    totalReviews: 42,
     enrollmentCount: 118,
     helpfulCount: 31,
     introAssetId: 'asset-vid-1',
@@ -119,8 +115,6 @@ export const COURSE_SEEDS: readonly CourseSeed[] = [
     mandatory: true,
     hue: 205,
     createdAt: '2026-02-03T09:00:00Z',
-    rating: 4.6,
-    totalReviews: 57,
     enrollmentCount: 96,
     helpfulCount: 24,
     introAssetId: 'asset-vid-2',
@@ -151,8 +145,6 @@ export const COURSE_SEEDS: readonly CourseSeed[] = [
     mandatory: true,
     hue: 8,
     createdAt: '2026-02-20T09:00:00Z',
-    rating: 4.4,
-    totalReviews: 33,
     enrollmentCount: 141,
     helpfulCount: 19,
     introAssetId: 'asset-vid-4',
@@ -178,8 +170,6 @@ export const COURSE_SEEDS: readonly CourseSeed[] = [
     mandatory: false,
     hue: 32,
     createdAt: '2026-03-09T09:00:00Z',
-    rating: 4.9,
-    totalReviews: 64,
     enrollmentCount: 88,
     helpfulCount: 40,
     introAssetId: 'asset-vid-3',
@@ -209,8 +199,6 @@ export const COURSE_SEEDS: readonly CourseSeed[] = [
     mandatory: false,
     hue: 140,
     createdAt: '2026-03-28T09:00:00Z',
-    rating: 4.7,
-    totalReviews: 29,
     enrollmentCount: 73,
     helpfulCount: 17,
     introAssetId: null,
@@ -233,8 +221,6 @@ export const COURSE_SEEDS: readonly CourseSeed[] = [
     mandatory: false,
     hue: 262,
     createdAt: '2026-04-15T09:00:00Z',
-    rating: 4.5,
-    totalReviews: 18,
     enrollmentCount: 41,
     helpfulCount: 9,
     introAssetId: 'asset-vid-5',
@@ -257,8 +243,6 @@ export const COURSE_SEEDS: readonly CourseSeed[] = [
     mandatory: false,
     hue: 292,
     createdAt: '2026-05-06T09:00:00Z',
-    rating: 4.3,
-    totalReviews: 21,
     enrollmentCount: 64,
     helpfulCount: 12,
     introAssetId: 'asset-vid-6',

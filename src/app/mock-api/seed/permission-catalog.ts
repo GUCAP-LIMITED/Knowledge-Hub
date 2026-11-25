@@ -37,7 +37,7 @@ export const PERMISSION_CATALOG: readonly CatalogModule[] = [
     description: 'Video tutorials',
     href: '/tutorials',
     basePermission: 'Tutorials.View',
-    actions: ['Tutorials.Edit'],
+    actions: ['Tutorials.Edit', 'Tutorials.Delete'],
     group: 'learning',
   }),
   mod({
@@ -48,7 +48,7 @@ export const PERMISSION_CATALOG: readonly CatalogModule[] = [
     description: 'Documents and guides',
     href: '/resources',
     basePermission: 'Resources.View',
-    actions: ['Resources.Delete'],
+    actions: ['Resources.Edit', 'Resources.Delete'],
     group: 'learning',
   }),
   mod({

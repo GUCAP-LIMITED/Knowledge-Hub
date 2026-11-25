@@ -11,12 +11,19 @@ export const requireUser = (request: MockRequest): MockUser => {
   return user;
 };
 
-/** Permission keys granted to a user via their user type's default permission set. */
+/**
+ * Effective permission keys for a user: their permission set (a personal override, else their user
+ * type's default) plus any direct grants, minus any explicit denies.
+ */
 export const grantsOf = (state: MockState, user: MockUser): ReadonlySet<string> => {
-  const setId = state.typeDefaults.get(user.userTypeId);
-  return (
-    state.permissionSets.find((set) => set.id === setId)?.grants ?? new Set<string>()
+  const entry = state.directory.find((u) => u.id === user.id);
+  const setId = entry?.permissionSetId ?? state.typeDefaults.get(user.userTypeId);
+  const base = new Set(
+    state.permissionSets.find((set) => set.id === setId)?.grants ?? [],
   );
+  entry?.grants.forEach((key) => base.add(key));
+  entry?.denies.forEach((key) => base.delete(key));
+  return base;
 };
 
 export const can = (state: MockState, user: MockUser, permission: string): boolean =>
@@ -58,4 +65,25 @@ export const sortBy = <T>(
     }
     return String(left).localeCompare(String(right)) * sign;
   });
+};
+
+/** Case-insensitive query lookup — the backend accepts both `Filter` and `filter`. */
+export const queryParam = (
+  query: Readonly<Record<string, string>>,
+  name: string,
+): string | undefined => {
+  const wanted = name.toLowerCase();
+  const key = Object.keys(query).find((k) => k.toLowerCase() === wanted);
+  return key === undefined ? undefined : query[key];
+};
+
+/** Lower-cases every query key so handlers can use one spelling. */
+export const normalizeQuery = (
+  query: Readonly<Record<string, string>>,
+): Readonly<Record<string, string>> =>
+  Object.fromEntries(Object.entries(query).map(([k, v]) => [k.toLowerCase(), v]));
+
+/** Applies a partial update to a mock record (the mock store is intentionally mutable). */
+export const patch = <T extends object>(target: T, changes: Partial<T>): void => {
+  Object.assign(target, changes);
 };

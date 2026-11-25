@@ -1,4 +1,5 @@
 import type { Clock } from '@core/time';
+import { ratingOf } from '../content-index';
 import { notFound, paginate, requireUser, sortBy } from '../mock-context';
 import type { MockState } from '../mock-state';
 import { MockHttpFailure, type MockRequest, type MockRoute } from '../mock-types';
@@ -32,13 +33,15 @@ const matchesFilter = (state: MockState, course: CourseSeed, filter: string): bo
   );
 };
 
-const SORTERS = {
+const sorters = (
+  state: MockState,
+): Record<string, (item: CourseSeed) => string | number> => ({
   title: (c: CourseSeed): string => c.title,
   creationtime: (c: CourseSeed): number => Date.parse(c.createdAt),
-  rating: (c: CourseSeed): number => c.rating,
+  rating: (c: CourseSeed): number => ratingOf(state, c.id).average,
   duration: (c: CourseSeed): number => courseDurationSeconds(c),
   enrollmentcount: (c: CourseSeed): number => c.enrollmentCount,
-} as const;
+});
 
 const completeLesson = (
   state: MockState,
@@ -97,7 +100,7 @@ export const courseHandlers = (state: MockState, clock: Clock): readonly MockRou
           (categoryId === undefined || courseCategoryId(course) === categoryId) &&
           (category === undefined || categoryNameOf(state, course) === category),
       );
-      const page = paginate(sortBy(matches, sorting, SORTERS), request.query);
+      const page = paginate(sortBy(matches, sorting, sorters(state)), request.query);
       return {
         items: page.items.map((c) => toCourseRow(state, c, user)),
         totalCount: page.totalCount,

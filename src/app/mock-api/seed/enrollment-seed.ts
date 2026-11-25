@@ -83,6 +83,22 @@ const SPECS: readonly Spec[] = [
     startedDaysAgo: 5,
   },
   { userId: 'user-admin', courseId: 'course-welcome', done: 'all', startedDaysAgo: 60 },
+  { userId: 'user-lead-1', courseId: 'course-welcome', done: 'all', startedDaysAgo: 45 },
+  { userId: 'user-lead-1', courseId: 'course-admissions', done: 4, startedDaysAgo: 12 },
+  { userId: 'user-cons-2', courseId: 'course-welcome', done: 'all', startedDaysAgo: 28 },
+  { userId: 'user-cons-2', courseId: 'course-admissions', done: 3, startedDaysAgo: 10 },
+  {
+    userId: 'user-cons-2',
+    courseId: 'course-compliance',
+    done: 1,
+    origin: 2,
+    dueInDays: 9,
+    startedDaysAgo: 3,
+  },
+  { userId: 'user-cons-3', courseId: 'course-welcome', done: 3, startedDaysAgo: 20 },
+  { userId: 'user-cons-4', courseId: 'course-welcome', done: 'all', startedDaysAgo: 33 },
+  { userId: 'user-cons-4', courseId: 'course-support', done: 'all', startedDaysAgo: 15 },
+  { userId: 'user-cons-5', courseId: 'course-welcome', done: 1, startedDaysAgo: 6 },
 ];
 
 export const createEnrollments = (now: Date): MockEnrollment[] =>

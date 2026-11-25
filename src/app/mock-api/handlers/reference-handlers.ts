@@ -1,6 +1,7 @@
 import type { MockState } from '../mock-state';
 import { requireUser } from '../mock-context';
 import type { MockRoute } from '../mock-types';
+import { BRANCHES } from '../seed/org-seed';
 
 interface EnumValue {
   readonly value: number;
@@ -29,11 +30,6 @@ const ENUMS: Readonly<Record<string, readonly EnumValue[]>> = {
   ],
 };
 
-const BRANCHES = [
-  { id: 'branch-london', name: 'London', code: 'LON', isPrimary: true },
-  { id: 'branch-manchester', name: 'Manchester', code: 'MAN', isPrimary: false },
-];
-
 /** Enums, categories and the signed-in user's branch / team scope. */
 export const referenceHandlers = (state: MockState): readonly MockRoute[] => [
   {
@@ -48,15 +44,6 @@ export const referenceHandlers = (state: MockState): readonly MockRoute[] => [
       state.categories.filter(
         (c) => query.type === undefined || c.type === Number(query.type),
       ),
-  },
-  {
-    method: 'GET',
-    pattern: '/api/app/branch/my',
-    handler: (request) => {
-      const user = requireUser(request);
-      const mine = BRANCHES.filter((b) => user.isGlobal || user.branchIds.includes(b.id));
-      return { items: mine };
-    },
   },
   {
     method: 'GET',
