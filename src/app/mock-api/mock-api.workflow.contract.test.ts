@@ -4,6 +4,7 @@ import { createAssignmentsModule } from '@features/assignments';
 import { createCertificatesModule } from '@features/certificates';
 import { createContentModule } from '@features/content';
 import { createCoursesModule } from '@features/courses';
+import { createDashboardModule } from '@features/dashboard';
 import { createCourseReviewsModule } from '@features/course-reviews';
 import { createEmailTemplatesModule } from '@features/email-templates';
 import { createPermissionsModule } from '@features/permissions';
@@ -40,6 +41,7 @@ interface Connected {
   readonly submissions: ReturnType<typeof createSubmissionsModule>;
   readonly content: ReturnType<typeof createContentModule>;
   readonly courses: ReturnType<typeof createCoursesModule>;
+  readonly dashboard: ReturnType<typeof createDashboardModule>;
   readonly emailTemplates: ReturnType<typeof createEmailTemplatesModule>;
 }
 
@@ -76,6 +78,7 @@ const modules = (
   submissions: createSubmissionsModule({ httpClient, logger }),
   content: createContentModule({ httpClient, logger }),
   courses: createCoursesModule({ httpClient, logger }),
+  dashboard: createDashboardModule({ httpClient, logger }),
   emailTemplates: createEmailTemplatesModule({ httpClient, logger }),
 });
 
@@ -171,6 +174,46 @@ describe('mock API contract (content, workflow, admin)', () => {
     expect(types.ok && types.value.length).toBeGreaterThanOrEqual(4);
     const templates = await m.emailTemplates.gateway.getList();
     expect(templates.ok && templates.value.length).toBeGreaterThan(0);
+  });
+
+  it('lets an admin define the default dashboard for a user type', async () => {
+    const m = connect('user-admin');
+    const before = await m.dashboard.getByUserTypeDashboard.execute('ut-consultant');
+    expect(before.ok && before.value?.widgets.length).toBeGreaterThan(0);
+    const saved = await m.dashboard.saveDashboardTemplate.execute({
+      input: {
+        name: 'Consultant',
+        userTypeId: 'ut-consultant',
+        isDefault: true,
+        widgets: [
+          {
+            widgetKey: 'courses.active',
+            x: 0,
+            y: 0,
+            width: 3,
+            height: 1,
+            order: 0,
+            config: null,
+          },
+        ],
+      },
+    });
+    expect(saved.ok).toBe(true);
+    const after = await m.dashboard.getByUserTypeDashboard.execute('ut-consultant');
+    expect(after.ok && after.value?.widgets.map((w) => w.widgetKey)).toEqual([
+      'courses.active',
+    ]);
+  });
+
+  it('applies an approved revision to the live course', async () => {
+    const admin = connect('user-admin');
+    const before = await admin.courses.getCourse.execute('course-communication');
+    expect(before.ok && before.value.title).toBe('Consultative Communication');
+    await admin.content.gateway.approveRevision('course-communication', 'Looks good');
+    const after = await admin.courses.getCourse.execute('course-communication');
+    expect(after.ok && after.value.title).toBe(
+      'Consultative Communication (2026 edition)',
+    );
   });
 
   it('exposes content records to the editor', async () => {

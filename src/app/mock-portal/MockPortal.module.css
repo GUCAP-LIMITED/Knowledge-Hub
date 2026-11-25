@@ -112,3 +112,22 @@
   background-color: var(--color-primary);
   border-radius: var(--radius-md);
 }
+
+.reset {
+  align-self: flex-start;
+  padding: 0.4rem 0.75rem;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.reset:hover,
+.reset:focus-visible {
+  color: var(--color-text);
+  background-color: var(--color-accent);
+  outline: none;
+}

@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { MOCK_USERS, clearMockState, type MockUser } from '@app/mock-api';
 import styles from './MockPortal.module.css';
@@ -19,6 +19,7 @@ const buildReturnUrl = (params: URLSearchParams, user: MockUser): string => {
  */
 export const MockPortalLoginPage = (): ReactElement => {
   const [params] = useSearchParams();
+  const [resetDone, setResetDone] = useState(false);
 
   return (
     <main className={styles.screen}>
@@ -34,8 +35,6 @@ export const MockPortalLoginPage = (): ReactElement => {
                 type="button"
                 className={styles.user}
                 onClick={() => {
-                  // A fresh sign-in starts the demo from the seed data again.
-                  clearMockState(window.sessionStorage);
                   window.location.assign(buildReturnUrl(params, user));
                 }}
               >
@@ -47,6 +46,23 @@ export const MockPortalLoginPage = (): ReactElement => {
             </li>
           ))}
         </ul>
+        <p className={styles.hint}>
+          Your changes are kept while this tab is open, so you can switch users to follow
+          a submission from author to approver.
+        </p>
+        <button
+          type="button"
+          className={styles.reset}
+          onClick={() => {
+            clearMockState(window.sessionStorage);
+            setResetDone(true);
+          }}
+        >
+          Reset demo data
+        </button>
+        {resetDone ? (
+          <p className={styles.hint}>Demo data reset to the original seed.</p>
+        ) : null}
       </div>
     </main>
   );

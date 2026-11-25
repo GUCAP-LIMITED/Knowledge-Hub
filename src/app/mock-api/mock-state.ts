@@ -80,6 +80,8 @@ export interface MockState {
   readonly helpfulVotes: Set<string>;
   /** userId -> saved dashboard widget layout (absent = the user-type default). */
   readonly dashboards: Map<string, unknown>;
+  /** userTypeId -> admin-defined default dashboard (absent = the built-in layout). */
+  readonly dashboardTemplates: Map<string, unknown>;
   readonly quizzes: QuizSeed[];
   /** `${userId}:${quizId}` -> attempts. */
   readonly quizAttempts: Map<string, MockQuizAttempt[]>;
@@ -160,6 +162,7 @@ export const createMockState = (now: Date = new Date()): MockState => {
     ),
     helpfulVotes: new Set<string>(),
     dashboards: new Map<string, unknown>(),
+    dashboardTemplates: new Map<string, unknown>(),
     quizzes: createQuizzes(),
     quizAttempts: new Map(),
     reviews: createReviews(now, contentIds),

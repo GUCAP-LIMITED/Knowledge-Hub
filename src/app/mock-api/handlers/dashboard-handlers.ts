@@ -1,7 +1,7 @@
-import { grantsOf, requireUser } from '../mock-context';
+import { grantsOf, notFound, requireUser } from '../mock-context';
 import { buildWidgetData } from '../dashboard-data';
 import type { MockState } from '../mock-state';
-import type { MockRoute } from '../mock-types';
+import type { MockRequest, MockRoute } from '../mock-types';
 import type { MockUser } from '../seed/mock-users';
 import {
   DEFAULT_LAYOUTS,
@@ -61,8 +61,8 @@ const instanceDto = (
   };
 };
 
-const defaultLayout = (user: MockUser): SavedWidget[] => {
-  const rows = DEFAULT_LAYOUTS[user.userTypeId] ?? DEFAULT_LAYOUTS['ut-consultant'] ?? [];
+const builtInLayout = (userTypeId: string): SavedWidget[] => {
+  const rows = DEFAULT_LAYOUTS[userTypeId] ?? DEFAULT_LAYOUTS['ut-consultant'] ?? [];
   let order = 0;
   return rows.flatMap((row, y) => {
     let x = 0;
@@ -86,9 +86,15 @@ const defaultLayout = (user: MockUser): SavedWidget[] => {
   });
 };
 
+/** An admin template for the type if one was saved, else the built-in layout. */
+const defaultLayout = (state: MockState, userTypeId: string): SavedWidget[] =>
+  (state.dashboardTemplates.get(userTypeId) as SavedWidget[] | undefined) ??
+  builtInLayout(userTypeId);
+
 const dashboardFor = (state: MockState, user: MockUser): Record<string, unknown> => {
   const saved =
-    (state.dashboards.get(user.id) as SavedWidget[] | undefined) ?? defaultLayout(user);
+    (state.dashboards.get(user.id) as SavedWidget[] | undefined) ??
+    defaultLayout(state, user.userTypeId);
   const grants = grantsOf(state, user);
   const widgets = saved
     .filter((w) =>
@@ -106,6 +112,56 @@ const dashboardFor = (state: MockState, user: MockUser): Record<string, unknown>
     widgets,
   };
 };
+
+interface TemplateBody {
+  readonly name: string;
+  readonly userTypeId: string | null;
+  readonly isDefault: boolean;
+  readonly widgets: SavedWidget[];
+}
+
+const templateDto = (
+  state: MockState,
+  userTypeId: string,
+  widgets: readonly SavedWidget[],
+): Record<string, unknown> => ({
+  id: `template-${userTypeId}`,
+  name: `${state.userTypes.find((t) => t.id === userTypeId)?.name ?? userTypeId} dashboard`,
+  userTypeId,
+  isDefault: true,
+  widgets: widgets.map(instanceDto).filter((w) => w !== null),
+});
+
+const saveTemplate = (state: MockState, request: MockRequest): unknown => {
+  const body = request.body as TemplateBody;
+  const userTypeId = body.userTypeId ?? request.params.id?.replace('template-', '') ?? '';
+  state.dashboardTemplates.set(userTypeId, body.widgets);
+  return templateDto(state, userTypeId, body.widgets);
+};
+
+const templateRoutes = (state: MockState): readonly MockRoute[] => [
+  {
+    method: 'GET',
+    pattern: `${BASE}/by-user-type/:userTypeId`,
+    handler: ({ params }) => {
+      const id = params.userTypeId ?? '';
+      if (!state.userTypes.some((t) => t.id === id)) {
+        throw notFound('User type');
+      }
+      return templateDto(state, id, defaultLayout(state, id));
+    },
+  },
+  { method: 'POST', pattern: BASE, handler: (r) => saveTemplate(state, r) },
+  { method: 'PUT', pattern: `${BASE}/:id`, handler: (r) => saveTemplate(state, r) },
+  {
+    method: 'DELETE',
+    pattern: `${BASE}/user/:userId`,
+    handler: ({ params }) => {
+      state.dashboards.delete(params.userId ?? '');
+      return null;
+    },
+  },
+];
 
 export const dashboardHandlers = (state: MockState): readonly MockRoute[] => [
   {
@@ -157,4 +213,5 @@ export const dashboardHandlers = (state: MockState): readonly MockRoute[] => [
       return null;
     },
   },
+  ...templateRoutes(state),
 ];
