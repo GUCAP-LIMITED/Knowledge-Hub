@@ -6,6 +6,7 @@ export interface UpdateResourceInput {
   readonly id: string;
   readonly title: string;
   readonly category: string;
+  readonly categoryId?: string | null | undefined;
   readonly type: string;
   readonly description: string;
   /** New content file (data URL). Omitted/empty keeps the existing media. */
@@ -40,6 +41,8 @@ export class UpdateResourceUseCase {
       existing.value.withDetails({
         title: input.title,
         category: input.category,
+        categoryId:
+          input.categoryId !== undefined ? input.categoryId : existing.value.categoryId,
         type: input.type,
         description: input.description,
         ...(input.mediaUrl !== undefined ? { mediaUrl: input.mediaUrl } : {}),

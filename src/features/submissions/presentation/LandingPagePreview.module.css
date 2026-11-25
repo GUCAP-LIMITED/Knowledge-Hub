@@ -1,0 +1,195 @@
+.container {
+  width: 100%;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.hero {
+  padding: 2.5rem 2rem;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+}
+
+.heroBadges {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.typeBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+}
+
+.categoryBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  background-color: rgba(59, 130, 246, 0.3);
+  color: #93c5fd;
+}
+
+.difficultyBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: 1.85rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.heroSubtitle {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  max-width: 800px;
+}
+
+.heroMeta {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  flex-wrap: wrap;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.enrollActions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.contentBody {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sectionTitle {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.description {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text);
+  white-space: pre-line;
+}
+
+.curriculumHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.curriculumMeta {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.curriculumList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.sectionCard {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sectionHeader {
+  padding: 0.85rem 1.25rem;
+  background-color: var(--color-surface-hover);
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lessonCount {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.lessonsContainer {
+  padding: 0.5rem 1.25rem;
+  background-color: var(--color-surface);
+}
+
+.lessonRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.lessonRowBorder {
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.lessonTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.videoIcon {
+  color: var(--color-link);
+}
+
+.quizIcon {
+  color: var(--color-success);
+}
+
+.docIcon {
+  color: var(--color-text-muted);
+}
+
+.previewBadge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-link);
+  background-color: var(--color-primary-subtle);
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+}

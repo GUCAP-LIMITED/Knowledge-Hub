@@ -1258,3 +1258,19 @@ A React app should not become a pile of components and API calls.
 It should be a well-structured product codebase where business rules are explicit, dependencies are controlled, external data is validated, errors are typed, tests are focused, and every new feature follows a predictable path.
 
 That is what **React-CleanWithDDD-Template** gives you from the first commit.
+
+## Demo mode: the mock backend
+
+This build has **no real API**. The UI, routes, permissions and data flows are the UAPP Academy
+frontend, running against an in-memory backend (`src/app/mock-api`) that implements the same
+`HttpClient` port as the real client — so every gateway, Zod DTO and mapper runs unchanged.
+
+- **Sign in:** "Sign in with UAPP" opens a demo portal (`/mock-portal`). Pick _Amelia Hart_
+  (Admin), _Daniel Okafor_ (BranchManager) or _Priya Nair_ (Consultant).
+- **Data:** seeded in `src/app/mock-api/seed` and mutable. Changes survive a page reload and user
+  switching within the tab (so a submission can be followed from author to approver); use
+  **Reset demo data** on the mock portal screen to start over.
+- **Go live:** set `VITE_USE_MOCK_API=false` and point `VITE_API_BASE_URL` / `VITE_PORTAL_LOGIN_URL`
+  at a real Academy backend. Nothing else changes.
+- **Contract tests:** `mock-api*.contract.test.ts` run the real gateways against the mock, so a seed
+  that drifts from the wire contract fails in CI.

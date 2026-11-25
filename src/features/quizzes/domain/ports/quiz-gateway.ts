@@ -1,6 +1,8 @@
 import type { Result } from '@core/result';
 import type { QuizError } from '../errors/quiz-errors';
-import type { Quiz } from '../entities/quiz';
+import type { Quiz, QuizAnswers } from '../entities/quiz';
+import type { QuizResult } from '../value-objects/quiz-result';
+import type { QuizLearnerStatus } from '../value-objects/quiz-learner-status';
 
 /**
  * Port to quiz storage. A piece of content can carry several quizzes. The domain states the
@@ -19,4 +21,14 @@ export interface QuizGateway {
 
   /** Remove a quiz by its id. */
   remove(quizId: string): Promise<Result<void, QuizError>>;
+
+  /** Grade learner answers and return the result. */
+  submit(
+    quizId: string,
+    answers: QuizAnswers,
+    quiz: Quiz,
+  ): Promise<Result<QuizResult, QuizError>>;
+
+  /** Get the current learner's submission status, latest attempt, and saved answers for a quiz. */
+  getMyStatus(quizId: string): Promise<Result<QuizLearnerStatus, QuizError>>;
 }

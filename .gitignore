@@ -41,3 +41,7 @@ Thumbs.db
 
 # TS build info
 *.tsbuildinfo
+
+test-results
+
+playwright-report

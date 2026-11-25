@@ -108,25 +108,27 @@ const LanguagePanel = ({ prefs, onChange }: PanelProps): ReactElement => (
     <Select
       label="Language"
       value={prefs.language}
-      onChange={(event) => {
-        onChange({ ...prefs, language: event.target.value });
+      onChange={(value) => {
+        onChange({ ...prefs, language: value });
       }}
-    >
-      <option value="en">English (UK)</option>
-      <option value="es">Spanish</option>
-      <option value="fr">French</option>
-    </Select>
+      options={[
+        { value: 'en', label: 'English (UK)' },
+        { value: 'es', label: 'Spanish' },
+        { value: 'fr', label: 'French' },
+      ]}
+    />
     <Select
       label="Timezone"
       value={prefs.timezone}
-      onChange={(event) => {
-        onChange({ ...prefs, timezone: event.target.value });
+      onChange={(value) => {
+        onChange({ ...prefs, timezone: value });
       }}
-    >
-      <option value="UTC">UTC</option>
-      <option value="GMT">GMT (London)</option>
-      <option value="EST">EST (New York)</option>
-    </Select>
+      options={[
+        { value: 'UTC', label: 'UTC' },
+        { value: 'GMT', label: 'GMT (London)' },
+        { value: 'EST', label: 'EST (New York)' },
+      ]}
+    />
   </div>
 );
 

@@ -1,0 +1,167 @@
+.screen {
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.headerActions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.dashboardCard {
+  background: var(--color-surface);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-top: 0;
+}
+
+.tabsHeader {
+  display: flex;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 24px;
+}
+
+.tab {
+  padding: 16px 24px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  color: var(--color-text);
+}
+
+.tabsContainer > :global([data-orientation]) {
+  gap: 0;
+}
+
+.tabsContainer [role='tablist'] {
+  padding: 0 24px;
+  background-color: var(--color-surface);
+}
+
+.tabContent {
+  padding: 1.5rem;
+  min-height: 220px;
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(at 0% 0%, var(--color-primary-soft) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, var(--color-secondary-soft) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+.loadingWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.curriculumList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 720px;
+}
+
+.sectionItem {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 600;
+}
+
+.lessonList {
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.lessonItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.75rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+
+.lessonItem:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-xs);
+}
+
+.lessonInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text);
+}
+
+.lessonActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-text-muted);
+}

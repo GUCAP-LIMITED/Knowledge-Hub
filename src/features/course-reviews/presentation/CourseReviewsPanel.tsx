@@ -13,7 +13,7 @@ export const CourseReviewsPanel = ({
   courseId,
   courseName,
   canReview,
-}: CourseReviewsPanelProps): ReactElement => (
+}: CourseReviewsPanelProps): ReactElement | null => (
   <ContentReviewsPanel
     contentId={courseId}
     contentName={courseName}

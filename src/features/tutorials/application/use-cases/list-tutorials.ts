@@ -1,6 +1,12 @@
 import type { Result } from '@core/result';
 import type { Logger } from '@core/logger';
-import type { Tutorial, TutorialError, TutorialGateway } from '../../domain';
+import type {
+  Tutorial,
+  TutorialError,
+  TutorialGateway,
+  TutorialCatalogParams,
+  PagedResult,
+} from '../../domain';
 
 export interface ListTutorialsUseCaseDeps {
   readonly tutorialGateway: TutorialGateway;
@@ -17,8 +23,10 @@ export class ListTutorialsUseCase {
     this.logger = deps.logger.child('list-tutorials');
   }
 
-  public async execute(): Promise<Result<readonly Tutorial[], TutorialError>> {
-    const result = await this.tutorialGateway.list();
+  public async execute(
+    params?: TutorialCatalogParams,
+  ): Promise<Result<PagedResult<Tutorial>, TutorialError>> {
+    const result = await this.tutorialGateway.list(params);
     if (!result.ok) {
       this.logger.warn('Listing tutorials failed', { code: result.error.code });
     }

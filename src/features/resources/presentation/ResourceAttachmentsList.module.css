@@ -1,0 +1,147 @@
+.attachmentsSection {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg, 12px);
+  background-color: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.04);
+}
+
+.attachmentsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.headerTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.headerIcon {
+  color: var(--color-primary, #0f766e);
+}
+
+.headerTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text, #0f172a);
+  margin: 0;
+}
+
+.attachmentsBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary-soft, #ccfbf1);
+  color: var(--color-primary, #0f766e);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.12rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.attachmentsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
+.attachmentCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--color-border, #e2e8f0);
+  background-color: var(--color-surface-muted);
+  gap: 0.75rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.attachmentCard:hover {
+  border-color: var(--color-primary, #0f766e);
+  background-color: var(--color-surface, #ffffff);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06);
+}
+
+.attachmentCardActive {
+  border-color: var(--color-primary, #0f766e);
+  background-color: var(--color-primary-soft, #f0fdfa);
+  box-shadow: 0 0 0 1px var(--color-primary, #0f766e);
+}
+
+.attachmentContent {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  flex: 1;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+}
+
+.iconTile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  color: #ffffff;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+}
+
+.iconWord {
+  background: linear-gradient(135deg, #2b579a, #1b365d);
+}
+
+.iconExcel {
+  background: linear-gradient(135deg, #107c41, #0b552c);
+}
+
+.iconPpt {
+  background: linear-gradient(135deg, #c43e1c, #942b13);
+}
+
+.iconPdf {
+  background: linear-gradient(135deg, #d9381e, #a81c05);
+}
+
+.iconDefault {
+  background: linear-gradient(135deg, #64748b, #475569);
+}
+
+.attachmentInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.attachmentName {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text, #0f172a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachmentMeta {
+  font-size: 0.72rem;
+  color: var(--color-text-muted, #64748b);
+}
+
+.attachmentActions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}

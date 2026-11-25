@@ -1,15 +1,44 @@
-import { useMemo, useState } from 'react';
-import type { Submission } from '../domain';
-import { filterSubmissions, submissionTypes } from './approvals-filter';
+import { useEffect, useMemo, useState } from 'react';
+import type { ApprovalStatusCounts, Submission } from '../domain';
 import {
   useApproveSubmission,
   useFlagSubmission,
   usePublishSubmission,
   useRejectSubmission,
-  useSubmissions,
 } from './use-submissions';
+import {
+  useApprovalStatusCounts,
+  useInfiniteSubmissions,
+} from './use-infinite-submissions';
 
 const isDecisionTab = (tab: string): boolean => tab === 'pending' || tab === 'review';
+
+const TAB_TO_STATUS: Readonly<Record<string, number>> = {
+  pending: 5,
+  review: 10,
+  approved: 15,
+  published: 20,
+  rejected: 25,
+};
+
+const TYPE_NAME_TO_INT: Readonly<Record<string, number>> = {
+  Course: 0,
+  Tutorial: 5,
+  Resource: 10,
+};
+
+const useDebouncedValue = (value: string, delayMs = 300): string => {
+  const [debounced, setDebounced] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebounced(value.trim());
+    }, delayMs);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, delayMs]);
+  return debounced;
+};
 
 export interface ApprovalActions {
   readonly switchTab: (value: string) => void;
@@ -22,6 +51,7 @@ export interface ApprovalActions {
   readonly rejectReviewed: (id: string, reason: string) => void;
   readonly flag: (id: string) => void;
   readonly publish: (id: string) => void;
+  readonly clearFilters: () => void;
 }
 
 export interface ApprovalQueue extends ApprovalActions {
@@ -30,7 +60,10 @@ export interface ApprovalQueue extends ApprovalActions {
   readonly type: string;
   readonly setType: (value: string) => void;
   readonly types: readonly string[];
+  readonly filtered: boolean;
   readonly data: readonly Submission[];
+  readonly totalCount: number;
+  readonly statusCounts: ApprovalStatusCounts | undefined;
   readonly busy: boolean;
   readonly activeTab: string;
   readonly selected: readonly string[];
@@ -40,6 +73,9 @@ export interface ApprovalQueue extends ApprovalActions {
   readonly rejectError: string | undefined;
   readonly isLoading: boolean;
   readonly error: Error | null;
+  readonly hasNextPage: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly fetchNextPage: () => void;
 }
 
 interface Mutations {
@@ -56,6 +92,7 @@ interface ActionDeps extends Mutations {
   readonly clearSelected: () => void;
   readonly closeReview: () => void;
   readonly openReviewId: (id: string) => void;
+  readonly clearFilters: () => void;
 }
 
 const makeActions = (d: ActionDeps): ApprovalActions => ({
@@ -93,35 +130,54 @@ const makeActions = (d: ActionDeps): ApprovalActions => ({
   publish: (id) => {
     d.publish.mutate(id);
   },
+  clearFilters: d.clearFilters,
 });
 
-/** All state, derived data and handlers for the approval queue, kept out of the view component. */
-export const useApprovalQueue = (): ApprovalQueue => {
-  const submissions = useSubmissions();
+const useApprovalMutations = (): Mutations & { readonly busy: boolean } => {
   const approve = useApproveSubmission();
   const reject = useRejectSubmission();
   const flag = useFlagSubmission();
   const publish = usePublishSubmission();
+  const busy =
+    approve.isPending || reject.isPending || flag.isPending || publish.isPending;
+  return { approve, reject, flag, publish, busy };
+};
 
+/** All state, derived data and handlers for the approval queue, kept out of the view component. */
+export const useApprovalQueue = (): ApprovalQueue => {
   const [activeTab, setActiveTab] = useState<string>('pending');
   const [reviewId, setReviewId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const debouncedQuery = useDebouncedValue(query);
   const [type, setType] = useState('all');
   const [selected, setSelected] = useState<readonly string[]>([]);
 
-  const busy =
-    approve.isPending || reject.isPending || flag.isPending || publish.isPending;
+  const resolvedType = TYPE_NAME_TO_INT[type];
+  const filterParams = useMemo(
+    () => ({
+      filter: debouncedQuery.length > 0 ? debouncedQuery : undefined,
+      type: resolvedType,
+    }),
+    [debouncedQuery, resolvedType],
+  );
+
+  const statusCountsQuery = useApprovalStatusCounts(filterParams);
+  const submissionsQuery = useInfiniteSubmissions({
+    ...filterParams,
+    status: TAB_TO_STATUS[activeTab],
+  });
+
+  const { approve, reject, flag, publish, busy } = useApprovalMutations();
+
   const data = useMemo(
-    () => filterSubmissions(submissions.data ?? [], query, type),
-    [submissions.data, query, type],
+    () => submissionsQuery.data?.pages.flatMap((page) => page.items) ?? [],
+    [submissionsQuery.data],
   );
-  const types = useMemo(
-    () => submissionTypes(submissions.data ?? []),
-    [submissions.data],
-  );
+
+  const totalCount = submissionsQuery.data?.pages[0]?.totalCount ?? 0;
   const reviewing = data.find((s) => s.id === reviewId) ?? null;
-  const inTab = data.filter((s) => s.status === activeTab).map((s) => s.id);
-  const selectedInTab = selected.filter((id) => inTab.includes(id));
+  const selectedInTab = selected.filter((id) => data.some((s) => s.id === id));
+  const filtered = query.trim() !== '' || type !== 'all';
 
   const actions = makeActions({
     approve,
@@ -138,6 +194,11 @@ export const useApprovalQueue = (): ApprovalQueue => {
       setReviewId(null);
     },
     openReviewId: setReviewId,
+    clearFilters: () => {
+      setQuery('');
+      setType('all');
+      setActiveTab('pending');
+    },
   });
 
   return {
@@ -146,8 +207,11 @@ export const useApprovalQueue = (): ApprovalQueue => {
     setQuery,
     type,
     setType,
-    types,
+    types: ['Course', 'Tutorial', 'Resource'],
+    filtered,
     data,
+    totalCount,
+    statusCounts: statusCountsQuery.data,
     busy,
     activeTab,
     selected,
@@ -155,7 +219,12 @@ export const useApprovalQueue = (): ApprovalQueue => {
     selectable: isDecisionTab(activeTab),
     reviewing,
     rejectError: reject.error?.message,
-    isLoading: submissions.isLoading,
-    error: submissions.isError ? submissions.error : null,
+    isLoading: submissionsQuery.isLoading,
+    error: submissionsQuery.isError ? submissionsQuery.error : null,
+    hasNextPage: submissionsQuery.hasNextPage,
+    isFetchingNextPage: submissionsQuery.isFetchingNextPage,
+    fetchNextPage: () => {
+      void submissionsQuery.fetchNextPage();
+    },
   };
 };

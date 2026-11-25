@@ -10,8 +10,11 @@ export {
 export {
   AssignmentsModuleProvider,
   useAssignments,
+  useInfiniteAssignments,
+  ASSIGNMENTS_PAGE_SIZE,
   useCreateAssignment,
   useDeleteAssignment,
+  useAssignableUsers,
   assignmentsQueryKey,
 } from './presentation';
 export { Assignment, type AssignmentProps } from './domain';

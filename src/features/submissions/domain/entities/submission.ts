@@ -22,6 +22,9 @@ export interface SubmissionProps {
   readonly status: SubmissionStatus;
   /** Reviewer note or rejection reason; `null` until a reviewer acts. */
   readonly note: string | null;
+  /** The content category id, or `null` when uncategorized. Display name is resolved at the edge. */
+  readonly categoryId: string | null;
+  readonly canModify?: boolean;
 }
 
 /**
@@ -42,6 +45,8 @@ export class Submission {
   public readonly submittedAt: Date;
   public readonly status: SubmissionStatus;
   public readonly note: string | null;
+  public readonly categoryId: string | null;
+  public readonly canModify: boolean;
 
   public constructor(props: SubmissionProps) {
     this.id = props.id;
@@ -51,6 +56,8 @@ export class Submission {
     this.submittedAt = props.submittedAt;
     this.status = props.status;
     this.note = props.note;
+    this.categoryId = props.categoryId;
+    this.canModify = props.canModify ?? false;
   }
 
   /** Awaiting a reviewer decision (still actionable in the queue). */
@@ -114,6 +121,7 @@ export class Submission {
       submittedAt: this.submittedAt,
       status: this.status,
       note: this.note,
+      categoryId: this.categoryId,
     };
   }
 }

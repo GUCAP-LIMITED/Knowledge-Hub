@@ -75,7 +75,7 @@
 }
 .segmentActive {
   background-color: var(--color-surface);
-  color: var(--color-primary);
+  color: var(--color-link);
   box-shadow: var(--shadow-xs);
 }
 .segment:focus-visible {
@@ -126,7 +126,7 @@
   flex-shrink: 0;
   border-radius: var(--radius-md);
   background-color: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-link);
 }
 .cardHeadText {
   min-width: 0;
@@ -277,7 +277,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--color-primary);
+  color: var(--color-link);
 }
 .panelTitle {
   margin: 0;
@@ -327,7 +327,7 @@
 }
 .activityAdd {
   background-color: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-link);
 }
 .activityRemove {
   background-color: var(--color-bg-subtle);

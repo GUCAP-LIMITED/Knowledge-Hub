@@ -8,9 +8,15 @@ import {
   InvalidAssignmentTargetError,
 } from '../../domain';
 
+import type { AssigneeCategory } from '../../domain';
+
 export interface CreateAssignmentInput {
-  readonly course: string;
-  readonly assignee: string;
+  readonly contentItemId: string;
+  readonly assignees: readonly {
+    readonly category: AssigneeCategory;
+    readonly targetId: string;
+    readonly displayName: string;
+  }[];
   readonly dueDate: Date;
 }
 
@@ -21,7 +27,7 @@ export interface CreateAssignmentUseCaseDeps {
 
 /**
  * Create a training assignment. Validates the assignee via the domain value object and requires a
- * non-empty course title; new assignments always start `active`.
+ * non-empty content item; new assignments always start `active`.
  */
 export class CreateAssignmentUseCase {
   private readonly assignmentGateway: AssignmentGateway;
@@ -35,23 +41,40 @@ export class CreateAssignmentUseCase {
   public async execute(
     input: CreateAssignmentInput,
   ): Promise<Result<Assignment, AssignmentError>> {
-    const course = input.course.trim();
-    if (course.length === 0) {
-      this.logger.warn('Rejected assignment with empty course');
-      return err(new InvalidAssignmentTargetError('course is required'));
+    const contentItemId = input.contentItemId.trim();
+    if (contentItemId.length === 0) {
+      this.logger.warn('Rejected assignment with empty content item');
+      return err(new InvalidAssignmentTargetError('content item is required'));
     }
 
-    const assignee = AssignmentTarget.create(input.assignee);
-    if (isErr(assignee)) {
-      this.logger.warn('Rejected invalid assignment target', {
-        code: assignee.error.code,
+    if (input.assignees.length === 0) {
+      this.logger.warn('Rejected assignment with zero assignees');
+      return err(new InvalidAssignmentTargetError('at least one assignee is required'));
+    }
+
+    const validatedAssignees: {
+      category: AssigneeCategory;
+      targetId: string;
+      displayName: string;
+    }[] = [];
+    for (const assigneeInput of input.assignees) {
+      const target = AssignmentTarget.create(assigneeInput.targetId);
+      if (isErr(target)) {
+        this.logger.warn('Rejected invalid assignment target', {
+          code: target.error.code,
+        });
+        return target;
+      }
+      validatedAssignees.push({
+        category: assigneeInput.category,
+        targetId: target.value.value,
+        displayName: assigneeInput.displayName.trim(),
       });
-      return assignee;
     }
 
     const result = await this.assignmentGateway.create({
-      course,
-      assignee: assignee.value.value,
+      contentItemId,
+      assignees: validatedAssignees,
       dueDate: input.dueDate,
       status: 'active',
     });

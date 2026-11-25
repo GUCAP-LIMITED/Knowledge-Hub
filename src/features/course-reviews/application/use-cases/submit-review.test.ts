@@ -12,8 +12,8 @@ const makeUseCase = (gateway: FakeReviewGateway): SubmitReviewUseCase =>
   });
 
 const INPUT = {
-  courseId: 'course-1',
-  courseName: 'Getting Started with UAPP Portal',
+  contentId: 'course-1',
+  contentName: 'Course 1',
   userId: 'u1',
   userName: 'Simona',
   userRole: 'Consultant',

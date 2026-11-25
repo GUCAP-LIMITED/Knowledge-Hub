@@ -1,5 +1,7 @@
 import type { ReactElement } from 'react';
 import { FilterBar, Select, TextField } from '@shared/ui';
+import { ApprovalsActiveFilterChips } from './components/ApprovalsActiveFilterChips';
+import styles from './ApprovalsPage.module.css';
 
 export interface ApprovalsToolbarProps {
   readonly query: string;
@@ -7,6 +9,7 @@ export interface ApprovalsToolbarProps {
   readonly types: readonly string[];
   readonly onQuery: (value: string) => void;
   readonly onType: (value: string) => void;
+  readonly onClearAll: () => void;
 }
 
 /** Search + content-type filter for the approval queue. */
@@ -16,33 +19,44 @@ export const ApprovalsToolbar = ({
   types,
   onQuery,
   onType,
+  onClearAll,
 }: ApprovalsToolbarProps): ReactElement => (
-  <FilterBar
-    search={
-      <TextField
-        label="Search"
-        placeholder="Search title or submitter…"
-        value={query}
-        onChange={(event) => {
-          onQuery(event.target.value);
-        }}
+  <div className={styles.toolbarContainer}>
+    <div className={styles.toolbar}>
+      <FilterBar
+        search={
+          <TextField
+            label="Search"
+            placeholder="Search title or submitter…"
+            value={query}
+            onChange={(event) => {
+              onQuery(event.target.value);
+            }}
+            onClear={() => {
+              onQuery('');
+            }}
+          />
+        }
+        controls={
+          <Select
+            label="Content type"
+            value={type}
+            onChange={onType}
+            options={[
+              { value: 'all', label: 'All types' },
+              ...types.map((t) => ({ value: t, label: t })),
+            ]}
+          />
+        }
       />
-    }
-    controls={
-      <Select
-        label="Content type"
-        value={type}
-        onChange={(event) => {
-          onType(event.target.value);
-        }}
-      >
-        <option value="all">All types</option>
-        {types.map((t) => (
-          <option key={t} value={t}>
-            {t}
-          </option>
-        ))}
-      </Select>
-    }
-  />
+    </div>
+
+    <ApprovalsActiveFilterChips
+      query={query}
+      onQueryChange={onQuery}
+      type={type}
+      onTypeChange={onType}
+      onClearAll={onClearAll}
+    />
+  </div>
 );

@@ -4,7 +4,10 @@ import {
   Certificate,
   type CertificateError,
   type CertificateGateway,
+  type CertificateListQuery,
+  type CertificateListResult,
   CertificateNotFoundError,
+  type CertificateStatisticsOverview,
 } from '../domain';
 import { CERTIFICATE_SEED } from './certificate-seed';
 
@@ -28,8 +31,62 @@ export class InMemoryCertificateGateway implements CertificateGateway {
     );
   }
 
-  public list(): Promise<Result<readonly Certificate[], CertificateError>> {
-    return Promise.resolve(ok([...this.certificates.values()]));
+  public getStatisticsOverview(): Promise<
+    Result<CertificateStatisticsOverview, CertificateError>
+  > {
+    const list = [...this.certificates.values()];
+    const categories = new Set(list.map((cert) => cert.category)).size;
+    const overview: CertificateStatisticsOverview = {
+      totalIssuedCertificates: list.length,
+      totalTeamsWithCertificates: 3,
+      totalCategories: categories,
+      teams: [
+        { teamId: 'team-sales', teamName: 'Sales Team', certificateCount: 12 },
+        {
+          teamId: 'team-cs',
+          teamName: 'Customer Success',
+          certificateCount: 8,
+        },
+      ],
+      roles: [
+        {
+          userTypeId: 'role-consultant',
+          roleName: 'Consultant',
+          certificateCount: 15,
+        },
+        {
+          userTypeId: 'role-leader',
+          roleName: 'Sales Team Leader',
+          certificateCount: 5,
+        },
+      ],
+    };
+    return Promise.resolve(ok(overview));
+  }
+
+  public list(
+    query?: CertificateListQuery,
+  ): Promise<Result<CertificateListResult, CertificateError>> {
+    let items = [...this.certificates.values()];
+    if (query?.filter !== undefined && query.filter.trim().length > 0) {
+      const needle = query.filter.toLowerCase();
+      items = items.filter(
+        (cert) =>
+          cert.courseName.toLowerCase().includes(needle) ||
+          cert.userName.toLowerCase().includes(needle),
+      );
+    }
+    const skip = query?.skipCount ?? 0;
+    const take = query?.maxResultCount ?? items.length;
+    const paged = items.slice(skip, skip + take);
+
+    return Promise.resolve(
+      ok({
+        totalCount: items.length,
+        myTotalCertificates: items.length,
+        items: paged,
+      }),
+    );
   }
 
   public getById(id: string): Promise<Result<Certificate, CertificateError>> {

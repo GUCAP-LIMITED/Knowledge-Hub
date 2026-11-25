@@ -1,3 +1,8 @@
 export * from './errors/team-errors';
 export * from './entities/team-member';
-export type { TeamGateway } from './ports/team-gateway';
+export * from './entities/team-progress-overview';
+export type {
+  TeamGateway,
+  GetTeamMembersQuery,
+  PagedTeamMembersResult,
+} from './ports/team-gateway';

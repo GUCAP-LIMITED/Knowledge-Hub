@@ -10,7 +10,7 @@ export interface StarRatingProps {
   readonly onChange?: (value: number) => void;
   /** Id of a visible label to associate with the interactive group (instead of an aria-label). */
   readonly labelledBy?: string;
-  readonly size?: 'sm' | 'md';
+  readonly size?: 'sm' | 'md' | 'lg';
 }
 
 /** Five-star rating — read-only display (value announced), or interactive radio group. */

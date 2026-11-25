@@ -61,3 +61,18 @@
   font-size: 0.8rem;
   color: var(--color-text-subtle);
 }
+
+.helpfulActive {
+  color: var(--color-link);
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-subtle, rgba(59, 130, 246, 0.08));
+}
+
+.icon {
+  margin-right: 0.25rem;
+}
+
+.iconActive {
+  margin-right: 0.25rem;
+  fill: currentColor;
+}

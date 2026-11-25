@@ -1,5 +1,5 @@
-import type { ReactElement } from 'react';
-import { Alert, CardGridSkeleton, EmptyState } from '@shared/ui';
+import type { ReactElement, RefObject } from 'react';
+import { Alert, Button, CardGridSkeleton, EmptyState } from '@shared/ui';
 import type { Tutorial } from '../domain';
 import { TutorialCard } from './TutorialCard';
 import styles from './TutorialsPage.module.css';
@@ -11,11 +11,53 @@ export interface TutorialsResultsProps {
   /** True when a search or filter is narrowing the list (changes the empty message). */
   readonly filtered: boolean;
   readonly removingId: string | null;
+  readonly hasNextPage?: boolean | undefined;
+  readonly isFetchingNextPage?: boolean | undefined;
+  readonly sentinelRef?: RefObject<HTMLDivElement> | undefined;
+  readonly totalCount?: number | undefined;
   readonly onWatch: (tutorial: Tutorial) => void;
   readonly onEdit: (tutorial: Tutorial) => void;
   readonly onDelete: (id: string) => void;
-  readonly onQuiz: (tutorial: Tutorial) => void;
+  readonly onClearAll: () => void;
 }
+
+const TutorialsListFooter = ({
+  hasNextPage,
+  isFetchingNextPage,
+  sentinelRef,
+  count,
+  totalCount,
+}: {
+  readonly hasNextPage: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly sentinelRef?: RefObject<HTMLDivElement> | undefined;
+  readonly count: number;
+  readonly totalCount?: number | undefined;
+}): ReactElement => {
+  const displayTotal = totalCount ?? count;
+  return (
+    <>
+      {isFetchingNextPage ? (
+        <div className={styles.loadingMoreContainer} role="status">
+          <div className={styles.spinner} />
+          <span>Loading more tutorials...</span>
+        </div>
+      ) : null}
+
+      {hasNextPage && sentinelRef ? (
+        <div ref={sentinelRef} className={styles.sentinel} />
+      ) : (
+        <div className={styles.endBanner}>
+          <span className={styles.endBannerTitle}>You&apos;re all caught up!</span>
+          <span className={styles.endBannerSub}>
+            Displaying {count} of {displayTotal}{' '}
+            {displayTotal === 1 ? 'tutorial' : 'tutorials'}
+          </span>
+        </div>
+      )}
+    </>
+  );
+};
 
 /** Loading / error / empty / grid states for the tutorials library. */
 export const TutorialsResults = ({
@@ -24,10 +66,14 @@ export const TutorialsResults = ({
   error,
   filtered,
   removingId,
+  hasNextPage = false,
+  isFetchingNextPage = false,
+  sentinelRef,
+  totalCount,
   onWatch,
   onEdit,
   onDelete,
-  onQuiz,
+  onClearAll,
 }: TutorialsResultsProps): ReactElement => {
   if (isLoading) {
     return <CardGridSkeleton />;
@@ -44,6 +90,11 @@ export const TutorialsResults = ({
       <EmptyState
         title="No tutorials match"
         description="Try a different search term or category."
+        action={
+          <Button variant="outline" onClick={onClearAll}>
+            Clear all filters
+          </Button>
+        }
       />
     ) : (
       <EmptyState
@@ -53,18 +104,27 @@ export const TutorialsResults = ({
     );
   }
   return (
-    <div className={styles.grid}>
-      {tutorials.map((tutorial) => (
-        <TutorialCard
-          key={tutorial.id}
-          tutorial={tutorial}
-          isBusy={tutorial.id === removingId}
-          onWatch={onWatch}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onQuiz={onQuiz}
-        />
-      ))}
-    </div>
+    <>
+      <div className={styles.grid}>
+        {tutorials.map((tutorial) => (
+          <TutorialCard
+            key={tutorial.id}
+            tutorial={tutorial}
+            isBusy={tutorial.id === removingId}
+            onWatch={onWatch}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        ))}
+      </div>
+
+      <TutorialsListFooter
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        sentinelRef={sentinelRef}
+        count={tutorials.length}
+        totalCount={totalCount}
+      />
+    </>
   );
 };

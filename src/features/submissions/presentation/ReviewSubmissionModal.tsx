@@ -1,6 +1,8 @@
 import { useEffect, useState, type ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CheckCircle, FileText, X } from 'lucide-react';
 import { Alert, Button, Modal, Textarea } from '@shared/ui';
+import { useMyCapabilities } from '@features/users';
 import type { Submission } from '../domain';
 import { SubmissionTimeline } from './SubmissionTimeline';
 import styles from './ReviewSubmissionModal.module.css';
@@ -11,22 +13,37 @@ const PreviewBlock = ({
   submission,
 }: {
   readonly submission: Submission;
-}): ReactElement => (
-  <div>
-    <div className={styles.previewLabel}>Preview</div>
-    <div className={styles.preview}>
-      <FileText size={34} aria-hidden="true" className={styles.previewIcon} />
-      <div className={styles.previewTitle}>{submission.title}</div>
-      <div className={styles.previewType}>{submission.type}</div>
-    </div>
-    {submission.note !== null ? (
-      <div className={styles.reviewerNote}>
-        <span className={styles.reviewerNoteLabel}>Reviewer note</span>
-        <p className={styles.reviewerNoteText}>{submission.note}</p>
+}): ReactElement => {
+  const navigate = useNavigate();
+
+  return (
+    <div>
+      <div className={styles.previewLabel}>Preview</div>
+      <div className={styles.preview}>
+        <FileText size={34} aria-hidden="true" className={styles.previewIcon} />
+        <div className={styles.previewTitle}>{submission.title}</div>
+        <div className={styles.previewType}>{submission.type}</div>
+        <div style={{ marginTop: '0.75rem' }}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              navigate(`/approvals/review/${submission.id}`);
+            }}
+          >
+            Inspect in Full Studio
+          </Button>
+        </div>
       </div>
-    ) : null}
-  </div>
-);
+      {submission.note !== null ? (
+        <div className={styles.reviewerNote}>
+          <span className={styles.reviewerNoteLabel}>Reviewer note</span>
+          <p className={styles.reviewerNoteText}>{submission.note}</p>
+        </div>
+      ) : null}
+    </div>
+  );
+};
 
 const DecisionForm = ({
   decision,
@@ -90,6 +107,7 @@ const ReviewFooter = ({
   onFlag,
   onClose,
 }: ReviewFooterProps): ReactElement => {
+  const { can } = useMyCapabilities();
   if (decision === null) {
     return (
       <>
@@ -104,22 +122,26 @@ const ReviewFooter = ({
             Send to review
           </Button>
         ) : null}
-        <Button
-          variant="danger"
-          onClick={() => {
-            onSetDecision('reject');
-          }}
-        >
-          <X size={14} aria-hidden="true" /> Reject
-        </Button>
-        <Button
-          variant="primary"
-          onClick={() => {
-            onSetDecision('approve');
-          }}
-        >
-          <CheckCircle size={14} aria-hidden="true" /> Approve
-        </Button>
+        {can('approvals', 'reject') ? (
+          <Button
+            variant="destructive"
+            onClick={() => {
+              onSetDecision('reject');
+            }}
+          >
+            <X size={14} aria-hidden="true" /> Reject
+          </Button>
+        ) : null}
+        {can('approvals', 'approve') ? (
+          <Button
+            variant="default"
+            onClick={() => {
+              onSetDecision('approve');
+            }}
+          >
+            <CheckCircle size={14} aria-hidden="true" /> Approve
+          </Button>
+        ) : null}
       </>
     );
   }
@@ -135,7 +157,7 @@ const ReviewFooter = ({
         Back
       </Button>
       <Button
-        variant={decision === 'approve' ? 'primary' : 'danger'}
+        variant={decision === 'approve' ? 'default' : 'destructive'}
         isLoading={isBusy}
         disabled={!canConfirm}
         onClick={() => {

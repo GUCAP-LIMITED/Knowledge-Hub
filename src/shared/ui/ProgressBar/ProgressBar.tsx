@@ -29,7 +29,7 @@ export const ProgressBar = ({
       </div>
       {showLabel === true ? (
         <div className={styles.label}>
-          {pct === 100 ? 'Complete' : `${String(pct)}% complete`}
+          {pct === 100 ? 'Completed' : `${String(pct)}% complete`}
         </div>
       ) : null}
     </div>

@@ -1,6 +1,12 @@
 import type { Result } from '@core/result';
 import type { Logger } from '@core/logger';
-import type { Resource, ResourceError, ResourceGateway } from '../../domain';
+import type {
+  Resource,
+  ResourceError,
+  ResourceGateway,
+  ResourceCatalogParams,
+  PagedResult,
+} from '../../domain';
 
 export interface ListResourcesUseCaseDeps {
   readonly resourceGateway: ResourceGateway;
@@ -17,8 +23,10 @@ export class ListResourcesUseCase {
     this.logger = deps.logger.child('list-resources');
   }
 
-  public async execute(): Promise<Result<readonly Resource[], ResourceError>> {
-    const result = await this.resourceGateway.list();
+  public async execute(
+    params?: ResourceCatalogParams,
+  ): Promise<Result<PagedResult<Resource>, ResourceError>> {
+    const result = await this.resourceGateway.list(params);
     if (!result.ok) {
       this.logger.warn('Listing resources failed', { code: result.error.code });
     }

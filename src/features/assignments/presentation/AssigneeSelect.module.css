@@ -1,0 +1,226 @@
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  height: 40px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.trigger:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--ring);
+}
+
+.placeholder {
+  color: var(--color-text-subtle);
+}
+
+.menu {
+  padding: 0.35rem;
+  min-width: 240px;
+  max-height: 320px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.2rem 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 0.25rem;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text-subtle);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.back:hover {
+  color: var(--color-text);
+  background-color: var(--color-surface-hover);
+}
+
+.headerCategory {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.item:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.itemEmpty {
+  padding: 0.45rem 0.6rem;
+  font-size: 0.9rem;
+  color: var(--color-text-subtle);
+}
+
+.emailRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.2rem 0.25rem;
+}
+
+.emailInput {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.emailInput:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--ring);
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-link);
+}
+
+.chevron {
+  color: var(--color-text-subtle);
+}
+
+.searchRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.35rem 0.2rem 0.5rem;
+}
+
+.searchInput {
+  width: 100%;
+  height: 36px;
+  padding: 0 0.6rem 0 2rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.searchInput:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--ring);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-subtle);
+  pointer-events: none;
+}
+
+.userItem {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+
+.userItem:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+}
+
+.userItem:disabled,
+.item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.userAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--color-primary-subtle, rgba(59, 130, 246, 0.12));
+  color: var(--color-primary, #3b82f6);
+  font-size: 0.75rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.userName {
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userEmail {
+  font-size: 0.75rem;
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

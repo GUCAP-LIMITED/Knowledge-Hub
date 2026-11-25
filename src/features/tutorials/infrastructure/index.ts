@@ -1,2 +1,1 @@
-export * from './in-memory-tutorial-gateway';
-export * from './tutorial-seed';
+export * from './http-tutorial-gateway';

@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { Award, CheckCircle2, Circle, Compass, GraduationCap, X } from 'lucide-react';
+import { Button } from '@shared/ui';
 import { cn, useLocalStorage } from '@shared/utils';
 import styles from './DashboardPage.module.css';
 
@@ -52,16 +53,16 @@ export const OnboardingChecklist = (
             {doneCount} of {steps.length} done — you’re on your way.
           </p>
         </div>
-        <button
-          type="button"
-          className={styles.onboardClose}
+        <Button
+          variant="ghost"
+          size="icon-sm"
           aria-label="Dismiss getting started"
           onClick={() => {
             setDismissed(true);
           }}
         >
-          <X size={16} aria-hidden="true" />
-        </button>
+          <X aria-hidden="true" />
+        </Button>
       </div>
       <ol className={styles.onboardSteps}>
         {steps.map((step, index) => {
@@ -83,9 +84,9 @@ export const OnboardingChecklist = (
               <StepIcon size={16} aria-hidden="true" className={styles.onboardStepIcon} />
               <span className={styles.onboardLabel}>{step.label}</span>
               {step.done ? null : (
-                <Link to={step.to} className={styles.onboardLink}>
-                  Go
-                </Link>
+                <Button asChild size="xs" className={styles.onboardLink}>
+                  <Link to={step.to}>Go</Link>
+                </Button>
               )}
             </li>
           );

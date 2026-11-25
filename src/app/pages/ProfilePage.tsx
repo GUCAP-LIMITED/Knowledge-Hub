@@ -9,9 +9,11 @@ import {
   Textarea,
   type BadgeTone,
 } from '@shared/ui';
-import { useLocalStorage } from '@shared/utils';
+import { formatDisplayName, formatUserType, useLocalStorage } from '@shared/utils';
 import { useAuth, type AuthenticatedUser } from '@features/auth';
 import { useCourses } from '@features/courses';
+import { useMyCapabilities, type MyCapabilities } from '@features/users';
+import { resolveUserTier } from './dashboard-data';
 import styles from './ProfilePage.module.css';
 
 interface ProfileData {
@@ -24,7 +26,7 @@ interface ProfileData {
 
 /** Seed profile for a user who hasn't saved one yet. */
 const defaultProfile = (user: AuthenticatedUser | null): ProfileData => ({
-  name: user?.fullName ?? '',
+  name: user !== null ? formatDisplayName(user.fullName) : '',
   email: user?.email.value ?? '',
   phone: '+44 7700 900123',
   location: 'London, UK',
@@ -38,21 +40,24 @@ const FIELDS: readonly { readonly key: keyof ProfileData; readonly label: string
   { key: 'location', label: 'Location' },
 ];
 
-const roleTone = (user: AuthenticatedUser | null): BadgeTone => {
-  if (user?.hasRole('admin') === true) {
+const roleTone = (can: MyCapabilities['can']): BadgeTone => {
+  const tier = resolveUserTier(can);
+  if (tier === 'admin') {
     return 'danger';
   }
-  return user?.hasRole('manager') === true ? 'info' : 'primary';
+  return tier === 'manager' ? 'info' : 'primary';
 };
 
 const ProfileCard = ({
   profile,
   user,
+  can,
   active,
   completed,
 }: {
   readonly profile: ProfileData;
   readonly user: AuthenticatedUser | null;
+  readonly can: MyCapabilities['can'];
   /** null while the course data is loading or errored — rendered as an em dash. */
   readonly active: number | null;
   readonly completed: number | null;
@@ -60,7 +65,7 @@ const ProfileCard = ({
   <div className={styles.summary}>
     <Avatar name={profile.name} size={88} />
     <h2 className={styles.name}>{profile.name}</h2>
-    <Badge tone={roleTone(user)}>{user?.userType ?? 'Learner'}</Badge>
+    <Badge tone={roleTone(can)}>{formatUserType(user?.userType) || 'Learner'}</Badge>
     <p className={styles.bio}>{profile.bio}</p>
     <div className={styles.stats}>
       <div>
@@ -84,11 +89,13 @@ const InfoCard = ({
   profile,
   draft,
   onDraft,
+  user,
 }: {
   readonly edit: boolean;
   readonly profile: ProfileData;
   readonly draft: ProfileData;
   readonly onDraft: (data: ProfileData) => void;
+  readonly user: AuthenticatedUser | null;
 }): ReactElement => (
   <div className={styles.info}>
     <h3 className={styles.infoTitle}>Personal information</h3>
@@ -109,6 +116,21 @@ const InfoCard = ({
         </div>
       ),
     )}
+    <div className={styles.viewRow}>
+      <span className={styles.viewLabel}>Teams</span>
+      <div
+        className={styles.viewValue}
+        style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}
+      >
+        {user?.teamNames && user.teamNames.length > 0
+          ? user.teamNames.map((teamName) => (
+              <Badge key={teamName} tone="neutral">
+                {teamName}
+              </Badge>
+            ))
+          : '—'}
+      </div>
+    </div>
     {edit ? (
       <Textarea
         label="Bio"
@@ -130,6 +152,7 @@ const InfoCard = ({
 /** The signed-in user's profile — view and edit (persisted locally). */
 export const ProfilePage = (): ReactElement => {
   const { user } = useAuth();
+  const { can } = useMyCapabilities();
   const courses = useCourses();
   // Namespaced per user so each account keeps its own profile (never shared across sign-ins).
   const [profile, setProfile] = useLocalStorage<ProfileData>(
@@ -186,10 +209,17 @@ export const ProfilePage = (): ReactElement => {
         <ProfileCard
           profile={profile}
           user={user}
+          can={can}
           active={active}
           completed={completed}
         />
-        <InfoCard edit={edit} profile={profile} draft={draft} onDraft={setDraft} />
+        <InfoCard
+          edit={edit}
+          profile={profile}
+          draft={draft}
+          onDraft={setDraft}
+          user={user}
+        />
       </div>
     </section>
   );

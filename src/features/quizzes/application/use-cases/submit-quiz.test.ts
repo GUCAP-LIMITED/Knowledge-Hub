@@ -9,7 +9,7 @@ const quiz = new Quiz({
   contentId: 'course-1',
   contentKind: 'course',
   title: 'Test',
-  passMark: 50,
+  passingPercentage: 50,
   questions: [{ id: 'a', prompt: 'A?', options: ['x', 'y'], correctIndexes: [1] }],
 });
 

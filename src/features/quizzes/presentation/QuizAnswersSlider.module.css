@@ -1,0 +1,248 @@
+.sliderCard {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl, 1.25rem);
+  box-shadow: var(--shadow-sm);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  outline: none;
+}
+
+.sliderCard:focus-visible {
+  box-shadow:
+    var(--shadow-sm),
+    0 0 0 2px var(--color-primary);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.headerTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.headerIconBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary-soft);
+  color: var(--color-link);
+  flex-shrink: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin: 0.2rem 0 0 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.pillNav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.pillButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pillButton:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.pillButtonActive {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: 0 2px 8px var(--color-primary-soft);
+}
+
+.pillButtonActive:hover {
+  background-color: var(--color-primary-strong);
+  border-color: var(--color-primary-strong);
+  color: var(--color-on-primary);
+}
+
+/* Slide viewport */
+.slideViewport {
+  position: relative;
+  min-height: 260px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.slideContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.questionMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.questionIndexTag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-soft);
+  color: var(--color-link);
+}
+
+.answeredTag {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.questionPrompt {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--color-text);
+}
+
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.optionCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  transition: all 0.2s ease;
+}
+
+.optionCardSelected {
+  background-color: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.optionLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.optionCheckCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--color-border-strong);
+  background-color: var(--color-surface);
+  color: transparent;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.optionCheckCircleSelected {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.optionText {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--color-text);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.optionTextSelected {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.yourChoiceBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+/* Footer slider controls */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.footerCounter {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}

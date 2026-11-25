@@ -1,0 +1,91 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.3rem;
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background-color: var(--color-surface-hover, var(--color-surface));
+}
+
+.toolbarButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+}
+
+.toolbarButton:hover {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.toolbarButton:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--ring);
+}
+
+.editor {
+  box-sizing: border-box;
+  height: var(--rte-height, 160px);
+  min-height: var(--rte-min-height, 100px);
+  max-height: var(--rte-max-height, none);
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overflow-wrap: break-word;
+  resize: vertical;
+}
+
+.editor:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--ring);
+}
+
+.editor :global(ul),
+.editor :global(ol) {
+  padding-left: 1.4rem;
+}
+
+.noResize {
+  resize: none;
+}
+
+.invalid {
+  border-color: var(--color-danger);
+}
+
+.error {
+  font-size: 0.8rem;
+  color: var(--color-danger);
+}
+
+.req {
+  color: var(--color-danger-strong);
+}

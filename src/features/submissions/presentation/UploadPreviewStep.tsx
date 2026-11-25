@@ -2,8 +2,9 @@ import { useState, type ReactElement } from 'react';
 import { Monitor, Smartphone, Tablet, type LucideIcon } from 'lucide-react';
 import { Alert } from '@shared/ui';
 import { cn } from '@shared/utils';
-import type { Section } from './upload-content-types';
+import type { QuizConfig, Section } from './upload-content-types';
 import type { Details } from './upload-details';
+import { useContentCategories, type CategoryKind } from '@features/content';
 import { LearnerPreview } from './LearnerPreview';
 import styles from './UploadPage.module.css';
 
@@ -28,6 +29,7 @@ const FRAME_CLASS: Record<Device, string> = {
 export interface UploadPreviewStepProps {
   readonly details: Details;
   readonly sections: readonly Section[];
+  readonly quiz?: QuizConfig | null | undefined;
   readonly author: string;
   readonly missing: readonly string[];
 }
@@ -36,10 +38,15 @@ export interface UploadPreviewStepProps {
 export const UploadPreviewStep = ({
   details,
   sections,
+  quiz,
   author,
   missing,
 }: UploadPreviewStepProps): ReactElement => {
   const [device, setDevice] = useState<Device>('desktop');
+  const kind = details.type.toLowerCase() as CategoryKind;
+  const { data: categories } = useContentCategories(kind);
+  const categoryName = categories?.find((c) => c.id === details.category)?.name;
+
   return (
     <div className={styles.previewStep}>
       <div className={styles.deviceSwitch}>
@@ -69,8 +76,10 @@ export const UploadPreviewStep = ({
           <LearnerPreview
             details={details}
             sections={sections}
+            quiz={quiz}
             author={author}
             compact={device !== 'desktop'}
+            categoryName={categoryName}
           />
         </div>
       </div>

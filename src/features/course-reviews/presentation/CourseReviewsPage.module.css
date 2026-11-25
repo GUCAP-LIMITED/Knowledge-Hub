@@ -1,6 +1,4 @@
 .screen {
-  max-width: 1120px;
-  margin: 0 auto;
   padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -21,7 +19,8 @@
 
 .columns {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: 360px minmax(0, 1fr);
+  align-items: start;
   gap: 1rem;
 }
 
@@ -31,6 +30,14 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xs);
   padding: 1.25rem 1.4rem;
+  min-width: 0;
+}
+
+.rankScroll {
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  scrollbar-gutter: stable;
 }
 
 .cardHeading {
@@ -47,12 +54,30 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.6rem 0;
+  padding: 0.6rem 0.5rem;
+  margin: 0 -0.5rem;
   border-top: 1px solid var(--color-border);
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast, 150ms ease);
 }
 
 .rankRow:first-of-type {
   border-top: none;
+}
+
+.rankRow:hover {
+  background-color: var(--color-bg-subtle);
+}
+
+.rankRow:hover .rankTitle {
+  color: var(--color-link);
+}
+
+.rankRow:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .rank {
@@ -85,6 +110,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color var(--transition-fast, 150ms ease);
 }
 
 .rankMeta {
@@ -117,15 +143,16 @@
   padding: 0 0.4rem;
   border-radius: var(--radius-full);
   background-color: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-link);
   font-size: 0.72rem;
   font-weight: 700;
 }
 .reviewScroll {
-  max-height: 460px;
+  max-height: 480px;
   overflow-y: auto;
   margin-top: 1rem;
   padding-right: 0.25rem;
+  scrollbar-gutter: stable;
 }
 .reviewList {
   display: flex;
@@ -181,8 +208,21 @@
 }
 
 .reviewerCourse {
+  display: inline-block;
   font-size: 0.72rem;
   color: var(--color-text-subtle);
+  text-decoration: none;
+  transition: color var(--transition-fast, 150ms ease);
+}
+
+.reviewerCourse:hover {
+  color: var(--color-link);
+  text-decoration: underline;
+}
+
+.reviewerCourse:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .reviewText {
@@ -198,7 +238,7 @@
   margin-top: 0.5rem;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 900px) {
   .columns {
     grid-template-columns: 1fr;
   }

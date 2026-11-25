@@ -11,11 +11,14 @@ export interface DropdownMenuItem {
   readonly disabled?: boolean;
 }
 
+export type DropdownMenuSide = 'top' | 'right' | 'bottom' | 'left';
+
 export interface DropdownMenuProps {
   /** The clickable element that opens the menu. */
   readonly trigger: ReactNode;
   readonly items: readonly DropdownMenuItem[];
   readonly align?: 'start' | 'center' | 'end';
+  readonly side?: DropdownMenuSide;
 }
 
 /**
@@ -26,12 +29,13 @@ export const DropdownMenu = ({
   trigger,
   items,
   align = 'end',
+  side = 'bottom',
 }: DropdownMenuProps): ReactElement => {
   return (
     <Menu.Root>
       <Menu.Trigger asChild>{trigger}</Menu.Trigger>
       <Menu.Portal>
-        <Menu.Content className={styles.content} align={align} sideOffset={6}>
+        <Menu.Content className={styles.content} align={align} side={side} sideOffset={6}>
           {items.map((item) => (
             <Menu.Item
               key={item.label}

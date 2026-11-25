@@ -8,6 +8,13 @@
   display: flex;
   gap: 0.25rem;
   border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.list::-webkit-scrollbar {
+  display: none;
 }
 
 .trigger {
@@ -20,6 +27,8 @@
   font: inherit;
   font-weight: 600;
   font-size: 0.9rem;
+  white-space: nowrap;
+  flex-shrink: 0;
   cursor: pointer;
   transition:
     color 0.15s ease,
@@ -31,8 +40,8 @@
 }
 
 .trigger[data-state='active'] {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+  color: var(--color-text);
+  border-bottom-color: var(--color-text);
 }
 
 .trigger:focus-visible {

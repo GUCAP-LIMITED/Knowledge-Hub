@@ -20,7 +20,7 @@ export class ListCourseReviewsUseCase {
   public async execute(
     courseId: string,
   ): Promise<Result<readonly Review[], ReviewError>> {
-    const result = await this.reviewGateway.listByCourse(courseId);
+    const result = await this.reviewGateway.listByContent(courseId);
     if (!result.ok) {
       this.logger.warn('Listing course reviews failed', {
         code: result.error.code,

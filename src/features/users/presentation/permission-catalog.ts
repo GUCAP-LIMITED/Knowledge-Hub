@@ -2,10 +2,11 @@ import {
   Award,
   BarChart3,
   BookOpen,
+  CalendarCheck,
   ClipboardCheck,
-  ClipboardList,
   FolderOpen,
   Lightbulb,
+  MessageSquare,
   Settings,
   Star,
   Upload,
@@ -28,7 +29,8 @@ export type CapId =
   | 'issue'
   | 'revoke'
   | 'invite'
-  | 'deactivate';
+  | 'deactivate'
+  | 'changePermissions';
 
 /** The base capability every module hangs off — turning it off gates the rest. */
 export const BASE_CAP: CapId = 'view';
@@ -48,6 +50,7 @@ export const CAP_LABEL: Record<CapId, string> = {
   revoke: 'Revoke',
   invite: 'Invite',
   deactivate: 'Deactivate',
+  changePermissions: 'Change permissions',
 };
 
 /** Short human explanation of what each capability lets a user do. */
@@ -66,6 +69,7 @@ export const CAP_DESC: Record<CapId, string> = {
   revoke: 'Revoke issued certificates',
   invite: 'Invite new people',
   deactivate: 'Deactivate accounts',
+  changePermissions: "Change other users' permissions",
 };
 
 export interface PermissionModule {
@@ -83,28 +87,21 @@ export const MODULES: readonly PermissionModule[] = [
     label: 'Courses',
     description: 'Structured learning paths for staff',
     icon: BookOpen,
-    capabilities: ['view', 'create', 'edit', 'delete', 'publish', 'assign'],
+    capabilities: ['view', 'edit', 'delete'],
   },
   {
     id: 'tutorials',
     label: 'Tutorials',
     description: 'Short how-to video walkthroughs',
     icon: Lightbulb,
-    capabilities: ['view', 'create', 'edit', 'delete', 'publish'],
+    capabilities: ['view', 'edit', 'delete'],
   },
   {
     id: 'resources',
     label: 'Resources',
     description: 'Documents, templates and downloads',
     icon: FolderOpen,
-    capabilities: ['view', 'create', 'edit', 'delete', 'publish'],
-  },
-  {
-    id: 'quizzes',
-    label: 'Quizzes',
-    description: 'Assessments attached to courses',
-    icon: ClipboardList,
-    capabilities: ['view', 'create', 'edit', 'delete'],
+    capabilities: ['view', 'edit', 'delete'],
   },
   {
     id: 'certificates',
@@ -115,10 +112,10 @@ export const MODULES: readonly PermissionModule[] = [
   },
   {
     id: 'submissions',
-    label: 'Submissions',
+    label: 'My Submissions',
     description: 'Content learners upload for review',
     icon: Upload,
-    capabilities: ['view', 'create'],
+    capabilities: ['view', 'edit', 'delete'],
   },
   {
     id: 'approvals',
@@ -130,23 +127,44 @@ export const MODULES: readonly PermissionModule[] = [
   {
     id: 'reviews',
     label: 'Reviews',
-    description: 'Ratings and written feedback',
+    description: 'Ratings and feedback across courses, tutorials, and resources',
     icon: Star,
-    capabilities: ['view', 'moderate', 'delete'],
+    capabilities: ['view', 'delete'],
+  },
+  {
+    id: 'course-reviews',
+    label: 'Course Reviews',
+    description: 'Monitor learner feedback and ratings across all courses',
+    icon: MessageSquare,
+    capabilities: ['view'],
   },
   {
     id: 'team',
-    label: 'Team',
-    description: 'Your branch team and progress',
+    label: 'Manage Teams',
+    description: 'Create and manage teams (UserType groups for content sharing)',
+    icon: Users,
+    capabilities: ['view', 'manage'],
+  },
+  {
+    id: 'team-progress',
+    label: 'Team Progress',
+    description: 'Your branch team and their progress',
     icon: BarChart3,
-    capabilities: ['view', 'manage', 'assign'],
+    capabilities: ['view'],
+  },
+  {
+    id: 'assign',
+    label: 'Assign Training',
+    description: 'Assign courses to team members',
+    icon: CalendarCheck,
+    capabilities: ['view', 'create', 'edit', 'delete'],
   },
   {
     id: 'users',
     label: 'Users',
     description: 'The platform-wide user directory',
     icon: Users,
-    capabilities: ['view', 'invite', 'edit', 'deactivate'],
+    capabilities: ['view', 'invite', 'edit', 'deactivate', 'changePermissions'],
   },
   {
     id: 'settings',
@@ -176,6 +194,7 @@ const CAP_MAX_LEVEL: Record<CapId, number> = {
   revoke: 1,
   invite: 2,
   deactivate: 1,
+  changePermissions: 1,
 };
 
 /** Sensible default: higher access levels (lower number) get more capabilities. */

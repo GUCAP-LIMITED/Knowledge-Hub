@@ -4,10 +4,17 @@
   --color-primary-strong: #034849;
   --color-primary-soft: rgba(4, 93, 94, 0.08);
   --color-on-primary: #ffffff;
+  /* The filled-CTA colour (Button `default`, `link`). Equals the brand teal in light mode and
+     lightens in dark mode, where the deep brand teal is too dim against the navy surfaces. */
+  --color-action: #045d5e;
 
   --color-secondary: #fc7300;
   --color-secondary-strong: #e56700;
   --color-secondary-soft: rgba(252, 115, 0, 0.1);
+
+  /* Academy app mark hex, distinct from --color-primary: the logo asset must stay pixel-exact
+     regardless of future UI accent tweaks. Swaps for contrast against --color-surface. */
+  --color-academy-mark: #00676e;
 
   --color-danger: #ef4444;
   --color-danger-strong: #b91c1c;
@@ -27,16 +34,46 @@
   --color-info-strong: #1d4ed8;
   --color-info-soft: #eff6ff;
 
-  --color-bg: #f1f4f3;
+  --color-bg: #f3f4f6;
   --color-bg-subtle: #e5eae9;
   --color-surface: #ffffff;
   --color-surface-muted: #f8fafc;
-  --color-border: #e2e8f0;
-  --color-border-strong: #cbd5e1;
-  --color-text: #0f172a;
-  --color-text-muted: #475569;
-  --color-text-subtle: #64748b;
+  --color-surface-hover: #f5f5f5;
+  --color-border: #e5e5e5;
+  --color-border-strong: #d4d4d4;
+  --color-text: #0a0a0a;
+  --color-text-muted: #737373;
+  /* Lead-Frontend has no third text tier: "subtle" resolves to the muted grey so it stays AA. */
+  --color-text-subtle: #737373;
   --color-focus: #045d5e;
+
+  /* Lead-Frontend interaction tokens (shadcn popover/accent/input/sidebar-accent). `accent` is the
+     neutral hover/highlight surface for menu items, ghost buttons and table rows. */
+  --color-popover: #ffffff;
+  --color-accent: #f5f5f5;
+  --color-accent-foreground: #171717;
+  --color-input-border: #e5e5e5;
+  --color-input-bg: transparent;
+  --color-ring: #a3a3a3;
+  --color-nav-hover: #f0fdf4;
+  --color-nav-hover-text: #045d5e;
+  /* Brand teal for TEXT/icons: the deep brand teal is too dim on dark surfaces, so dark lifts it
+     to Lead-Frontend's table-link teal. */
+  --color-link: #045d5e;
+  /* Document viewer chrome (original light literals; dark maps them to theme tokens). */
+  --doc-viewer-primary: #0f766e;
+  --doc-viewer-secondary: #ffffff;
+  --doc-viewer-tertiary: #f8fafc;
+  --doc-viewer-text-primary: #0f172a;
+  --doc-viewer-text-secondary: #64748b;
+  --doc-viewer-text-tertiary: #94a3b8;
+  --doc-viewer-bg: #f8fafc;
+
+  --font-sans: Geist, Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Fixed dark box behind a not-yet-loaded thumbnail/media preview — loading chrome,
+     not a themed surface, so it never swaps between light and dark. */
+  --color-media-placeholder: #1a1a2e;
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -74,29 +111,159 @@
 }
 
 /* Manual dark theme (set on <html data-theme="dark"> by the ThemeProvider, which initialises
-   from the user's stored choice or their system preference). */
+   from the user's stored choice or their system preference).
+
+   Palette is the Communication Hub dark theme: a teal-tinted near-black (never blue/navy or
+   neutral grey), with the brand teal LIFTED so it keeps contrast on the dark surfaces. Hub token
+   -> Academy token: bg->bg, off-hours->bg-subtle, surface->surface, surface-muted->surface-muted,
+   text->text, text-mid->text-muted, text-soft->text-subtle, primary->primary, primary-10->
+   primary-soft/nav-hover. See docs/design-theming.md. */
 [data-theme='dark'] {
-  --color-primary: #0a9396;
-  --color-primary-strong: #0a9396;
-  --color-primary-soft: rgba(10, 147, 150, 0.18);
-  --color-secondary-soft: rgba(252, 115, 0, 0.18);
-  --color-danger-soft: rgba(239, 68, 68, 0.15);
-  --color-success-soft: rgba(16, 185, 129, 0.15);
-  --color-warning-soft: rgba(245, 158, 11, 0.15);
+  /* Brand teal lifts (Hub: #3fb5b7). `action` is the filled-CTA colour with white text on it, so
+     it is a contrast-safe teal (>= 4.5:1 with white), darker than Hub's primary-strong. */
+  --color-primary: #3fb5b7;
+  --color-primary-strong: #2d9799;
+  --color-primary-soft: rgba(63, 181, 183, 0.1);
+  --color-action: #1f7e80;
+  --color-secondary: #ff8a2e;
+  --color-secondary-strong: #c25400;
+  --color-secondary-soft: rgba(255, 138, 46, 0.12);
+  --color-academy-mark: #ffffff;
+
+  --color-danger: #f87171;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger-soft: rgba(248, 113, 113, 0.12);
+  --color-success-soft: rgba(52, 211, 153, 0.12);
+  --color-warning-soft: rgba(251, 191, 36, 0.12);
   --color-info-soft: rgba(59, 130, 246, 0.15);
-  --color-bg: #0b1220;
-  --color-bg-subtle: #0f172a;
-  --color-surface: #1e293b;
-  --color-surface-muted: #172033;
-  --color-border: #334155;
-  --color-border-strong: #475569;
-  --color-text: #f1f5f9;
-  --color-text-muted: #cbd5e1;
-  --color-text-subtle: #94a3b8;
-  --color-focus: #0a9396;
-  --ring: 0 0 0 3px rgba(10, 147, 150, 0.3);
+
+  --color-bg: #0f1517;
+  --color-bg-subtle: #11181b;
+  --color-surface: #1a2226;
+  --color-surface-muted: #222c30;
+  --color-surface-hover: #28343a;
+  --color-border: rgba(255, 255, 255, 0.09);
+  --color-border-strong: rgba(255, 255, 255, 0.13);
+
+  --color-text: #e8edef;
+  --color-text-muted: #a8b5bd;
+  --color-text-subtle: #7c8a92;
+  --color-focus: #3fb5b7;
+  --ring: 0 0 0 3px rgba(63, 181, 183, 0.3);
+
+  /* One step above surface so a menu/select/popover opened over a modal still reads as floating. */
+  --color-popover: #222c30;
+  --color-accent: #222c30;
+  --color-accent-foreground: #e8edef;
+  --color-input-border: rgba(255, 255, 255, 0.24);
+  --color-input-bg: rgba(255, 255, 255, 0.04);
+  /* Input focus ring is brand teal in dark (Hub), not grey. */
+  --color-ring: #3fb5b7;
+  --color-nav-hover: rgba(63, 181, 183, 0.1);
+  --color-nav-hover-text: #3fb5b7;
+  --color-link: #3fb5b7;
+
+  /* The *-strong status tokens are only ever used as TEXT on the soft tints; the deep light-mode
+     values are illegible on the dark surface, so dark lifts them to AA-contrast tints. */
+  --color-danger-strong: #fca5a5;
+  --color-success-strong: #6ee7b7;
+  --color-warning-strong: #fcd34d;
+  --color-info-strong: #93c5fd;
+
+  /* Shadows are invisible on a dark surface at light-mode opacity; use black at higher alpha. */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.45), 0 2px 4px -2px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.55), 0 8px 10px -6px rgba(0, 0, 0, 0.45);
+  --color-overlay: rgba(0, 0, 0, 0.6);
+
+  /* Semantic aliases (dark only): names already used across feature CSS/TSX that were never
+     defined, so they dropped or fell back to a light-only hex. Light is intentionally untouched. */
+  --color-surface-sunken: var(--color-surface-muted);
+  --color-bg-strong: var(--color-bg-subtle);
+  --color-background: var(--color-bg);
+  --color-text-primary: var(--color-text);
+  --color-text-main: var(--color-text);
+  --color-text-emphasis: var(--color-text);
+  --color-text-secondary: var(--color-text-muted);
+  --color-border-subtle: var(--color-border);
+  --color-border-hover: var(--color-border-strong);
+  --color-primary-subtle: var(--color-primary-soft);
+  --color-primary-light: var(--color-primary-soft);
+  --color-primary-rgb: 4, 93, 94;
+  --color-danger-subtle: var(--color-danger-soft);
+  --color-danger-bg: var(--color-danger-soft);
+  --color-success-subtle: var(--color-success-soft);
+  --color-warning-subtle: var(--color-warning-soft);
+  --color-destructive: var(--color-danger);
+
+  /* Loading box behind a not-yet-loaded thumbnail: Hub teal-tinted instead of navy. */
+  --color-media-placeholder: #1a2226;
+
+  /* Document viewer chrome follows the dark tokens. */
+  --doc-viewer-primary: var(--color-action);
+  --doc-viewer-secondary: var(--color-surface);
+  --doc-viewer-tertiary: var(--color-surface-muted);
+  --doc-viewer-text-primary: var(--color-text);
+  --doc-viewer-text-secondary: var(--color-text-muted);
+  --doc-viewer-text-tertiary: var(--color-text-subtle);
+  --doc-viewer-bg: var(--color-surface-muted);
 
   color-scheme: dark;
+}
+
+/* Light theme island: pins the light-mode palette on a subtree that must stay legible/printable
+   regardless of the surrounding app theme (e.g. the certificate artifact), by re-declaring the
+   same custom properties [data-theme='dark'] overrides so they win over inheritance from <html>. */
+[data-theme='light'] {
+  --color-primary: #045d5e;
+  --color-action: #045d5e;
+  --color-primary-strong: #034849;
+  --color-primary-soft: rgba(4, 93, 94, 0.08);
+  --color-secondary-soft: rgba(252, 115, 0, 0.1);
+  --color-academy-mark: #00676e;
+  --color-danger-soft: #fef2f2;
+  --color-success-soft: #ecfdf5;
+  --color-warning-soft: #fffbeb;
+  --color-info-soft: #eff6ff;
+  --color-bg: #f3f4f6;
+  --color-bg-subtle: #e5eae9;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-surface-hover: #f5f5f5;
+  --color-border: #e5e5e5;
+  --color-border-strong: #d4d4d4;
+  --color-text: #0a0a0a;
+  --color-text-muted: #737373;
+  --color-text-subtle: #737373;
+  --color-focus: #045d5e;
+  --ring: 0 0 0 3px rgba(4, 93, 94, 0.22);
+  --color-popover: #ffffff;
+  --color-accent: #f5f5f5;
+  --color-accent-foreground: #171717;
+  --color-input-border: #e5e5e5;
+  --color-input-bg: transparent;
+  --color-ring: #a3a3a3;
+  --color-nav-hover: #f0fdf4;
+  --color-nav-hover-text: #045d5e;
+  --color-link: #045d5e;
+  --color-danger-strong: #b91c1c;
+  --color-success-strong: #047857;
+  --color-warning-strong: #b45309;
+  --color-info-strong: #1d4ed8;
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md:
+    0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-lg:
+    0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+  --shadow-xl:
+    0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+  --color-overlay: rgba(15, 23, 42, 0.45);
+
+  color-scheme: light;
 }
 
 * {
@@ -132,17 +299,28 @@ body,
 
 body {
   margin: 0;
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
   background-color: var(--color-bg);
   color: var(--color-text);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* A short horizontal shake for a required field the user tried to skip; see RequiredHint. */
+@keyframes field-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
 }
 
 @keyframes shimmer {
@@ -152,4 +330,73 @@ body {
   100% {
     background-position: 200% 0;
   }
+}
+
+/*
+ * A modal Radix Dialog (Modal) sets pointer-events: none on <body> and re-enables it only on its
+ * own content. A Popover/Select/DropdownMenu opened from inside that dialog is positioned via a
+ * Radix Popper wrapper portalled to <body>, outside the dialog's own content — it inherits the
+ * none and silently stops receiving clicks, so its items render but every click falls through to
+ * whatever sits underneath. Whenever this wrapper is mounted, its contents are the active
+ * interactive layer, so force it clickable regardless of what a dialog above it has locked down.
+ */
+[data-radix-popper-content-wrapper] {
+  pointer-events: auto;
+}
+
+/* Custom scrollbar — hidden by default, revealed on hover or while actively scrolling (the
+   `.is-scrolling` class is toggled by useScrollbarAutoHide, mounted once at the app root). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+*:hover,
+*.is-scrolling {
+  scrollbar-color: color-mix(in srgb, var(--color-primary) 65%, transparent)
+    color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*:hover::-webkit-scrollbar,
+*.is-scrolling::-webkit-scrollbar {
+  width: 9.5px;
+  height: 9.5px;
+}
+
+*:hover::-webkit-scrollbar-track,
+*.is-scrolling::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+
+*:hover::-webkit-scrollbar-thumb,
+*.is-scrolling::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--color-primary) 65%, transparent);
+}
+
+/* Dark only: placeholders follow the subtle text tier (browser defaults are unpredictable on dark
+   surfaces). */
+[data-theme='dark'] ::placeholder {
+  color: var(--color-text-subtle);
+  opacity: 1;
+}
+
+/* Dark only: the X mark is black and would vanish on a dark tile; follow the text colour. */
+[data-theme='dark'] svg[data-brand='x'] {
+  fill: currentColor;
 }

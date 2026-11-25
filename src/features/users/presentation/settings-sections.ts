@@ -5,7 +5,9 @@ export type SettingsSectionKey =
   | 'content-types'
   | 'certificates'
   | 'users'
-  | 'permissions';
+  | 'permissions'
+  | 'dashboards'
+  | 'email-templates';
 
 export interface SettingsSectionMeta {
   readonly key: SettingsSectionKey;
@@ -45,6 +47,19 @@ export const SETTINGS_SECTIONS: readonly SettingsSectionMeta[] = [
     label: 'Permissions',
     title: 'Permissions',
     subtitle: 'Configure what each access level can see and do.',
+  },
+  {
+    key: 'dashboards',
+    label: 'Configure Dashboard',
+    title: 'Configure Dashboards',
+    subtitle:
+      'Configure which widgets each user type receives and arrange their default layout.',
+  },
+  {
+    key: 'email-templates',
+    label: 'Email Templates',
+    title: 'Email Templates',
+    subtitle: 'Manage and customize notification and communication email templates.',
   },
 ];
 

@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { useStore } from 'zustand';
 import type { AuthenticatedUser } from '../domain';
 import type { AuthState } from '../store';
+import type { PortalConfig } from '../infrastructure';
 import { AuthStoreContext } from './auth-store-context';
 
 const useAuthState = <T>(selector: (state: AuthState) => T): T => {
@@ -15,12 +16,13 @@ const useAuthState = <T>(selector: (state: AuthState) => T): T => {
 export interface UseAuthResult {
   readonly status: AuthState['status'];
   readonly user: AuthenticatedUser | null;
+  readonly accessToken: string | null;
   readonly error: string | null;
   readonly isAuthenticated: boolean;
   readonly isInitializing: boolean;
   readonly isBusy: boolean;
-  readonly login: (email: string, password: string) => Promise<boolean>;
-  readonly register: (email: string, password: string) => Promise<boolean>;
+  /** Redirect to the Uapp Portal to begin SSO sign-in. */
+  readonly beginSso: () => void;
   readonly logout: () => Promise<void>;
   readonly clearError: () => void;
 }
@@ -32,22 +34,28 @@ export interface UseAuthResult {
 export const useAuth = (): UseAuthResult => {
   const status = useAuthState((state) => state.status);
   const user = useAuthState((state) => state.session?.user ?? null);
+  const accessToken = useAuthState((state) => state.session?.accessToken ?? null);
   const error = useAuthState((state) => state.error);
-  const login = useAuthState((state) => state.login);
-  const register = useAuthState((state) => state.register);
+  const beginSso = useAuthState((state) => state.beginSso);
   const logout = useAuthState((state) => state.logout);
   const clearError = useAuthState((state) => state.clearError);
 
   return {
     status,
     user,
+    accessToken,
     error,
     isAuthenticated: status === 'authenticated',
     isInitializing: status === 'initializing',
     isBusy: status === 'authenticating',
-    login,
-    register,
+    beginSso,
     logout,
     clearError,
   };
 };
+
+/** Uapp Portal SSO config (login URL + this app's client secret) — for embedding Portal widgets. */
+export const usePortalConfig = (): PortalConfig => useAuthState((state) => state.portal);
+
+/** Raw Portal SSO secret (null if the session predates it) — for embedded Portal widgets. */
+export const useSsoSecret = (): string | null => useAuthState((state) => state.ssoSecret);

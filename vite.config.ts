@@ -6,6 +6,33 @@ import { defineConfig } from 'vite';
 const resolvePath = (relativePath: string): string =>
   fileURLToPath(new URL(relativePath, import.meta.url));
 
+function getManualChunks(id: string): string | undefined {
+  if (!id.includes('node_modules')) {
+    return undefined;
+  }
+  if (id.includes('@tanstack')) {
+    return 'query';
+  }
+  if (id.includes('@radix-ui')) {
+    return 'radix';
+  }
+  if (id.includes('@sentry')) {
+    return 'sentry';
+  }
+  if (id.includes('node_modules/motion')) {
+    return 'motion';
+  }
+  if (id.includes('node_modules/recharts')) {
+    return 'charts';
+  }
+  if (
+    /node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//.test(id)
+  ) {
+    return 'react';
+  }
+  return undefined;
+}
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -23,34 +50,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // Split heavy, rarely-changing vendor code into stable chunks so the app bundle stays
-        // small and these are cached independently across deploys. Scoped packages are matched
-        // before `react` so e.g. `@tanstack/react-query` is not swept into the react chunk.
-        manualChunks: (id: string): string | undefined => {
-          if (!id.includes('node_modules')) {
-            return undefined;
-          }
-          if (id.includes('@tanstack')) {
-            return 'query';
-          }
-          if (id.includes('@radix-ui')) {
-            return 'radix';
-          }
-          if (id.includes('@sentry')) {
-            return 'sentry';
-          }
-          if (id.includes('node_modules/motion')) {
-            return 'motion';
-          }
-          if (
-            /node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//.test(
-              id,
-            )
-          ) {
-            return 'react';
-          }
-          return undefined;
-        },
+        manualChunks: getManualChunks,
       },
     },
   },
@@ -58,6 +58,8 @@ export default defineConfig({
     globals: false,
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
+    testTimeout: 15_000,
+    hookTimeout: 15_000,
     css: false,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     coverage: {

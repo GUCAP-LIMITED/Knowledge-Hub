@@ -1,18 +1,32 @@
 import type { ReactElement } from 'react';
-import { Lightbulb, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
 import styles from './TutorialsPage.module.css';
 
 export interface TutorialThumbProps {
   readonly duration: string;
+  readonly thumbnailUrl?: string | null;
+  readonly title?: string;
 }
 
-/** Video-style thumbnail band: category-tinted frame, a play affordance, and a duration overlay. */
-export const TutorialThumb = ({ duration }: TutorialThumbProps): ReactElement => (
+/** Video thumbnail band: real cover image or styled video backdrop, play affordance, and duration overlay. */
+export const TutorialThumb = ({
+  duration,
+  thumbnailUrl,
+  title,
+}: TutorialThumbProps): ReactElement => (
   <span className={styles.thumb}>
-    <Lightbulb size={26} aria-hidden="true" className={styles.thumbIcon} />
+    {thumbnailUrl ? (
+      <img src={thumbnailUrl} alt={title ?? ''} className={styles.thumbImg} />
+    ) : (
+      <span className={styles.thumbFallback}>
+        <Play size={28} aria-hidden="true" className={styles.thumbFallbackIcon} />
+      </span>
+    )}
     <span className={styles.thumbPlay}>
       <Play size={20} aria-hidden="true" />
     </span>
-    <span className={styles.thumbDur}>{duration}</span>
+    {duration && duration !== 'N/A' && duration !== '0m' ? (
+      <span className={styles.thumbDur}>{duration}</span>
+    ) : null}
   </span>
 );

@@ -1,3 +1,7 @@
-export * from './errors/user-errors';
-export * from './entities/user-account';
-export type { UserGateway } from './ports/user-gateway';
+export * from './entities/branch-user';
+export type {
+  BranchUserPage,
+  UserDirectoryFilter,
+  UserDirectoryGateway,
+} from './ports/user-directory-gateway';
+export * from './platform-settings-gateway';

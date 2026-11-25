@@ -4,7 +4,7 @@
   flex-direction: column;
   gap: 0.125rem;
   padding: 0.35rem;
-  background-color: var(--color-surface);
+  background-color: var(--color-popover);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
@@ -25,7 +25,8 @@
 }
 
 .item[data-highlighted] {
-  background-color: var(--color-surface-muted);
+  background-color: var(--color-accent);
+  color: var(--color-accent-foreground);
 }
 
 .item[data-disabled] {

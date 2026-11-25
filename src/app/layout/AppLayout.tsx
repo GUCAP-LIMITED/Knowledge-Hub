@@ -1,16 +1,19 @@
 import { useEffect, useState, type ReactElement } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { cn, useBodyScrollLock } from '@shared/utils';
 import { useAuth } from '@features/auth';
+import { UploadProgressWidget } from '@features/content';
 import { SearchOverlay } from '@app/search/SearchOverlay';
 import { AppSidebar } from './AppSidebar';
 import { AppHeader } from './AppHeader';
+import { AppBottomNav } from './AppBottomNav';
+import { useSignOut } from './use-sign-out';
 import styles from './AppLayout.module.css';
 
 /** Authenticated app shell: sidebar + header wrapping the routed page, plus global search. */
 export const AppLayout = (): ReactElement => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const handleSignOut = useSignOut();
   const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
@@ -37,17 +40,11 @@ export const AppLayout = (): ReactElement => {
   // Lock background scroll while the mobile drawer is open.
   useBodyScrollLock(navOpen);
 
-  const handleSignOut = (): void => {
-    void logout().then(() => {
-      navigate('/login', { replace: true });
-    });
-  };
-
   return (
     <div className={cn(styles.shell, collapsed && styles.shellCollapsed)}>
       <AppSidebar
-        user={user}
         open={navOpen}
+        collapsed={collapsed}
         onNavigate={() => {
           setNavOpen(false);
         }}
@@ -81,6 +78,8 @@ export const AppLayout = (): ReactElement => {
           <Outlet />
         </main>
       </div>
+      <AppBottomNav />
+      <UploadProgressWidget />
       {searchOpen ? (
         <SearchOverlay
           onClose={() => {

@@ -10,7 +10,7 @@ export const QUIZ_SEED: readonly QuizProps[] = [
     contentId: 'course-1',
     contentKind: 'course',
     title: 'Knowledge check',
-    passMark: 60,
+    passingPercentage: 60,
     questions: [
       {
         id: 'q1',
@@ -59,7 +59,7 @@ export const QUIZ_SEED: readonly QuizProps[] = [
     contentId: 'course-2',
     contentKind: 'course',
     title: 'Quick quiz',
-    passMark: 50,
+    passingPercentage: 50,
     questions: [
       {
         id: 'q1',

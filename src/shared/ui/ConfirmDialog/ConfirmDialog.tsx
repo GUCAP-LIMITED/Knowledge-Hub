@@ -41,7 +41,11 @@ export const ConfirmDialog = ({
         <Button variant="ghost" onClick={onCancel}>
           {cancelLabel}
         </Button>
-        <Button variant={tone} isLoading={isBusy} onClick={onConfirm}>
+        <Button
+          variant={tone === 'danger' ? 'destructive' : 'default'}
+          isLoading={isBusy}
+          onClick={onConfirm}
+        >
           {confirmLabel}
         </Button>
       </div>

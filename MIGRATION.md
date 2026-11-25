@@ -1,5 +1,11 @@
 # Knowledge Hub — Clean Architecture + DDD migration
 
+> **Status update — Knowledge Hub now mirrors UAPP Academy.** The UI/UX, shell, routes, permission
+> model and feature slices are the Academy frontend (the source of truth), served by an in-memory
+> mock backend. The history below describes the original prototype migration and is kept for
+> context. For how the demo works today (sign-in, data, going live), see the **Demo mode** section
+> in [`README.md`](./README.md).
+
 This repository was upgraded from a single-file React prototype (`KnowledgeHub.jsx`) into the
 **Clean / Hexagonal + DDD** structure used by the GUCAP `React-CleanWithDDD-Template` and the
 Communication-Hub project. This document records what changed, the decisions taken, and exactly how

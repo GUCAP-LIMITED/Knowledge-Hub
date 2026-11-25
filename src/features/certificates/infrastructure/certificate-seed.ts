@@ -9,7 +9,6 @@ import type { CertificateProps } from '../domain';
 export const CERTIFICATE_SEED: readonly CertificateProps[] = [
   {
     id: 'CERT-2026-001',
-    courseId: 'course-1',
     courseName: 'Getting Started with UAPP Portal',
     userName: 'Simona',
     userRole: 'Consultant',
@@ -18,10 +17,10 @@ export const CERTIFICATE_SEED: readonly CertificateProps[] = [
     credentialId: 'UAPP-GS-001-2026',
     category: 'Onboarding',
     grade: 'Distinction',
+    contentKind: 'course',
   },
   {
     id: 'CERT-2026-002',
-    courseId: 'course-2',
     courseName: 'Compliance & Legal Requirements',
     userName: 'Simona',
     userRole: 'Consultant',
@@ -30,10 +29,10 @@ export const CERTIFICATE_SEED: readonly CertificateProps[] = [
     credentialId: 'UAPP-CL-002-2026',
     category: 'Compliance',
     grade: 'Merit',
+    contentKind: 'course',
   },
   {
     id: 'CERT-2026-003',
-    courseId: 'course-3',
     courseName: 'Advanced Sales Techniques',
     userName: 'Marcus',
     userRole: 'Sales Lead',
@@ -42,10 +41,10 @@ export const CERTIFICATE_SEED: readonly CertificateProps[] = [
     credentialId: 'UAPP-AS-003-2026',
     category: 'Sales',
     grade: 'Distinction',
+    contentKind: 'tutorial',
   },
   {
     id: 'CERT-2026-004',
-    courseId: 'course-6',
     courseName: 'Leadership Essentials',
     userName: 'Priya',
     userRole: 'Team Manager',
@@ -54,10 +53,10 @@ export const CERTIFICATE_SEED: readonly CertificateProps[] = [
     credentialId: 'UAPP-LE-004-2026',
     category: 'Leadership',
     grade: 'Pass',
+    contentKind: 'resource',
   },
   {
     id: 'CERT-2026-005',
-    courseId: 'course-5',
     courseName: 'Operations Playbook',
     userName: 'Daniel',
     userRole: 'Operations Analyst',
@@ -66,5 +65,6 @@ export const CERTIFICATE_SEED: readonly CertificateProps[] = [
     credentialId: 'UAPP-OP-005-2026',
     category: 'Operations',
     grade: 'Merit',
+    contentKind: 'tutorial',
   },
 ];

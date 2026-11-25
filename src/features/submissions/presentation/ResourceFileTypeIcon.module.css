@@ -1,0 +1,186 @@
+.iconTile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.iconTileSm {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+}
+
+.iconTileLg {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+}
+
+/* Category Palettes */
+.iconPdf {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.iconWord {
+  color: #2563eb;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.iconExcel {
+  color: #059669;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+
+.iconPpt {
+  color: #ea580c;
+  background-color: #fff7ed;
+  border: 1px solid #fed7aa;
+}
+
+.iconArchive {
+  color: #7c3aed;
+  background-color: #f5f3ff;
+  border: 1px solid #ddd6fe;
+}
+
+.iconImage {
+  color: #db2777;
+  background-color: #fdf2f8;
+  border: 1px solid #fbcfe8;
+}
+
+.iconCode {
+  color: #475569;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.iconDefault {
+  color: #64748b;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .iconPdf {
+  color: #f87171;
+  background-color: rgba(220, 38, 38, 0.15);
+  border-color: rgba(220, 38, 38, 0.35);
+}
+
+[data-theme='dark'] .iconWord {
+  color: #60a5fa;
+  background-color: rgba(37, 99, 235, 0.15);
+  border-color: rgba(37, 99, 235, 0.35);
+}
+
+[data-theme='dark'] .iconExcel {
+  color: #34d399;
+  background-color: rgba(5, 150, 105, 0.15);
+  border-color: rgba(5, 150, 105, 0.35);
+}
+
+[data-theme='dark'] .iconPpt {
+  color: #fb923c;
+  background-color: rgba(234, 88, 12, 0.15);
+  border-color: rgba(234, 88, 12, 0.35);
+}
+
+[data-theme='dark'] .iconArchive {
+  color: #c084fc;
+  background-color: rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+[data-theme='dark'] .iconImage {
+  color: #f472b6;
+  background-color: rgba(219, 39, 119, 0.15);
+  border-color: rgba(219, 39, 119, 0.35);
+}
+
+[data-theme='dark'] .iconCode {
+  color: #94a3b8;
+  background-color: rgba(71, 85, 105, 0.15);
+  border-color: rgba(71, 85, 105, 0.35);
+}
+
+[data-theme='dark'] .iconDefault {
+  color: #94a3b8;
+  background-color: rgba(100, 116, 139, 0.15);
+  border-color: rgba(100, 116, 139, 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .iconPdf {
+    color: #f87171;
+    background-color: rgba(220, 38, 38, 0.15);
+    border-color: rgba(220, 38, 38, 0.35);
+  }
+
+  :root:not([data-theme='light']) .iconWord {
+    color: #60a5fa;
+    background-color: rgba(37, 99, 235, 0.15);
+    border-color: rgba(37, 99, 235, 0.35);
+  }
+
+  :root:not([data-theme='light']) .iconExcel {
+    color: #34d399;
+    background-color: rgba(5, 150, 105, 0.15);
+    border-color: rgba(5, 150, 105, 0.35);
+  }
+
+  :root:not([data-theme='light']) .iconPpt {
+    color: #fb923c;
+    background-color: rgba(234, 88, 12, 0.15);
+    border-color: rgba(234, 88, 12, 0.35);
+  }
+
+  :root:not([data-theme='light']) .iconArchive {
+    color: #c084fc;
+    background-color: rgba(124, 58, 237, 0.15);
+    border-color: rgba(124, 58, 237, 0.35);
+  }
+
+  :root:not([data-theme='light']) .iconImage {
+    color: #f472b6;
+    background-color: rgba(219, 39, 119, 0.15);
+    border-color: rgba(219, 39, 119, 0.35);
+  }
+
+  :root:not([data-theme='light']) .iconCode {
+    color: #94a3b8;
+    background-color: rgba(71, 85, 105, 0.15);
+    border-color: rgba(71, 85, 105, 0.35);
+  }
+
+  :root:not([data-theme='light']) .iconDefault {
+    color: #94a3b8;
+    background-color: rgba(100, 116, 139, 0.15);
+    border-color: rgba(100, 116, 139, 0.35);
+  }
+}
+
+/* Extension Tag Pill */
+.formatBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  user-select: none;
+}

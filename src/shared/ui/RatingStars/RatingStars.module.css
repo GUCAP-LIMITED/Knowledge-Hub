@@ -1,0 +1,56 @@
+.container {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.starsTrack {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.star {
+  flex-shrink: 0;
+  transition:
+    color 0.15s ease,
+    fill 0.15s ease;
+}
+
+.filled {
+  color: var(--color-warning, #f59e0b);
+}
+
+.empty {
+  color: #f59e0b;
+}
+
+.valueText {
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  letter-spacing: -0.01em;
+}
+
+.reviewCount {
+  font-size: 0.85em;
+  color: var(--color-text-muted, #6b7280);
+}
+
+/* Sizes */
+.sm .valueText {
+  font-size: 0.78rem;
+}
+
+.sm .reviewCount {
+  font-size: 0.72rem;
+}
+
+.md .valueText {
+  font-size: 0.9rem;
+}
+
+.md .reviewCount {
+  font-size: 0.82rem;
+}

@@ -10,6 +10,11 @@ export {
 export {
   CertificatesModuleProvider,
   useCertificates,
+  useCertificate,
+  useCertificatesModule,
   certificatesQueryKey,
+  certificateKeys,
+  CertificateModal,
+  type CertificateModalProps,
 } from './presentation';
 export { Certificate, type CertificateProps } from './domain';

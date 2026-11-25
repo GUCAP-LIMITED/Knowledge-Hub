@@ -1,8 +1,7 @@
 import type { ReactElement } from 'react';
 import { Search } from 'lucide-react';
 import { cn } from '@shared/utils';
-import { CONTENT_KINDS, type ContentKind } from '../store/content-types-store';
-import { KIND_META } from './content-types-model';
+import { CONTENT_KINDS, type ContentKind, KIND_META } from './content-types-model';
 import styles from './ContentTypesManager.module.css';
 
 export type KindFilter = 'all' | ContentKind;

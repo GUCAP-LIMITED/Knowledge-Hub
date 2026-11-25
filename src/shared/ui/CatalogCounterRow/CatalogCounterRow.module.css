@@ -1,0 +1,21 @@
+.counterRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: -0.75rem;
+  margin-bottom: -0.5rem;
+  min-height: 28px;
+}
+
+.counterBadgeText {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--color-text-main);
+}
+
+.counterBadgeText strong {
+  font-weight: 700;
+  color: var(--color-text-emphasis, var(--color-text-main));
+}

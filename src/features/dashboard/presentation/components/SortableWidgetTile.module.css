@@ -1,0 +1,125 @@
+.tileWrapper {
+  position: relative;
+  height: 100%;
+  min-height: 80px;
+}
+
+.tileEditMode {
+  outline: 2px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: grab;
+}
+
+.tileDragging {
+  opacity: 0.4;
+  z-index: 10;
+}
+
+.tile {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.actionTile {
+  padding: 0.65rem 0.85rem;
+  justify-content: center;
+}
+
+.tileHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.tileTitle {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tileBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.deleteButton {
+  position: absolute;
+  top: -0.5rem;
+  left: -0.5rem;
+  z-index: 5;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-danger, #ef4444);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease;
+}
+
+.deleteButton:hover {
+  transform: scale(1.1);
+}
+
+.configButton {
+  position: absolute;
+  top: -0.5rem;
+  left: 1.25rem;
+  z-index: 5;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.configButton:hover {
+  color: var(--color-link);
+  border-color: var(--color-primary);
+}
+
+.skeletonBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex: 1;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}

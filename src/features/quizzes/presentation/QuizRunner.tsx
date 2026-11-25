@@ -1,84 +1,180 @@
-import { useState, type ReactElement } from 'react';
-import { Check } from 'lucide-react';
-import { Button } from '@shared/ui';
-import { cn } from '@shared/utils';
-import type { Quiz, QuizAnswers } from '../domain';
-import styles from './QuizSection.module.css';
+/* eslint-disable complexity, max-lines-per-function */
+import { useState, type ReactElement, useEffect } from 'react';
+import { AlertCircle } from 'lucide-react';
+import { Skeleton } from '@shared/ui';
+import { useQueryClient } from '@tanstack/react-query';
+import { useQuizzes, useSubmitQuiz } from './use-quizzes';
+import {
+  useQuizLearnerStatus,
+  quizLearnerStatusQueryKey,
+} from './use-quiz-learner-status';
+import { useQuizProgressStore } from './use-quiz-progress';
+import { QuizContent } from './QuizContent';
+import type { QuizResult, QuizAnswers } from '../domain';
 
-export interface QuizRunnerProps {
-  readonly quiz: Quiz;
-  readonly isSubmitting: boolean;
-  readonly onSubmit: (answers: QuizAnswers) => void;
+// Using the same fallback styles as MediaViewer for consistency
+import styles from '@shared/ui/MediaViewer/MediaViewer.module.css';
+
+interface QuizFallbackProps {
+  readonly message: string;
+  readonly isError?: boolean;
 }
 
-const toggle = (list: readonly number[], index: number): readonly number[] =>
-  list.includes(index) ? list.filter((i) => i !== index) : [...list, index];
+const QuizFallback = ({ message, isError = false }: QuizFallbackProps): ReactElement => (
+  <div className={styles.fallback}>
+    <AlertCircle
+      size={40}
+      className={isError ? 'text-destructive' : undefined}
+      style={{
+        marginBottom: '1rem',
+        color: isError ? undefined : 'var(--color-text-muted)',
+      }}
+    />
+    <p className={styles.fallbackText}>{message}</p>
+  </div>
+);
 
-/** Learner-facing quiz form: one card per question, multi-select answers, gated submit. */
+export interface QuizRunnerProps {
+  readonly quizId: string | null;
+  readonly lessonId: string | null;
+  readonly onPassed?: () => void;
+  readonly onResultChange?: (result: QuizResult | null) => void;
+}
+
+/**
+ * A drop-in quiz player for use in modals (like the course curriculum lesson player).
+ * Manages the state of the active quiz, grading, and recording progress.
+ */
 export const QuizRunner = ({
-  quiz,
-  isSubmitting,
-  onSubmit,
+  quizId,
+  lessonId,
+  onPassed,
+  onResultChange,
 }: QuizRunnerProps): ReactElement => {
-  const [answers, setAnswers] = useState<Record<string, readonly number[]>>({});
-  const answered = quiz.questions.filter((q) => (answers[q.id]?.length ?? 0) > 0).length;
-  const allAnswered = answered === quiz.questionCount;
+  const queryClient = useQueryClient();
+  const {
+    data: quizzes,
+    isLoading: isQuizLoading,
+    isError,
+    error,
+  } = useQuizzes(quizId ?? '');
+  const { data: learnerStatus, isLoading: isStatusLoading } =
+    useQuizLearnerStatus(quizId);
+  const submit = useSubmitQuiz();
+
+  const [localResult, setLocalResult] = useState<QuizResult | null>(null);
+  const [localAnswers, setLocalAnswers] = useState<Record<string, string[]> | null>(null);
+  const [isRetaking, setIsRetaking] = useState(false);
+  const [attempt, setAttempt] = useState(1);
+  const markPassed = useQuizProgressStore((s) => s.markPassed);
+
+  // Reset state when quiz changes
+  useEffect(() => {
+    setLocalResult(null);
+    setLocalAnswers(null);
+    setIsRetaking(false);
+    setAttempt(1);
+  }, [quizId]);
+
+  // Server progress hydration: sync passed status across browsers/devices
+  // Once complete, always complete: preserve course lesson completion if learner has ever passed
+  useEffect(() => {
+    if (
+      (learnerStatus?.status === 'passed' || learnerStatus?.hasEverPassed) &&
+      lessonId
+    ) {
+      markPassed(lessonId);
+    }
+  }, [learnerStatus?.status, learnerStatus?.hasEverPassed, lessonId, markPassed]);
+
+  const quiz = quizzes?.[0];
+
+  const handleSubmit = (answers: QuizAnswers): void => {
+    if (!quiz) {
+      return;
+    }
+    submit.mutate(
+      { quizId: quiz.id, answers },
+      {
+        onSuccess: (res) => {
+          setLocalResult(res);
+          if (res.answers) {
+            setLocalAnswers(res.answers);
+          } else {
+            const mappedAnswers: Record<string, string[]> = {};
+            for (const question of quiz.questions) {
+              const selectedIndexes = answers[question.id] ?? [];
+              mappedAnswers[question.id] = selectedIndexes
+                .map((idx) => question.optionIds[idx])
+                .filter((id): id is string => typeof id === 'string');
+            }
+            setLocalAnswers(mappedAnswers);
+          }
+          setIsRetaking(false);
+          void queryClient.invalidateQueries({
+            queryKey: quizLearnerStatusQueryKey(quiz.id),
+          });
+          if (res.passed) {
+            if (lessonId) {
+              markPassed(lessonId);
+            }
+            onPassed?.();
+          }
+        },
+      },
+    );
+  };
+
+  const handleRetake = (): void => {
+    setIsRetaking(true);
+    setLocalResult(null);
+    setLocalAnswers(null);
+    setAttempt((a) => a + 1);
+  };
+
+  // Active result: local submission takes precedence, otherwise server's latest result if already taken and not retaking
+  const activeResult =
+    localResult ??
+    (!isRetaking && learnerStatus && learnerStatus.status !== 'not_attempted'
+      ? learnerStatus.latestResult
+      : null);
+
+  useEffect(() => {
+    onResultChange?.(activeResult);
+  }, [activeResult, onResultChange]);
+
+  if (!quizId) {
+    return <QuizFallback message="No quiz available for this lesson." />;
+  }
+
+  if (isQuizLoading || isStatusLoading) {
+    return <Skeleton width="100%" height={400} radius={12} />;
+  }
+
+  if (isError || !quizzes) {
+    return <QuizFallback message={error?.message ?? 'Failed to load quiz'} isError />;
+  }
+
+  if (!quiz) {
+    return <QuizFallback message="No quiz available for this lesson." />;
+  }
+
+  const activeAnswers =
+    localAnswers ?? activeResult?.answers ?? learnerStatus?.latestAnswers ?? null;
 
   return (
-    <div className={styles.runner}>
-      <p className={styles.runnerMeta}>
-        {quiz.questionCount} question{quiz.questionCount === 1 ? '' : 's'} ·{' '}
-        {quiz.passMark}% to pass · select all that apply
-      </p>
-      {quiz.questions.map((question, index) => (
-        <fieldset key={question.id} className={styles.question}>
-          <legend className={styles.questionPrompt}>
-            {index + 1}. {question.prompt}
-          </legend>
-          <div className={styles.options}>
-            {question.options.map((option, optionIndex) => {
-              const checked = (answers[question.id] ?? []).includes(optionIndex);
-              return (
-                <label
-                  key={option}
-                  className={cn(styles.option, checked && styles.optionSelected)}
-                >
-                  <span className={cn(styles.optionBox, checked && styles.optionBoxOn)}>
-                    {checked ? <Check size={13} aria-hidden /> : null}
-                  </span>
-                  <input
-                    type="checkbox"
-                    className={styles.optionInput}
-                    checked={checked}
-                    onChange={() => {
-                      setAnswers((prev) => ({
-                        ...prev,
-                        [question.id]: toggle(prev[question.id] ?? [], optionIndex),
-                      }));
-                    }}
-                  />
-                  <span>{option}</span>
-                </label>
-              );
-            })}
-          </div>
-        </fieldset>
-      ))}
-      <div className={styles.runnerFoot}>
-        <span className={styles.runnerProgress}>
-          {answered}/{quiz.questionCount} answered
-        </span>
-        <Button
-          variant="accent"
-          disabled={!allAnswered || isSubmitting}
-          isLoading={isSubmitting}
-          onClick={() => {
-            onSubmit(answers);
-          }}
-        >
-          Submit answers
-        </Button>
-      </div>
-    </div>
+    <QuizContent
+      quiz={quiz}
+      result={activeResult}
+      userAnswers={activeAnswers}
+      canAttempt={learnerStatus?.canAttempt ?? true}
+      isQuizUpdated={learnerStatus?.isQuizUpdatedSinceLastAttempt ?? false}
+      attempt={attempt}
+      isSubmitting={submit.isPending}
+      certificateReady={false} // Certificates are handled at the course level
+      isPostSubmission={Boolean(localResult)}
+      onSubmit={handleSubmit}
+      onRetake={handleRetake}
+    />
   );
 };

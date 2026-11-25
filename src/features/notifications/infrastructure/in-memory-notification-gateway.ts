@@ -5,6 +5,9 @@ import {
   AnnouncementNotFoundError,
   type NotificationError,
   type NotificationGateway,
+  type NotificationQueryParams,
+  type NotificationStats,
+  type PagedAnnouncementsResult,
 } from '../domain';
 import { ANNOUNCEMENT_SEED } from './announcement-seed';
 
@@ -26,6 +29,33 @@ export class InMemoryNotificationGateway implements NotificationGateway {
 
   public list(): Promise<Result<readonly Announcement[], NotificationError>> {
     return Promise.resolve(ok([...this.announcements.values()]));
+  }
+
+  public listPaged(
+    params: NotificationQueryParams,
+  ): Promise<Result<PagedAnnouncementsResult, NotificationError>> {
+    let items = [...this.announcements.values()];
+    if (params.isRead !== undefined) {
+      items = items.filter((a) => a.read === params.isRead);
+    }
+    if (params.topicId) {
+      items = items.filter((a) => a.topicId === params.topicId);
+    }
+    const totalCount = items.length;
+    const skip = params.skipCount ?? 0;
+    const take = params.maxResultCount ?? 15;
+    const paged = items.slice(skip, skip + take);
+
+    return Promise.resolve(ok({ items: paged, totalCount }));
+  }
+
+  public getStats(): Promise<Result<NotificationStats, NotificationError>> {
+    const items = [...this.announcements.values()];
+    const totalCount = items.length;
+    const readCount = items.filter((a) => a.read).length;
+    const unreadCount = Math.max(0, totalCount - readCount);
+
+    return Promise.resolve(ok({ totalCount, readCount, unreadCount }));
   }
 
   public markRead(id: string): Promise<Result<Announcement, NotificationError>> {

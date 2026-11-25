@@ -1,0 +1,76 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--motion-fast, 0.12s) ease;
+  user-select: none;
+}
+
+.button:hover:not(:disabled) {
+  background-color: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-link);
+  transform: translateY(-1px);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.active {
+  background-color: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-link);
+  font-weight: 700;
+}
+
+.active:hover:not(:disabled) {
+  background-color: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-link);
+  opacity: 0.9;
+}
+
+.countBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-full);
+  font-size: 0.76rem;
+  font-weight: 700;
+  background-color: var(--color-border);
+  color: var(--color-text-muted);
+  transition: all var(--motion-fast, 0.12s) ease;
+}
+
+.active .countBadge {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary, #ffffff);
+}

@@ -1,0 +1,58 @@
+import { z } from 'zod';
+
+export const MyLearningItemRowSchema = z.object({
+  id: z.string(),
+  slug: z.string().nullable().optional(),
+  assignmentId: z.string().nullable().optional(),
+  enrollmentId: z.string().nullable().optional(),
+  title: z.string(),
+  subtitle: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  contentType: z.number(),
+  contentTypeName: z.string().optional().default('Course'),
+  origin: z.number(),
+  originName: z.string().optional().default('Self'),
+  assignedScope: z.number().nullable().optional(),
+  assignedScopeName: z.string().nullable().optional(),
+  status: z.number(),
+  statusName: z.string().optional().default('Not Started'),
+  progress: z.number().optional().default(0),
+  dueDate: z.string().nullable().optional(),
+  isOverdue: z.boolean().optional().default(false),
+  daysRemaining: z.number().nullable().optional(),
+  enrolledOrAssignedAt: z.string(),
+  lastAccessedAt: z.string().nullable().optional(),
+  completedAt: z.string().nullable().optional(),
+  totalLessons: z.number().optional().default(0),
+  completedLessons: z.number().optional().default(0),
+  durationSeconds: z.number().optional().default(0),
+  difficultyName: z.string().optional().default('Beginner'),
+  categoryName: z.string().nullable().optional(),
+  topic: z.string().nullable().optional(),
+  thumbnailUrl: z.string().nullable().optional(),
+  certificateId: z.string().nullable().optional(),
+  certificateUrl: z.string().nullable().optional(),
+  isAccessible: z.boolean().optional().default(true),
+  isPublished: z.boolean().optional().default(true),
+  helpfulCount: z.number().optional().default(0),
+  isHelpful: z.boolean().optional().default(false),
+  averageRating: z.number().optional().default(0),
+  rating: z.number().optional().default(0),
+  totalReviews: z.number().optional().default(0),
+  actionLabel: z.string().optional().default('Start course'),
+});
+
+export const MyLearningStatsRowSchema = z.object({
+  totalCount: z.number().optional().default(0),
+  selfCount: z.number().optional().default(0),
+  assignedCount: z.number().optional().default(0),
+  assignedMeCount: z.number().optional().default(0),
+  assignedTeamCount: z.number().optional().default(0),
+  assignedRoleCount: z.number().optional().default(0),
+  inProgressCount: z.number().optional().default(0),
+  completedCount: z.number().optional().default(0),
+  overdueCount: z.number().optional().default(0),
+});
+
+export type MyLearningItemRow = z.infer<typeof MyLearningItemRowSchema>;
+export type MyLearningStatsRow = z.infer<typeof MyLearningStatsRowSchema>;

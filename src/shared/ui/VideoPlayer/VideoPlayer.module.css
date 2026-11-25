@@ -1,0 +1,332 @@
+.playerContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 560px;
+  background-color: #000000;
+  border-radius: var(--radius-md, 8px);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  font-family: inherit;
+  outline: none;
+  isolation: isolate;
+  container-type: inline-size;
+}
+
+.videoElement {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  cursor: pointer;
+}
+
+.centerOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.centerPlayBtn {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.centerPlayBtn:hover {
+  transform: scale(1.1);
+  background: var(--color-primary, #0f766e);
+  border-color: var(--color-primary, #0f766e);
+  box-shadow: 0 0 24px rgba(15, 118, 110, 0.6);
+}
+
+.bufferingSpinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--color-primary, #0f766e);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.controlsOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.4) 60%,
+    transparent 100%
+  );
+  padding: 1.5rem 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 20;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.controlsOverlayHidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+}
+
+.timelineTrack {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: height 0.15s ease;
+}
+
+.timelineTrack:hover {
+  height: 8px;
+}
+
+.bufferBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 3px;
+  pointer-events: none;
+  transition: width 0.2s ease;
+}
+
+.playedBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: var(--color-primary, #0f766e);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.scrubberThumb {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.15s ease;
+  pointer-events: none;
+}
+
+.timelineTrack:hover .scrubberThumb {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.controlsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: #ffffff;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.leftControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.rightControls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.controlBtn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  padding: 0.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  opacity: 0.9;
+}
+
+.controlBtn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+.controlBtn:focus-visible {
+  outline: 2px solid var(--color-primary, #0f766e);
+}
+
+.timeText {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #e2e8f0;
+  margin-left: 0.25rem;
+  white-space: nowrap;
+}
+
+.volumeGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.volumeSlider {
+  width: 0;
+  opacity: 0;
+  transition:
+    width 0.2s ease,
+    opacity 0.2s ease;
+  accent-color: var(--color-primary, #0f766e);
+  cursor: pointer;
+  height: 4px;
+}
+
+.volumeGroup:hover .volumeSlider,
+.volumeSlider:focus-visible {
+  width: 60px;
+  opacity: 1;
+}
+
+.speedMenu {
+  position: relative;
+}
+
+.speedDropdown,
+.menuDropdown {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 30;
+  min-width: 90px;
+}
+
+.speedOption,
+.menuOption {
+  background: transparent;
+  border: none;
+  color: #e2e8f0;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+}
+
+.speedOption:hover,
+.menuOption:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.speedOptionActive,
+.menuOptionActive {
+  color: var(--color-primary, #14b8a6);
+  font-weight: 600;
+}
+
+.bitrateText {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-left: 0.5rem;
+  font-weight: normal;
+}
+
+/* Compact layouts: sized by the player's own width, not the viewport */
+@container (max-width: 560px) {
+  .controlsOverlay {
+    padding: 1rem 0.6rem 0.5rem;
+  }
+
+  .leftControls,
+  .rightControls {
+    gap: 0.15rem;
+  }
+
+  .controlBtn {
+    padding: 0.3rem;
+  }
+
+  .rightControls .controlBtn span {
+    display: none;
+  }
+
+  .timeText {
+    font-size: 0.72rem;
+  }
+
+  .centerPlayBtn {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+@container (max-width: 380px) {
+  .leftControls > :nth-child(2),
+  .leftControls > :nth-child(3) {
+    display: none;
+  }
+
+  .menuDropdown,
+  .speedDropdown {
+    right: -0.25rem;
+  }
+}

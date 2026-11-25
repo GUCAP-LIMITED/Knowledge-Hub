@@ -1,0 +1,28 @@
+.content {
+  width: min(440px, calc(100vw - 2rem));
+  max-height: calc(100dvh - 80px);
+  border-radius: var(--radius-lg);
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.message {
+  margin: 0;
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.frame {
+  display: block;
+  width: 100%;
+  border: none;
+}
+
+@media (max-width: 768px) {
+  .content {
+    /* Leave room for the top bar and the mobile bottom navigation. */
+    max-height: calc(100dvh - 140px);
+  }
+}

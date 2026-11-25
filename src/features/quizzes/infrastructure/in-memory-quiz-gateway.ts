@@ -1,6 +1,14 @@
 import type { Logger } from '@core/logger';
 import { type Result, err, ok } from '@core/result';
-import { Quiz, type QuizError, type QuizGateway, QuizNotFoundError } from '../domain';
+import {
+  Quiz,
+  type QuizAnswers,
+  type QuizError,
+  type QuizGateway,
+  type QuizLearnerStatus,
+  QuizNotFoundError,
+  type QuizResult,
+} from '../domain';
 import { QUIZ_SEED } from './quiz-seed';
 
 export interface InMemoryQuizGatewayDeps {
@@ -41,5 +49,32 @@ export class InMemoryQuizGateway implements QuizGateway {
     }
     this.quizzes.delete(quizId);
     return Promise.resolve(ok(undefined));
+  }
+
+  public submit(
+    _quizId: string,
+    answers: QuizAnswers,
+    quiz: Quiz,
+  ): Promise<Result<QuizResult, QuizError>> {
+    return Promise.resolve(ok(quiz.grade(answers)));
+  }
+
+  public getMyStatus(quizId: string): Promise<Result<QuizLearnerStatus, QuizError>> {
+    const quiz = this.quizzes.get(quizId);
+    if (!quiz) {
+      return Promise.resolve(err(new QuizNotFoundError(quizId)));
+    }
+    return Promise.resolve(
+      ok({
+        status: 'not_attempted' as const,
+        hasEverPassed: false,
+        attemptCount: 0,
+        versionAttemptCount: 0,
+        canAttempt: true,
+        isQuizUpdatedSinceLastAttempt: false,
+        latestResult: null,
+        latestAnswers: null,
+      }),
+    );
   }
 }

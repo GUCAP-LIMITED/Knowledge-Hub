@@ -1,49 +1,22 @@
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  background-color: var(--color-overlay);
-  animation: fade 0.15s ease;
-}
-.drawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 41;
-  width: min(380px, 100vw);
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding: 1.25rem;
-  background-color: var(--color-surface);
-  border-left: 1px solid var(--color-border);
-  box-shadow: var(--shadow-lg);
-  overflow-y: auto;
-  animation: slide 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.headerTitle {
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--color-text);
-}
 .identity {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.6rem;
   text-align: center;
+  margin-bottom: 1.25rem;
 }
 .name {
   margin: 0;
   font-size: 1.2rem;
   font-weight: 800;
   color: var(--color-text);
+}
+.typeBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  justify-content: center;
 }
 .info {
   display: flex;
@@ -83,21 +56,4 @@
   font-weight: 600;
   color: var(--color-text);
   overflow-wrap: anywhere;
-}
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  margin-top: auto;
-}
-
-@keyframes fade {
-  from {
-    opacity: 0;
-  }
-}
-@keyframes slide {
-  from {
-    transform: translateX(100%);
-  }
 }

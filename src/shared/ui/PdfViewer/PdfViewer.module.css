@@ -1,0 +1,185 @@
+.viewer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 75vh;
+  min-height: 480px;
+  max-height: 900px;
+  background-color: #202124;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.viewer:fullscreen {
+  height: 100vh;
+  max-height: none;
+  border-radius: 0;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  background-color: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.topBarActions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-shrink: 0;
+}
+
+.pageCount {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  color: #ffffff;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--motion-fast, 0.12s) ease;
+}
+
+.iconBtn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.stage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e8eaed;
+  overflow: auto;
+  padding: 1.5rem;
+}
+
+.pageWrap {
+  display: flex;
+  justify-content: center;
+}
+
+.pageWrap :global(.react-pdf__Page__canvas) {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+}
+
+.navBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  cursor: pointer;
+  z-index: 1;
+  transition: background-color var(--motion-fast, 0.12s) ease;
+}
+
+.navBtn:hover:not(:disabled) {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+.navBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.navBtnLeft {
+  left: 1rem;
+}
+
+.navBtnRight {
+  right: 1rem;
+}
+
+.fallbackFrame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: #ffffff;
+}
+
+.bottomBar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background-color: rgba(0, 0, 0, 0.55);
+  flex-shrink: 0;
+}
+
+.pageIndicator {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #ffffff;
+  flex-shrink: 0;
+  min-width: 3rem;
+}
+
+.slider {
+  flex: 1;
+  height: 4px;
+  accent-color: #ffffff;
+  cursor: pointer;
+}
+
+.zoomControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.zoomBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: none;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color var(--motion-fast, 0.12s) ease;
+}
+
+.zoomBtn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.zoomBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

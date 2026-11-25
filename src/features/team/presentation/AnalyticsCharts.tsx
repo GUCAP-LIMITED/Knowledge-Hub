@@ -77,30 +77,31 @@ export const Gauge = ({
   readonly value: number;
   readonly caption: string;
 }): ReactElement => {
-  const radius = 52;
+  const radius = 60;
   const circumference = 2 * Math.PI * radius;
   const dash = (clamp(value) / 100) * circumference;
+
   return (
     <div className={styles.gauge}>
       <svg
-        viewBox="0 0 130 130"
+        viewBox="0 0 150 150"
         className={styles.gaugeSvg}
         role="img"
         aria-label={caption}
       >
-        <circle cx={65} cy={65} r={radius} className={styles.gaugeTrack} />
+        <circle cx={75} cy={75} r={radius} className={styles.gaugeTrack} />
         <circle
-          cx={65}
-          cy={65}
+          cx={75}
+          cy={75}
           r={radius}
           className={styles.gaugeValue}
           strokeDasharray={`${String(dash)} ${String(circumference)}`}
-          transform="rotate(-90 65 65)"
+          transform="rotate(-90 75 75)"
         />
-        <text x={65} y={61} className={styles.gaugeNumber} textAnchor="middle">
+        <text x={75} y={71} className={styles.gaugeNumber} textAnchor="middle">
           {value}%
         </text>
-        <text x={65} y={82} className={styles.gaugeUnit} textAnchor="middle">
+        <text x={75} y={93} className={styles.gaugeUnit} textAnchor="middle">
           complete
         </text>
       </svg>

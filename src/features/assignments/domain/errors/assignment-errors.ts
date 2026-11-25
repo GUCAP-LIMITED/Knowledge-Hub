@@ -7,8 +7,13 @@ export abstract class AssignmentError extends DomainError {}
 export class AssignmentsUnavailableError extends AssignmentError {
   public readonly code = 'ASSIGNMENTS_UNAVAILABLE';
 
-  public constructor(cause?: unknown) {
-    super('Training assignments are currently unavailable. Please try again.', { cause });
+  public constructor(cause?: unknown, message?: string) {
+    super(
+      message ?? 'Training assignments are currently unavailable. Please try again.',
+      {
+        cause,
+      },
+    );
   }
 }
 

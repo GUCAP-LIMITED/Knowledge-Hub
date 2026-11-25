@@ -1,105 +1,184 @@
 .shell {
   display: grid;
-  grid-template-columns: 252px 1fr;
+  grid-template-columns: 256px 1fr;
   min-height: 100vh;
   transition: grid-template-columns 0.2s ease;
 }
 
-/* Desktop: collapse the fixed sidebar to reclaim its column. */
+/* Desktop: collapse the sidebar to a slim rail that keeps the brand mark visible. */
 .shellCollapsed {
-  grid-template-columns: 0 1fr;
+  grid-template-columns: 48px 1fr;
 }
 
 .sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  padding: 1.25rem 0.85rem;
+  gap: 0;
+  padding: 0 0 1.25rem;
   background-color: var(--color-surface);
   border-right: 1px solid var(--color-border);
   overflow: hidden;
+  font-family: var(--font-sans);
 }
 
 .shellCollapsed .sidebar {
   padding-left: 0;
   padding-right: 0;
-  border-right-color: transparent;
-  opacity: 0;
-  pointer-events: none;
+  align-items: center;
+}
+
+.shellCollapsed .brandText {
+  display: none;
+}
+
+/* Icon-only rail: keep .nav visible but strip labels, badges, chevrons and sub-menus. */
+.shellCollapsed .navLabel,
+.shellCollapsed .navBadge,
+.shellCollapsed .navChevron,
+.shellCollapsed .subNav,
+.shellCollapsed .section {
+  display: none;
+}
+
+.shellCollapsed .navLink,
+.shellCollapsed .navGroupToggle {
+  justify-content: center;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  padding: 0.25rem 0.6rem;
+  gap: 0;
+  padding: 0.75rem 1rem;
 }
 
 .brandMark {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  flex-shrink: 0;
+  padding: 5px;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  color: var(--color-on-primary);
-  font-weight: 800;
-  font-size: 0.9rem;
 }
 
 .brandText {
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.3rem;
   line-height: 1.2;
 }
 
 .brandText strong {
-  font-size: 0.95rem;
+  color: var(--color-text);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
 }
 
-.brandText small {
-  color: var(--color-text-subtle);
-  font-size: 0.75rem;
+.reg {
+  vertical-align: super;
+  font-size: 0.625rem;
+  font-weight: 400;
+}
+
+.brandProduct {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .nav {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.5rem;
+  scrollbar-gutter: stable;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+}
+
+.groupItems {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .section {
-  padding: 0.75rem 0.75rem 0.35rem;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--color-text-subtle);
+}
+
+.navBadge {
+  margin-left: auto;
+  min-width: 1.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-subtle);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+[data-theme='dark'] .navBadge {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.navSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .navLink {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.55rem 0.75rem;
+  height: 2rem;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
   border-radius: var(--radius-md);
   color: var(--color-text-muted);
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 400;
+  font-size: 0.875rem;
   transition:
     background-color 0.15s ease,
     color 0.15s ease;
 }
 
 .navLink:hover {
-  background-color: var(--color-surface-muted);
-  color: var(--color-text);
+  background-color: var(--color-nav-hover);
+  color: var(--color-nav-hover-text);
 }
 
 .navLinkActive {
-  background-color: var(--color-primary-soft);
-  color: var(--color-primary);
+  background-color: var(--color-nav-hover);
+  color: var(--color-nav-hover-text);
+  font-weight: 500;
 }
 
 .navGroup {
@@ -122,38 +201,41 @@
 }
 
 .navChevronOpen {
-  transform: rotate(180deg);
+  transform: rotate(90deg);
 }
 
 .subNav {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
-  margin: 0.1rem 0 0.2rem 1.55rem;
-  padding-left: 0.6rem;
+  gap: 0.25rem;
+  margin: 0.125rem 0 0.125rem 1.55rem;
+  padding-left: 0.625rem;
   border-left: 1px solid var(--color-border);
 }
 
 .subLink {
-  padding: 0.4rem 0.65rem;
+  display: flex;
+  align-items: center;
+  height: 1.75rem;
+  padding: 0 0.5rem;
   border-radius: var(--radius-md);
   color: var(--color-text-muted);
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.83rem;
+  font-weight: 400;
+  font-size: 0.875rem;
   transition:
     background-color 0.15s ease,
     color 0.15s ease;
 }
 
 .subLink:hover {
-  background-color: var(--color-surface-muted);
-  color: var(--color-text);
+  background-color: var(--color-nav-hover);
+  color: var(--color-nav-hover-text);
 }
 
 .subLinkActive {
-  background-color: var(--color-primary-soft);
-  color: var(--color-primary);
+  background-color: var(--color-nav-hover);
+  color: var(--color-nav-hover-text);
 }
 
 .main {
@@ -166,13 +248,14 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  height: 60px;
   gap: 0.5rem;
-  padding: 0.7rem 1.5rem;
+  padding: 0 1rem;
   background-color: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 40;
 }
 
 .userTrigger {
@@ -187,7 +270,7 @@
 }
 
 .userTrigger:hover {
-  background-color: var(--color-surface-muted);
+  background-color: var(--color-surface-hover);
 }
 
 .userBox {
@@ -211,6 +294,7 @@
 .content {
   flex: 1;
   min-width: 0;
+  isolation: isolate;
 }
 
 /* Hamburger — hidden on desktop, shown on mobile. */
@@ -219,17 +303,22 @@
   margin-right: 0.25rem;
 }
 
+/* Mobile-only brand mark: the sidebar's own brand is hidden behind the closed drawer, so the
+   header carries a compact stand-in. Hidden on desktop, where the sidebar already shows it. */
+.headerBrand {
+  display: none;
+}
+
 /* Desktop-only sidebar collapse toggle. Hidden on mobile, where the drawer button rules. */
 .collapseBtn {
   display: inline-flex;
-  margin-right: 0.25rem;
 }
 
 /* Full-screen dim behind the mobile drawer. */
 .backdrop {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 45;
   border: none;
   padding: 0;
   background-color: var(--color-overlay);
@@ -257,7 +346,7 @@
     top: 0;
     left: 0;
     bottom: 0;
-    width: 274px;
+    width: 288px;
     max-width: 82vw;
     z-index: 50;
     overflow-y: auto;
@@ -272,7 +361,15 @@
 
   .menuBtn {
     display: inline-flex;
-    margin-right: auto;
+  }
+
+  .headerBrand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 4px;
+    border-radius: var(--radius-md);
   }
 
   /* On mobile the sidebar is a drawer; desktop collapse doesn't apply. */
@@ -284,19 +381,20 @@
     grid-template-columns: 1fr;
   }
 
-  .header {
-    padding: 0.6rem 1rem;
+  /* Reserve space for the fixed AppBottomNav so it never covers the last bit of page content. */
+  .content {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
   }
 
-  /* Collapse the search box to just its icon on small screens. */
-  .searchTrigger {
-    min-width: 0;
-    margin-right: 0;
-  }
-
-  .searchTrigger span,
-  .kbd {
+  /* Collapse the user menu to just the avatar on small screens — the name/role
+     text has no shrink or truncation behaviour, so it can force the header to
+     overflow horizontally when the signed-in user has a long name or role. */
+  .userBox {
     display: none;
+  }
+
+  .userTrigger {
+    padding: 0.25rem;
   }
 }
 
@@ -307,10 +405,15 @@
   }
 }
 
+/* Left-aligned search trigger — the auto margin pushes everything after it (launcher,
+   notifications, theme toggle, user menu) flush against the right edge, leaving search
+   grouped with the sidebar/menu toggle on the left instead of the right-hand icon cluster. */
 .searchTrigger {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  flex-shrink: 0;
+  min-width: 12rem;
   margin-right: auto;
   padding: 0.4rem 0.75rem;
   border: 1px solid var(--color-border);
@@ -319,14 +422,10 @@
   color: var(--color-text-subtle);
   font-size: 0.85rem;
   cursor: pointer;
-  min-width: 200px;
+  white-space: nowrap;
 }
 .searchTrigger:hover {
   border-color: var(--color-border-strong);
-}
-.searchTrigger span {
-  flex: 1;
-  text-align: left;
 }
 .kbd {
   font-size: 0.7rem;
@@ -336,4 +435,36 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   color: var(--color-text-subtle);
+  margin-left: auto;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Dark theme only: the Communication Hub rail colours (hover, active, orange count badge).
+   Sizes, spacing, icon sizes and weights are shared with light — only colours differ here.
+   --------------------------------------------------------------------------------------------- */
+[data-theme='dark'] .navLink:hover {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .navLinkActive,
+[data-theme='dark'] .navLinkActive:hover {
+  background-color: var(--color-nav-hover);
+  color: var(--color-nav-hover-text);
+}
+
+[data-theme='dark'] .navBadge {
+  background-color: var(--color-secondary-strong);
+  color: var(--color-on-primary);
+}
+
+[data-theme='dark'] .subLink:hover {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+[data-theme='dark'] .subLinkActive,
+[data-theme='dark'] .subLinkActive:hover {
+  background-color: var(--color-nav-hover);
+  color: var(--color-nav-hover-text);
 }

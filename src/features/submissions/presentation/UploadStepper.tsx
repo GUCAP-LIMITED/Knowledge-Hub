@@ -4,27 +4,26 @@ import { cn } from '@shared/utils';
 import type { StepKey } from './upload-content-types';
 import styles from './UploadPage.module.css';
 
-interface JourneyStage {
-  readonly key: StepKey;
-  readonly label: string;
-}
-
-/** The canonical five-stage journey shown on every step so the full flow is always visible. */
-const JOURNEY: readonly JourneyStage[] = [
-  { key: 'type', label: 'Type' },
-  { key: 'details', label: 'Details' },
-  { key: 'file', label: 'Upload' },
-  { key: 'curriculum', label: 'Review' },
-  { key: 'preview', label: 'Publish' },
-];
+const STEP_LABELS: Record<StepKey, string> = {
+  type: 'Type',
+  details: 'Details',
+  file: 'Upload',
+  curriculum: 'Review',
+  preview: 'Publish',
+  studio: 'Studio',
+};
 
 export interface UploadStepperProps {
+  readonly steps: readonly StepKey[];
   readonly activeKey: StepKey;
   readonly done: boolean;
 }
 
-const activeStage = (activeKey: StepKey, done: boolean): number =>
-  done ? JOURNEY.length : JOURNEY.findIndex((stage) => stage.key === activeKey);
+const activeStage = (
+  steps: readonly StepKey[],
+  activeKey: StepKey,
+  done: boolean,
+): number => (done ? steps.length : steps.indexOf(activeKey));
 
 type StageState = 'complete' | 'active' | 'locked';
 
@@ -35,16 +34,19 @@ const stateFor = (index: number, current: number): StageState => {
   return index === current ? 'active' : 'locked';
 };
 
-/** A polished, always-visible progress journey with completed / current / locked stages. */
-export const UploadStepper = ({ activeKey, done }: UploadStepperProps): ReactElement => {
-  const current = activeStage(activeKey, done);
+export const UploadStepper = ({
+  steps,
+  activeKey,
+  done,
+}: UploadStepperProps): ReactElement => {
+  const current = activeStage(steps, activeKey, done);
   return (
     <ol className={styles.stepper} aria-label="Upload progress">
-      {JOURNEY.map((stage, index) => {
+      {steps.map((stageKey, index) => {
         const state = stateFor(index, current);
         return (
           <li
-            key={stage.key}
+            key={stageKey}
             className={cn(styles.step, styles[`step_${state}`])}
             aria-current={state === 'active' ? 'step' : undefined}
           >
@@ -56,7 +58,7 @@ export const UploadStepper = ({ activeKey, done }: UploadStepperProps): ReactEle
             </span>
             <span className={styles.stepText}>
               <span className={styles.stepIndex}>Step {index + 1}</span>
-              <span className={styles.stepLabel}>{stage.label}</span>
+              <span className={styles.stepLabel}>{STEP_LABELS[stageKey]}</span>
             </span>
           </li>
         );

@@ -7,20 +7,28 @@ import {
 } from '@tanstack/react-query';
 import { useToast } from '@shared/ui';
 import { isErr } from '@core/result';
-import type { Submission } from '../domain';
+import { contentKeys } from '@features/content';
+import type { Submission, SubmissionQueryParams } from '../domain';
 import type { SubmitContentInput } from '../application';
 import { useSubmissionsModule } from './use-submissions-module';
 
+/** The search/type/status/category/sorting filters the submissions filter box drives. */
+export type SubmissionFilterParams = Omit<
+  SubmissionQueryParams,
+  'skipCount' | 'maxResultCount'
+>;
+
 /** Root key for every submissions query; mutations invalidate this prefix (covers "mine" too). */
 export const submissionsQueryKey = ['submissions'] as const;
-export const mySubmissionsQueryKey = (submittedBy: string): readonly string[] => [
-  'submissions',
-  'mine',
-  submittedBy,
-];
+export const mySubmissionsQueryKey = (
+  submittedBy: string,
+  params?: SubmissionFilterParams,
+): readonly unknown[] => ['submissions', 'mine', submittedBy, params ?? null];
 
 /** Full queue (reviewer view). */
-export const useSubmissions = (): UseQueryResult<readonly Submission[]> => {
+export const useSubmissions = (options?: {
+  readonly enabled?: boolean;
+}): UseQueryResult<readonly Submission[]> => {
   const { listSubmissions } = useSubmissionsModule();
   return useQuery({
     queryKey: submissionsQueryKey,
@@ -31,23 +39,31 @@ export const useSubmissions = (): UseQueryResult<readonly Submission[]> => {
       }
       return result.value;
     },
+    enabled: options?.enabled ?? true,
   });
 };
 
-/** The current user's own submissions. */
+/**
+ * The current user's own submissions, filtered by the shared search/type/status/category/sorting
+ * box. The Content API has no server-side "owner" filter, so the use case applies the filters
+ * server-side and enforces the owner scope afterwards — never leaking another author's documents.
+ */
 export const useMySubmissions = (
   submittedBy: string,
+  params?: SubmissionFilterParams,
+  options?: { readonly enabled?: boolean },
 ): UseQueryResult<readonly Submission[]> => {
   const { listMySubmissions } = useSubmissionsModule();
   return useQuery({
-    queryKey: mySubmissionsQueryKey(submittedBy),
+    queryKey: mySubmissionsQueryKey(submittedBy, params),
     queryFn: async (): Promise<readonly Submission[]> => {
-      const result = await listMySubmissions.execute(submittedBy);
+      const result = await listMySubmissions.execute(submittedBy, params);
       if (isErr(result)) {
         throw result.error;
       }
       return result.value;
     },
+    enabled: options?.enabled ?? true,
   });
 };
 
@@ -64,6 +80,7 @@ const useInvalidateSubmissions = (): (() => void) => {
   const queryClient = useQueryClient();
   return () => {
     void queryClient.invalidateQueries({ queryKey: submissionsQueryKey });
+    void queryClient.invalidateQueries({ queryKey: contentKeys.all });
   };
 };
 

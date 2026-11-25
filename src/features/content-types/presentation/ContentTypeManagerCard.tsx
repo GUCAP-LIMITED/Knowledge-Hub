@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
-import type { ContentKind } from '../store/content-types-store';
-import type { KindMeta } from './content-types-model';
+import { useMyCapabilities } from '@features/users';
+import type { ContentKind, KindMeta } from './content-types-model';
 import { TypeChip } from './TypeChip';
 import { AddTypeRow } from './AddTypeRow';
 import styles from './ContentTypesManager.module.css';
@@ -14,7 +14,7 @@ const ChipArea = ({
   readonly types: readonly string[];
   readonly visible: readonly string[];
   readonly query: string;
-  readonly onRemove: (name: string) => void;
+  readonly onRemove: ((name: string) => void) | undefined;
 }): ReactElement => {
   if (types.length === 0) {
     return <p className={styles.cardEmpty}>No types yet — add the first one below.</p>;
@@ -28,9 +28,13 @@ const ChipArea = ({
         <TypeChip
           key={type}
           label={type}
-          onRemove={() => {
-            onRemove(type);
-          }}
+          onRemove={
+            onRemove !== undefined
+              ? () => {
+                  onRemove(type);
+                }
+              : undefined
+          }
         />
       ))}
     </div>
@@ -55,6 +59,9 @@ export const ContentTypeManagerCard = ({
   onAdd,
   onRequestRemove,
 }: ContentTypeManagerCardProps): ReactElement => {
+  const { can } = useMyCapabilities();
+  const canCreate = can('content-types', 'create');
+  const canDelete = can('content-types', 'delete');
   const Icon = meta.icon;
   const needle = query.trim().toLowerCase();
   const visible =
@@ -81,18 +88,24 @@ export const ContentTypeManagerCard = ({
         types={types}
         visible={visible}
         query={query}
-        onRemove={(name) => {
-          onRequestRemove(kind, name);
-        }}
+        onRemove={
+          canDelete
+            ? (name) => {
+                onRequestRemove(kind, name);
+              }
+            : undefined
+        }
       />
 
-      <AddTypeRow
-        label={meta.label}
-        existing={types}
-        onAdd={(name) => {
-          onAdd(kind, name);
-        }}
-      />
+      {canCreate ? (
+        <AddTypeRow
+          label={meta.label}
+          existing={types}
+          onAdd={(name) => {
+            onAdd(kind, name);
+          }}
+        />
+      ) : null}
     </section>
   );
 };

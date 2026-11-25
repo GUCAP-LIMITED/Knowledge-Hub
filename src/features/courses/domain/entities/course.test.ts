@@ -12,6 +12,23 @@ describe('Course', () => {
     expect(buildCourse({ progress: 1 }).hasStarted()).toBe(true);
   });
 
+  it('trusts a server-reported completion flag over the progress heuristic', () => {
+    expect(buildCourse({ progress: 40, completed: true }).isCompleted()).toBe(true);
+    expect(buildCourse({ progress: 100, completed: false }).isCompleted()).toBe(false);
+  });
+
+  it('exposes certificate fields once completed, defaulting to null', () => {
+    const course = buildCourse({
+      progress: 100,
+      completed: true,
+      certificateId: 'cert-1',
+      certificateUrl: 'https://example.com/cert.png',
+    });
+    expect(course.certificateId).toBe('cert-1');
+    expect(course.certificateUrl).toBe('https://example.com/cert.png');
+    expect(buildCourse().certificateUrl).toBeNull();
+  });
+
   it('clamps progress into 0..100 and returns a new instance', () => {
     const course = buildCourse({ progress: 20 });
     const advanced = course.withProgress(150);
