@@ -10,7 +10,19 @@ export {
 export {
   ResourcesModuleProvider,
   useResources,
+  useInfiniteResources,
+  useResource,
+  useUpdateResource,
   useMarkResourceHelpful,
+  useMarkResourceComplete,
   resourcesQueryKey,
+  resourceQueryKey,
+  ResourceEditModal,
 } from './presentation';
-export { Resource, type ResourceProps } from './domain';
+export {
+  Resource,
+  type ResourceProps,
+  type ResourceAttachment,
+  type ResourceCatalogParams,
+  type PagedResult,
+} from './domain';

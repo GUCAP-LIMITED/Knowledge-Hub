@@ -10,6 +10,8 @@ const DEFAULT_SUBMISSION: SubmissionProps = {
   submittedAt: new Date('2024-01-20T00:00:00.000Z'),
   status: 'pending',
   note: null,
+  categoryId: null,
+  canModify: false,
 };
 
 /** Construct a valid {@link Submission} for tests, overriding only what matters per case. */

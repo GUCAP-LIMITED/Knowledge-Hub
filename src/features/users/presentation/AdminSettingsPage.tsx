@@ -3,8 +3,10 @@ import { Navigate, useParams } from 'react-router-dom';
 import { PageHeader } from '@shared/ui';
 import { ContentTypesManager } from '@features/content-types';
 import { CertificateTemplatesManager } from '@features/certificate-templates';
+import { PermissionsManager } from '@features/permissions';
+import { ConfigureDashboardPage } from '@features/dashboard';
+import { EmailTemplatesManager } from '@features/email-templates';
 import { SettingsToggles } from './SettingsToggles';
-import { PermissionSets } from './PermissionSets';
 import { UsersSection } from './UsersSection';
 import {
   PLATFORM_SETTINGS,
@@ -19,7 +21,9 @@ const PANELS: Record<SettingsSectionKey, () => ReactElement> = {
   'content-types': () => <ContentTypesManager />,
   certificates: () => <CertificateTemplatesManager />,
   users: () => <UsersSection />,
-  permissions: () => <PermissionSets />,
+  permissions: () => <PermissionsManager />,
+  dashboards: () => <ConfigureDashboardPage hideHeader />,
+  'email-templates': () => <EmailTemplatesManager />,
 };
 
 /** Routed admin Settings page — one section per URL, chosen from the sidebar submenu. */

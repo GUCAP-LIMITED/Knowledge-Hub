@@ -1,0 +1,74 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.center {
+  display: grid;
+  place-items: center;
+  padding: 2.5rem 0;
+}
+
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-info-soft, var(--color-primary-soft));
+  color: var(--color-text);
+  font-size: 0.82rem;
+}
+
+/* --- Module rail override indicator --- */
+.overrideDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 0.35rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-warning, var(--color-primary));
+  vertical-align: middle;
+}
+
+/* --- Granular-card override tags (used inside PermissionsManager.module.css cards) --- */
+.overrideTag {
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-warning-soft, var(--color-primary-soft));
+  color: var(--color-warning, var(--color-primary));
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.deniedTag {
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: var(--radius-full);
+  background-color: var(
+    --color-danger-soft,
+    var(--color-danger-bg, rgba(220, 38, 38, 0.12))
+  );
+  color: var(--color-danger, #b91c1c);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.resetLink {
+  align-self: flex-start;
+  margin-top: 0.15rem;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.9rem;
+  margin-top: 0.15rem;
+}

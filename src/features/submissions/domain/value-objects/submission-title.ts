@@ -2,7 +2,7 @@ import { type Result, ok, err } from '@core/result';
 import { InvalidSubmissionTitleError } from '../errors/submission-errors';
 
 const MIN_LENGTH = 3;
-const MAX_LENGTH = 120;
+const MAX_LENGTH = 200;
 
 /** Submission title value object: trimmed, non-empty, bounded. Construct via `create`. */
 export class SubmissionTitle {
@@ -12,20 +12,24 @@ export class SubmissionTitle {
   private constructor(public readonly value: string) {}
 
   public static create(
-    raw: string,
+    raw: string | undefined | null,
   ): Result<SubmissionTitle, InvalidSubmissionTitleError> {
-    const trimmed = raw.trim();
+    const val = raw ?? '';
+    const trimmed = val.trim();
+    if (trimmed.length === 0) {
+      return err(new InvalidSubmissionTitleError('is required.'));
+    }
     if (trimmed.length < MIN_LENGTH) {
       return err(
         new InvalidSubmissionTitleError(
-          `must be at least ${String(MIN_LENGTH)} characters`,
+          `must be at least ${String(MIN_LENGTH)} characters.`,
         ),
       );
     }
-    if (trimmed.length > MAX_LENGTH) {
+    if (val.length > MAX_LENGTH) {
       return err(
         new InvalidSubmissionTitleError(
-          `must be at most ${String(MAX_LENGTH)} characters`,
+          `must not exceed ${String(MAX_LENGTH)} characters.`,
         ),
       );
     }

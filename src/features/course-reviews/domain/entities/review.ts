@@ -1,7 +1,7 @@
 export interface ReviewProps {
   readonly id: string;
-  readonly courseId: string;
-  readonly courseName: string;
+  readonly contentId: string;
+  readonly contentName: string;
   readonly userId: string;
   readonly userName: string;
   readonly userRole: string;
@@ -9,17 +9,18 @@ export interface ReviewProps {
   readonly feedback: string;
   readonly createdAt: Date;
   readonly helpful: number;
+  readonly isHelpful?: boolean;
 }
 
 /**
- * A learner's review of a course. Immutable. Identity is deterministic — `courseId:userId` — which
- * encodes the "one review per user per course" invariant: re-submitting overwrites rather than
+ * A learner's review of content. Immutable. Identity is deterministic — `contentId:userId` — which
+ * encodes the "one review per user per content" invariant: re-submitting overwrites rather than
  * duplicating. Business questions ("is this mine?") are answered here, not in components.
  */
 export class Review {
   public readonly id: string;
-  public readonly courseId: string;
-  public readonly courseName: string;
+  public readonly contentId: string;
+  public readonly contentName: string;
   public readonly userId: string;
   public readonly userName: string;
   public readonly userRole: string;
@@ -27,11 +28,12 @@ export class Review {
   public readonly feedback: string;
   public readonly createdAt: Date;
   public readonly helpful: number;
+  public readonly isHelpful: boolean;
 
   public constructor(props: ReviewProps) {
     this.id = props.id;
-    this.courseId = props.courseId;
-    this.courseName = props.courseName;
+    this.contentId = props.contentId;
+    this.contentName = props.contentName;
     this.userId = props.userId;
     this.userName = props.userName;
     this.userRole = props.userRole;
@@ -39,26 +41,31 @@ export class Review {
     this.feedback = props.feedback;
     this.createdAt = props.createdAt;
     this.helpful = Math.max(0, Math.round(props.helpful));
+    this.isHelpful = props.isHelpful ?? false;
   }
 
-  /** The deterministic id for a given course + user (enforces one-per-user-per-course). */
-  public static idFor(courseId: string, userId: string): string {
-    return `${courseId}:${userId}`;
+  /** The deterministic id for a given content + user (enforces one-per-user-per-content). */
+  public static idFor(contentId: string, userId: string): string {
+    return `${contentId}:${userId}`;
   }
 
   public isBy(userId: string): boolean {
     return this.userId === userId;
   }
 
-  public withHelpful(helpful: number): Review {
-    return new Review({ ...this.toProps(), helpful });
+  public withHelpful(helpful: number, isHelpful?: boolean): Review {
+    return new Review({
+      ...this.toProps(),
+      helpful,
+      isHelpful: isHelpful ?? this.isHelpful,
+    });
   }
 
   private toProps(): ReviewProps {
     return {
       id: this.id,
-      courseId: this.courseId,
-      courseName: this.courseName,
+      contentId: this.contentId,
+      contentName: this.contentName,
       userId: this.userId,
       userName: this.userName,
       userRole: this.userRole,
@@ -66,6 +73,7 @@ export class Review {
       feedback: this.feedback,
       createdAt: this.createdAt,
       helpful: this.helpful,
+      isHelpful: this.isHelpful,
     };
   }
 }

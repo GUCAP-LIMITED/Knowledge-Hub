@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import { Plus } from 'lucide-react';
 import {
   Alert,
   Badge,
@@ -68,18 +69,35 @@ const BADGE_TONES: readonly BadgeTone[] = [
 export const ButtonsSection = (): ReactElement => (
   <div className={styles.stack}>
     <div className={styles.row}>
-      <Button variant="primary">Primary</Button>
+      <Button variant="default">Default</Button>
+      <Button variant="destructive">Destructive</Button>
+      <Button variant="outline">Outline</Button>
       <Button variant="secondary">Secondary</Button>
-      <Button variant="accent">Accent</Button>
       <Button variant="ghost">Ghost</Button>
-      <Button variant="danger">Danger</Button>
+      <Button variant="link">Link</Button>
+      <Button variant="accent">Accent</Button>
     </div>
     <div className={styles.row}>
+      <Button size="xs">Extra small</Button>
       <Button size="sm">Small</Button>
       <Button size="md">Medium</Button>
       <Button size="lg">Large</Button>
       <Button isLoading>Loading</Button>
       <Button disabled>Disabled</Button>
+    </div>
+    <div className={styles.row}>
+      <Button variant="outline" size="icon-xs" aria-label="Extra small icon button">
+        <Plus />
+      </Button>
+      <Button variant="outline" size="icon-sm" aria-label="Small icon button">
+        <Plus />
+      </Button>
+      <Button variant="outline" size="icon" aria-label="Icon button">
+        <Plus />
+      </Button>
+      <Button variant="outline" size="icon-lg" aria-label="Large icon button">
+        <Plus />
+      </Button>
     </div>
   </div>
 );

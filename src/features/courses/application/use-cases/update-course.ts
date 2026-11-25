@@ -1,13 +1,16 @@
 import { type Result, isErr } from '@core/result';
 import type { Logger } from '@core/logger';
-import type { Course, CourseError, CourseGateway } from '../../domain';
+import type { Course, CourseError, CourseGateway, Difficulty } from '../../domain';
 
 export interface UpdateCourseInput {
   readonly id: string;
   readonly title: string;
   readonly category: string;
+  readonly categoryId?: string | null;
+  readonly difficulty?: Difficulty;
   readonly duration: string;
-  readonly mandatory: boolean;
+  readonly durationSeconds?: number;
+  readonly mandatory?: boolean;
   readonly description: string;
   /** New content file (data URL). Omitted/empty keeps the existing media. */
   readonly mediaUrl?: string;
@@ -39,8 +42,13 @@ export class UpdateCourseUseCase {
       existing.value.withDetails({
         title: input.title,
         category: input.category,
+        ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
+        ...(input.difficulty !== undefined ? { difficulty: input.difficulty } : {}),
         duration: input.duration,
-        mandatory: input.mandatory,
+        ...(input.durationSeconds !== undefined
+          ? { durationSeconds: input.durationSeconds }
+          : {}),
+        ...(input.mandatory !== undefined ? { mandatory: input.mandatory } : {}),
         description: input.description,
         ...(input.mediaUrl !== undefined ? { mediaUrl: input.mediaUrl } : {}),
         ...(input.thumbnailUrl !== undefined ? { thumbnailUrl: input.thumbnailUrl } : {}),

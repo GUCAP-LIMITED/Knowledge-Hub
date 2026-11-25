@@ -1,161 +1,246 @@
-import { useState, type ReactElement } from 'react';
-import { Link } from 'react-router-dom';
-import { Award, BookOpen, CheckCircle, Clock, PlayCircle } from 'lucide-react';
 import {
-  Alert,
-  EmptyState,
-  PageHeader,
-  ProgressBar,
-  Spinner,
-  StatCard,
-  Tabs,
-  TabsPanel,
-} from '@shared/ui';
-import { cn } from '@shared/utils';
-import { useCourses, type Course } from '@features/courses';
-import { useCertificates } from '@features/certificates';
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  type ReactElement,
+} from 'react';
+import { Navigate, useSearchParams } from 'react-router-dom';
+import { PageHeader } from '@shared/ui';
+import {
+  useInfiniteMyLearning,
+  useMyLearningStats,
+  useMyLearningStatuses,
+  MyLearningToolbar,
+  mapOriginParam,
+  mapAssignedScopeParam,
+  type MyLearningQueryParams,
+} from '@features/my-learning';
+import { MyLearningContent } from './MyLearningContent';
 import styles from './MyLearningPage.module.css';
 
-const actionLabel = (course: Course): string => {
-  if (course.isCompleted()) {
-    return 'View details';
-  }
-  return course.hasStarted() ? 'Continue' : 'Start';
-};
-
-const TABS = [
-  { value: 'in-progress', label: 'In progress' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'not-started', label: 'Not started' },
-] as const;
-
-const LearningCard = ({ course }: { readonly course: Course }): ReactElement => (
-  <Link to={`/courses/${course.id}`} className={styles.card}>
-    <div className={styles.thumb}>
-      <PlayCircle size={34} aria-hidden="true" className={styles.thumbIcon} />
-      {course.isCompleted() ? (
-        <span className={styles.doneBadge}>
-          <CheckCircle size={14} aria-hidden="true" />
-        </span>
-      ) : null}
-    </div>
-    <div className={styles.cardBody}>
-      <h3 className={styles.cardTitle}>{course.title}</h3>
-      <span className={styles.meta}>
-        {course.category} • {course.lessons} lessons
-      </span>
-      {course.hasStarted() ? (
-        <ProgressBar value={course.progress} showLabel tone="auto" />
-      ) : null}
-      <span className={styles.cardBtn}>{actionLabel(course)}</span>
-    </div>
-  </Link>
-);
-
-const LearningGrid = ({
-  courses,
-}: {
-  readonly courses: readonly Course[];
-}): ReactElement => {
-  if (courses.length === 0) {
+const isForbiddenError = (err: unknown): boolean => {
+  if (err instanceof Error) {
+    const lower = err.message.toLowerCase();
     return (
-      <EmptyState
-        title="Nothing here yet"
-        description="Start a course from the catalog to see it here."
-        action={
-          <Link to="/courses" className={styles.cta}>
-            Browse catalog
-          </Link>
-        }
-      />
+      lower.includes('403') ||
+      lower.includes('forbidden') ||
+      lower.includes('unauthorized') ||
+      lower.includes('access denied')
     );
   }
-  return (
-    <div className={styles.grid}>
-      {courses.map((course) => (
-        <LearningCard key={course.id} course={course} />
-      ))}
-    </div>
-  );
+  return false;
 };
 
-/** Learner's personal view of their courses, grouped by progress. */
+const shouldRedirectToForbidden = (
+  isError: boolean,
+  error: unknown,
+  statsIsError: boolean,
+  statsError: unknown,
+): boolean =>
+  (isError && isForbiddenError(error)) || (statsIsError && isForbiddenError(statsError));
+
+// eslint-disable-next-line max-lines-per-function
 export const MyLearningPage = (): ReactElement => {
-  const courses = useCourses();
-  const certificates = useCertificates();
-  const [tab, setTab] = useState<string>('in-progress');
-  const list = courses.data ?? [];
-  const certCount = (certificates.data ?? []).length;
+  const { statuses } = useMyLearningStatuses();
+  const overdueStatusValue = useMemo(
+    () =>
+      statuses.find((s) => s.name.toLowerCase() === 'overdue')?.value.toString() ?? '3',
+    [statuses],
+  );
 
-  const buckets = {
-    'in-progress': list.filter((course) => course.hasStarted() && !course.isCompleted()),
-    completed: list.filter((course) => course.isCompleted()),
-    'not-started': list.filter((course) => !course.hasStarted()),
-  } as const;
+  const [searchParams] = useSearchParams();
+  const initialOrigin = searchParams.get('origin');
+  const initialStatus =
+    searchParams.get('status') ??
+    (searchParams.get('tab') === 'overdue' ? overdueStatusValue : 'all');
 
-  if (courses.isLoading) {
-    return (
-      <div className={cn(styles.screen, styles.center)}>
-        <Spinner size="lg" label="Loading your courses" />
-      </div>
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [origin, setOrigin] = useState<'all' | 'self' | 'assigned'>(
+    initialOrigin === 'assigned' ||
+      initialStatus === overdueStatusValue ||
+      initialStatus === '3'
+      ? 'assigned'
+      : initialOrigin === 'self'
+        ? 'self'
+        : 'all',
+  );
+  const [assignedScope, setAssignedScope] = useState<'all' | 'me' | 'team' | 'role'>(
+    'all',
+  );
+  const [contentType, setContentType] = useState<string>('all');
+  const [status, setStatus] = useState<string>(initialStatus);
+  const [sorting, setSorting] = useState<string>('EnrolledOrAssignedAt DESC');
+
+  useEffect(() => {
+    const urlOrigin = searchParams.get('origin');
+    const urlStatus = searchParams.get('status');
+    const urlTab = searchParams.get('tab');
+
+    if (urlStatus === overdueStatusValue || urlStatus === '3' || urlTab === 'overdue') {
+      setOrigin('assigned');
+      setStatus(overdueStatusValue);
+    } else if (urlOrigin === 'assigned' || urlOrigin === 'self' || urlOrigin === 'all') {
+      setOrigin(urlOrigin);
+      if (urlStatus) {
+        setStatus(urlStatus);
+      }
+    }
+  }, [searchParams, overdueStatusValue]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 350);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  const handleOriginChange = useCallback(
+    (newOrigin: 'all' | 'self' | 'assigned') => {
+      setOrigin(newOrigin);
+      if (newOrigin !== 'assigned') {
+        setAssignedScope('all');
+        if (status === overdueStatusValue || status === '3') {
+          setStatus('all');
+        }
+      }
+      if (newOrigin !== 'assigned' && sorting.startsWith('DueDate')) {
+        setSorting('EnrolledOrAssignedAt DESC');
+      }
+    },
+    [overdueStatusValue, sorting, status],
+  );
+
+  const handleClearAll = useCallback(() => {
+    setSearch('');
+    setDebouncedSearch('');
+    setOrigin('all');
+    setAssignedScope('all');
+    setContentType('all');
+    setStatus('all');
+    setSorting('EnrolledOrAssignedAt DESC');
+  }, []);
+
+  const originParam = useMemo(() => mapOriginParam(origin), [origin]);
+  const assignedScopeParam = useMemo(
+    () => mapAssignedScopeParam(origin, assignedScope),
+    [origin, assignedScope],
+  );
+  const contentTypeParam = useMemo(
+    () => (contentType !== 'all' ? Number(contentType) : undefined),
+    [contentType],
+  );
+  const statusParam = useMemo(
+    () => (status !== 'all' ? Number(status) : undefined),
+    [status],
+  );
+
+  const queryParams: Omit<MyLearningQueryParams, 'skipCount'> = useMemo(
+    () => ({
+      filter: debouncedSearch.trim() !== '' ? debouncedSearch.trim() : undefined,
+      origin: originParam,
+      assignedScope: assignedScopeParam,
+      contentType: contentTypeParam,
+      status: statusParam,
+      sorting,
+      maxResultCount: 12,
+    }),
+    [
+      debouncedSearch,
+      originParam,
+      assignedScopeParam,
+      contentTypeParam,
+      statusParam,
+      sorting,
+    ],
+  );
+
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteMyLearning(queryParams);
+
+  const statsQuery = useMyLearningStats();
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const target = sentinelRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          void fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' },
     );
-  }
 
-  if (courses.isError) {
-    return (
-      <section className={styles.screen}>
-        <PageHeader
-          title="My Learning"
-          subtitle="Pick up where you left off, track completed courses, and start something new"
-        />
-        <Alert tone="error" title="Could not load your courses">
-          {courses.error.message}
-        </Alert>
-      </section>
-    );
+    observer.observe(target);
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const allItems = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
+
+  const hasActiveFilters =
+    search.trim() !== '' || origin !== 'all' || contentType !== 'all' || status !== 'all';
+
+  if (shouldRedirectToForbidden(isError, error, statsQuery.isError, statsQuery.error)) {
+    return <Navigate to="/forbidden" replace />;
   }
 
   return (
     <section className={styles.screen}>
       <PageHeader
         title="My Learning"
-        subtitle="Pick up where you left off, track completed courses, and start something new"
+        subtitle="Track your assigned training, enrolled courses, and completed materials in one place"
       />
-      <div className={styles.stats}>
-        <StatCard
-          label="In progress"
-          value={buckets['in-progress'].length}
-          icon={BookOpen}
-          tone="primary"
-        />
-        <StatCard
-          label="Completed"
-          value={buckets.completed.length}
-          icon={CheckCircle}
-          tone="success"
-        />
-        <StatCard
-          label="Not started"
-          value={buckets['not-started'].length}
-          icon={Clock}
-          tone="warning"
-        />
-        <StatCard label="Certificates" value={certCount} icon={Award} tone="secondary" />
-      </div>
-      <Tabs
-        value={tab}
-        onValueChange={setTab}
-        tabs={TABS.map((entry) => ({
-          value: entry.value,
-          label: `${entry.label} (${String(buckets[entry.value].length)})`,
-        }))}
-      >
-        {TABS.map((entry) => (
-          <TabsPanel key={entry.value} value={entry.value}>
-            <LearningGrid courses={buckets[entry.value]} />
-          </TabsPanel>
-        ))}
-      </Tabs>
+
+      <MyLearningToolbar
+        search={search}
+        onSearchChange={setSearch}
+        origin={origin}
+        onOriginChange={handleOriginChange}
+        assignedScope={assignedScope}
+        onAssignedScopeChange={setAssignedScope}
+        contentType={contentType}
+        onContentTypeChange={setContentType}
+        status={status}
+        onStatusChange={setStatus}
+        statuses={statuses}
+        sorting={sorting}
+        onSortingChange={setSorting}
+        stats={statsQuery.data}
+        onClearAll={handleClearAll}
+      />
+
+      <MyLearningContent
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        refetch={() => {
+          void refetch();
+        }}
+        items={allItems}
+        hasActiveFilters={hasActiveFilters}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        sentinelRef={sentinelRef}
+        onClearAll={handleClearAll}
+      />
     </section>
   );
 };

@@ -1,119 +1,212 @@
-import { useState, type ReactElement } from 'react';
-import { Bell } from 'lucide-react';
-import { Badge, IconButton, type BadgeTone } from '@shared/ui';
-import { cn } from '@shared/utils';
-import type { Announcement, AnnouncementPriority } from '../domain';
 import {
-  useAnnouncements,
+  useState,
+  useEffect,
+  useRef,
+  type ReactElement,
+  type RefObject,
+  type Dispatch,
+  type SetStateAction,
+} from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Bell } from 'lucide-react';
+import { IconButton } from '@shared/ui';
+import type { Announcement, NotificationStats } from '../domain';
+import {
+  useInfiniteNotifications,
   useMarkAllRead,
   useMarkAnnouncementRead,
+  useNotificationStats,
 } from './use-notifications';
+import { useNotificationSse } from './use-notification-sse';
+import { NotificationsDropdownPanel, type FilterTab } from './NotificationsDropdownPanel';
 import styles from './NotificationsBell.module.css';
 
-const priorityTone = (priority: AnnouncementPriority): BadgeTone => {
-  if (priority === 'high') {
-    return 'danger';
-  }
-  if (priority === 'medium') {
-    return 'warning';
-  }
-  return priority === 'normal' ? 'info' : 'neutral';
+const useEscapeToClose = (isOpen: boolean, onClose: () => void): void => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 };
 
-const AnnouncementItem = ({
-  announcement,
-  onRead,
-}: {
-  readonly announcement: Announcement;
-  readonly onRead: (id: string) => void;
-}): ReactElement => (
-  <button
-    type="button"
-    className={cn(styles.item, announcement.isUnread() && styles.unread)}
-    onClick={() => {
-      onRead(announcement.id);
-    }}
-  >
-    <div className={styles.itemTop}>
-      <span className={styles.itemTitle}>{announcement.title}</span>
-      <Badge tone={priorityTone(announcement.priority)} size="sm">
-        {announcement.priority}
-      </Badge>
-    </div>
-    <p className={styles.itemContent}>{announcement.content}</p>
-    <span className={styles.itemMeta}>
-      {announcement.author} · {announcement.date}
-    </span>
-  </button>
-);
+interface ObserverParams {
+  readonly enabled: boolean;
+  readonly containerRef: RefObject<HTMLDivElement>;
+  readonly sentinelRef: RefObject<HTMLDivElement>;
+  readonly hasNextPage: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly fetchNextPage: () => void;
+}
 
-/** Header notifications bell: unread count + a dismissible panel of announcements. */
-export const NotificationsBell = (): ReactElement => {
-  const announcements = useAnnouncements();
+const useInfiniteScrollObserver = ({
+  enabled,
+  containerRef,
+  sentinelRef,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
+}: ObserverParams): void => {
+  useEffect(() => {
+    if (!enabled) return;
+    const target = sentinelRef.current;
+    const container = containerRef.current;
+    if (!target || !container) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { root: container, rootMargin: '120px' },
+    );
+
+    observer.observe(target);
+    return () => {
+      observer.disconnect();
+    };
+  }, [
+    enabled,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    containerRef,
+    sentinelRef,
+  ]);
+};
+
+interface NotificationsBellState {
+  readonly open: boolean;
+  readonly setOpen: Dispatch<SetStateAction<boolean>>;
+  readonly filter: FilterTab;
+  readonly setFilter: Dispatch<SetStateAction<FilterTab>>;
+  readonly stats: NotificationStats;
+  readonly displayedList: readonly Announcement[];
+  readonly isLoading: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly hasNextPage: boolean;
+  readonly listRef: RefObject<HTMLDivElement>;
+  readonly sentinelRef: RefObject<HTMLDivElement>;
+  readonly handleMarkAllRead: () => void;
+  readonly handleRead: (id: string) => void;
+  readonly handleNavigate: (route: string) => void;
+  readonly handleClose: () => void;
+}
+
+const useNotificationsBellState = (): NotificationsBellState => {
+  const navigate = useNavigate();
+  useNotificationSse();
+
+  const statsQuery = useNotificationStats();
+  const stats = statsQuery.data ?? { totalCount: 0, readCount: 0, unreadCount: 0 };
   const markRead = useMarkAnnouncementRead();
   const markAll = useMarkAllRead();
   const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState<FilterTab>('all');
 
-  const list = announcements.data ?? [];
-  const unread = list.filter((announcement) => announcement.isUnread()).length;
+  const {
+    data: infiniteData,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteNotifications(filter, { pageSize: 15 });
+
+  const listRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEscapeToClose(open, () => {
+    setOpen(false);
+  });
+
+  useInfiniteScrollObserver({
+    enabled: open,
+    containerRef: listRef,
+    sentinelRef,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage: () => {
+      void fetchNextPage();
+    },
+  });
+
+  const displayedList = infiniteData?.pages.flatMap((page) => page.items) ?? [];
+
+  return {
+    open,
+    setOpen,
+    filter,
+    setFilter,
+    stats,
+    displayedList,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    listRef,
+    sentinelRef,
+    handleMarkAllRead: () => {
+      markAll.mutate();
+    },
+    handleRead: (id: string) => {
+      markRead.mutate(id);
+    },
+    handleNavigate: (route: string) => {
+      setOpen(false);
+      navigate(route);
+    },
+    handleClose: () => {
+      setOpen(false);
+    },
+  };
+};
+
+/** Header notifications bell: unread count badge + paginated infinite-scroll dropdown. */
+export const NotificationsBell = (): ReactElement => {
+  const bell = useNotificationsBellState();
+  const label =
+    bell.stats.unreadCount > 0
+      ? `Notifications, ${String(bell.stats.unreadCount)} unread`
+      : 'Notifications';
 
   return (
     <div className={styles.wrap}>
       <IconButton
-        label={unread > 0 ? `Notifications, ${String(unread)} unread` : 'Notifications'}
+        label={label}
         onClick={() => {
-          setOpen((prev) => !prev);
+          bell.setOpen((prev) => !prev);
         }}
       >
-        <Bell size={18} />
-        {unread > 0 ? (
+        <Bell size={16} />
+        {bell.stats.unreadCount > 0 ? (
           <span className={styles.count} aria-hidden="true">
-            {unread}
+            {bell.stats.unreadCount}
           </span>
         ) : null}
       </IconButton>
-      {open ? (
-        <>
-          <button
-            type="button"
-            className={styles.backdrop}
-            aria-label="Close notifications"
-            onClick={() => {
-              setOpen(false);
-            }}
-          />
-          <div className={styles.panel} role="dialog" aria-label="Notifications">
-            <div className={styles.head}>
-              <span className={styles.headTitle}>Notifications</span>
-              {unread > 0 ? (
-                <button
-                  type="button"
-                  className={styles.markAll}
-                  onClick={() => {
-                    markAll.mutate();
-                  }}
-                >
-                  Mark all read
-                </button>
-              ) : null}
-            </div>
-            <div className={styles.list}>
-              {list.length === 0 ? (
-                <p className={styles.empty}>You're all caught up.</p>
-              ) : (
-                list.map((announcement) => (
-                  <AnnouncementItem
-                    key={announcement.id}
-                    announcement={announcement}
-                    onRead={(id) => {
-                      markRead.mutate(id);
-                    }}
-                  />
-                ))
-              )}
-            </div>
-          </div>
-        </>
+
+      {bell.open ? (
+        <NotificationsDropdownPanel
+          filter={bell.filter}
+          onTabChange={bell.setFilter}
+          unreadCount={bell.stats.unreadCount}
+          totalCount={bell.stats.totalCount}
+          displayedList={bell.displayedList}
+          isLoading={bell.isLoading}
+          isFetchingNextPage={bell.isFetchingNextPage}
+          hasNextPage={bell.hasNextPage}
+          listRef={bell.listRef}
+          sentinelRef={bell.sentinelRef}
+          onMarkAllRead={bell.handleMarkAllRead}
+          onRead={bell.handleRead}
+          onNavigate={bell.handleNavigate}
+          onClose={bell.handleClose}
+        />
       ) : null}
     </div>
   );

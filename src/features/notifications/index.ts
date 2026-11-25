@@ -12,4 +12,4 @@ export {
   useMarkAllRead,
   announcementsQueryKey,
 } from './presentation';
-export { Announcement, type AnnouncementProps } from './domain';
+export { Announcement, type AnnouncementProps, formatNotificationTopic } from './domain';

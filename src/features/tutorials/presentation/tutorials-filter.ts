@@ -1,3 +1,4 @@
+import { parseDuration } from '@shared/utils';
 import type { Tutorial } from '../domain';
 
 export type TutorialSort = 'recent' | 'popular' | 'shortest' | 'az';
@@ -12,9 +13,12 @@ export const SORT_OPTIONS: readonly {
   { value: 'az', label: 'A – Z' },
 ];
 
-const durationMinutes = (duration: string): number => {
-  const match = /\d+/.exec(duration);
-  return match === null ? Number.MAX_SAFE_INTEGER : Number(match[0]);
+const getDurationSeconds = (tutorial: Tutorial): number => {
+  if (typeof tutorial.durationSeconds === 'number' && tutorial.durationSeconds > 0) {
+    return tutorial.durationSeconds;
+  }
+  const parsed = parseDuration(tutorial.duration);
+  return parsed > 0 ? parsed : Number.MAX_SAFE_INTEGER;
 };
 
 const matchesQuery = (tutorial: Tutorial, q: string): boolean =>
@@ -30,7 +34,7 @@ const compare =
       return b.views - a.views;
     }
     if (sort === 'shortest') {
-      return durationMinutes(a.duration) - durationMinutes(b.duration);
+      return getDurationSeconds(a) - getDurationSeconds(b);
     }
     if (sort === 'az') {
       return a.title.localeCompare(b.title);

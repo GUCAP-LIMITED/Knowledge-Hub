@@ -1,13 +1,19 @@
 import type { Result } from '@core/result';
 import type { Logger } from '@core/logger';
-import type { Course, CourseError, CourseGateway } from '../../domain';
+import type {
+  Course,
+  CourseCatalogParams,
+  CourseError,
+  CourseGateway,
+  PagedResult,
+} from '../../domain';
 
 export interface ListCoursesUseCaseDeps {
   readonly courseGateway: CourseGateway;
   readonly logger: Logger;
 }
 
-/** Fetch the whole catalog. Pure orchestration: delegate to the gateway and return its `Result`. */
+/** Fetch courses catalog with filtering and pagination. Pure orchestration: delegate to the gateway. */
 export class ListCoursesUseCase {
   private readonly courseGateway: CourseGateway;
   private readonly logger: Logger;
@@ -17,8 +23,10 @@ export class ListCoursesUseCase {
     this.logger = deps.logger.child('list-courses');
   }
 
-  public async execute(): Promise<Result<readonly Course[], CourseError>> {
-    const result = await this.courseGateway.list();
+  public async execute(
+    params?: CourseCatalogParams,
+  ): Promise<Result<PagedResult<Course>, CourseError>> {
+    const result = await this.courseGateway.list(params);
     if (!result.ok) {
       this.logger.warn('Listing courses failed', { code: result.error.code });
     }

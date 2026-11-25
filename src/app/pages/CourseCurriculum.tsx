@@ -1,128 +1,189 @@
 import type { ReactElement } from 'react';
-import { Check, Clock, Play } from 'lucide-react';
-import { Badge, MediaViewer, Modal, demoAsset } from '@shared/ui';
+import {
+  Check,
+  Clock,
+  Edit2,
+  Lock,
+  Play,
+  FileText,
+  HelpCircle,
+  Clipboard,
+  Link,
+} from 'lucide-react';
+import { Badge, IconButton, Tooltip } from '@shared/ui';
 import { cn } from '@shared/utils';
 import type { Course } from '@features/courses';
+import { type LessonWithState, buildCurriculum } from './course-curriculum-utils';
 import styles from './CourseDetailPage.module.css';
 
-export interface Lesson {
-  readonly id: number;
-  readonly title: string;
-  readonly duration: string;
-  readonly completed: boolean;
-  readonly current: boolean;
-}
-
-const LESSON_TITLES = [
-  'Welcome and overview',
-  'Setting up your environment',
-  'Core concepts',
-  'Hands-on walkthrough',
-  'Common pitfalls and how to avoid them',
-  'Real-world scenarios',
-  'Practice exercises',
-  'Assessment',
-  'Advanced topics',
-  'Capstone',
-  'Final review',
-  'Wrap-up & resources',
-];
-
-const buildCurriculum = (course: Course): readonly Lesson[] => {
-  const done = Math.floor((course.progress / 100) * course.lessons);
-  return Array.from({ length: course.lessons }, (_, index) => ({
-    id: index + 1,
-    title: LESSON_TITLES[index % LESSON_TITLES.length] ?? `Lesson ${String(index + 1)}`,
-    duration: `${String(8 + ((index * 7) % 14))} min`,
-    completed: index < done,
-    current: index === done && course.progress > 0 && course.progress < 100,
-  }));
+const getLessonIcon = (kind: string, size = 15): ReactElement => {
+  switch (kind) {
+    case 'video':
+      return <Play size={size} aria-hidden="true" />;
+    case 'pdf':
+      return <FileText size={size} aria-hidden="true" />;
+    case 'quiz':
+      return <HelpCircle size={size} aria-hidden="true" />;
+    case 'assignment':
+      return <Clipboard size={size} aria-hidden="true" />;
+    case 'link':
+      return <Link size={size} aria-hidden="true" />;
+    default:
+      return <Play size={size} aria-hidden="true" />;
+  }
 };
 
-/** Curriculum list — each lesson opens a player. */
+const CurriculumCardHead = ({
+  done,
+  total,
+  canEdit,
+  onEdit,
+}: {
+  readonly done: number;
+  readonly total: number;
+  readonly canEdit: boolean;
+  readonly onEdit: () => void;
+}): ReactElement => (
+  <div className={styles.cardHead}>
+    <h2 className={styles.cardTitle}>Curriculum</h2>
+    <div className={styles.cardHeadActions}>
+      <span className={styles.cardHint}>
+        {done} of {total} complete
+      </span>
+      {canEdit && (
+        <Tooltip label="Edit curriculum">
+          <IconButton label="Edit curriculum" onClick={onEdit}>
+            <Edit2 size={14} aria-hidden="true" />
+          </IconButton>
+        </Tooltip>
+      )}
+    </div>
+  </div>
+);
+
+const ENROLL_TOOLTIP = 'Please enroll in the course to unlock this lesson';
+
+export const LessonRow = ({
+  lesson,
+  number,
+  locked,
+  active,
+  onPlay,
+}: {
+  readonly lesson: LessonWithState;
+  readonly number: number;
+  readonly locked: boolean;
+  readonly active?: boolean;
+  readonly onPlay: (lesson: LessonWithState) => void;
+}): ReactElement => {
+  const title = (
+    <div className={cn(styles.lessonTitle, lesson.current && styles.lessonTitleCurrent)}>
+      {lesson.title}
+    </div>
+  );
+
+  return (
+    <button
+      type="button"
+      className={cn(
+        styles.lesson,
+        locked && styles.lessonLocked,
+        active && styles.lessonActive,
+      )}
+      aria-disabled={locked}
+      onClick={() => {
+        if (!locked) {
+          onPlay(lesson);
+        }
+      }}
+    >
+      <span
+        className={cn(
+          styles.lessonNum,
+          lesson.completed && styles.lessonDone,
+          lesson.current && styles.lessonCurrent,
+        )}
+      >
+        {lesson.completed ? <Check size={14} aria-hidden="true" /> : number}
+      </span>
+      <div className={styles.lessonBody}>
+        {locked ? (
+          <Tooltip label={ENROLL_TOOLTIP} align="start">
+            {title}
+          </Tooltip>
+        ) : (
+          title
+        )}
+        <div className={styles.lessonMeta}>
+          <Clock size={11} aria-hidden="true" /> {lesson.duration}
+          {lesson.current ? (
+            <Badge tone="primary" size="sm">
+              Current
+            </Badge>
+          ) : null}
+          {lesson.isPreview ? (
+            <Badge tone="success" size="sm">
+              Free Preview
+            </Badge>
+          ) : null}
+        </div>
+      </div>
+      <div className={styles.lessonPlay}>
+        {locked ? (
+          <Tooltip label={ENROLL_TOOLTIP} align="start">
+            <Lock size={15} aria-hidden="true" />
+          </Tooltip>
+        ) : (
+          getLessonIcon(lesson.kind, 15)
+        )}
+      </div>
+    </button>
+  );
+};
+
+/** Curriculum list — each lesson opens a player. Lessons are locked until the learner enrolls, except free preview lessons. */
 export const CurriculumCard = ({
   course,
   onPlay,
+  canEdit,
+  onEdit,
 }: {
   readonly course: Course;
-  readonly onPlay: (lesson: Lesson) => void;
+  readonly onPlay: (lesson: LessonWithState) => void;
+  readonly canEdit: boolean;
+  readonly onEdit: () => void;
 }): ReactElement => {
-  const lessons = buildCurriculum(course);
-  const done = lessons.filter((lesson) => lesson.completed).length;
+  const sections = buildCurriculum(course);
+  const allLessons = sections.flatMap((s) => s.lessons);
+  const done = allLessons.filter((lesson) => lesson.completed).length;
+  const lessonNumbers = new Map(
+    allLessons.map((lesson, index) => [lesson.id, index + 1]),
+  );
+
   return (
     <section className={styles.card}>
-      <div className={styles.cardHead}>
-        <h2 className={styles.cardTitle}>Curriculum</h2>
-        <span className={styles.cardHint}>
-          {done} of {lessons.length} complete
-        </span>
-      </div>
+      <CurriculumCardHead
+        done={done}
+        total={allLessons.length}
+        canEdit={canEdit}
+        onEdit={onEdit}
+      />
       <div>
-        {lessons.map((lesson) => (
-          <button
-            key={lesson.id}
-            type="button"
-            className={styles.lesson}
-            onClick={() => {
-              onPlay(lesson);
-            }}
-          >
-            <span
-              className={cn(
-                styles.lessonNum,
-                lesson.completed && styles.lessonDone,
-                lesson.current && styles.lessonCurrent,
-              )}
-            >
-              {lesson.completed ? <Check size={14} aria-hidden="true" /> : lesson.id}
-            </span>
-            <div className={styles.lessonBody}>
-              <div
-                className={cn(
-                  styles.lessonTitle,
-                  lesson.current && styles.lessonTitleCurrent,
-                )}
-              >
-                Lesson {lesson.id} · {lesson.title}
-              </div>
-              <div className={styles.lessonMeta}>
-                <Clock size={11} aria-hidden="true" /> {lesson.duration}
-                {lesson.current ? (
-                  <Badge tone="primary" size="sm">
-                    Current
-                  </Badge>
-                ) : null}
-              </div>
-            </div>
-            <Play size={15} aria-hidden="true" className={styles.lessonPlay} />
-          </button>
+        {sections.map((section) => (
+          <div key={section.id} className={styles.sectionGroup}>
+            {section.title && <div className={styles.sectionTitle}>{section.title}</div>}
+            {section.lessons.map((lesson) => (
+              <LessonRow
+                key={lesson.id}
+                lesson={lesson}
+                number={lessonNumbers.get(lesson.id) ?? 0}
+                locked={!course.isEnrolled && !lesson.isPreview}
+                onPlay={onPlay}
+              />
+            ))}
+          </div>
         ))}
       </div>
     </section>
   );
 };
-
-/** Modal video player for a chosen lesson. */
-export const LessonPlayer = ({
-  lesson,
-  courseTitle,
-  onClose,
-}: {
-  readonly lesson: Lesson | null;
-  readonly courseTitle: string;
-  readonly onClose: () => void;
-}): ReactElement => (
-  <Modal
-    open={lesson !== null}
-    onOpenChange={(next) => {
-      if (!next) {
-        onClose();
-      }
-    }}
-    title={lesson ? `Lesson ${String(lesson.id)} · ${lesson.title}` : 'Lesson'}
-    description={courseTitle}
-    size="lg"
-  >
-    {lesson !== null ? <MediaViewer asset={demoAsset('video', lesson.title)} /> : null}
-  </Modal>
-);

@@ -21,13 +21,13 @@ export class ReviewNotFoundError extends ReviewError {
   }
 }
 
-/** A rating outside the allowed 1–5 range. */
+/** A rating that failed its value-object rules (non-integer or outside the allowed range). */
 export class InvalidRatingError extends ReviewError {
   public readonly code = 'REVIEWS_INVALID_RATING';
 
-  public constructor(value: number) {
-    super(`Rating must be a whole number from 1 to 5 (received ${String(value)}).`, {
-      context: { value },
+  public constructor(value: number, reason: string) {
+    super(`Invalid rating: ${reason} (received ${String(value)}).`, {
+      context: { value, reason },
     });
   }
 }

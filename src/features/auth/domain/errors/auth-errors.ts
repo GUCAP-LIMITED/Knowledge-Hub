@@ -12,12 +12,24 @@ export class InvalidCredentialsError extends AuthError {
   }
 }
 
-/** The user authenticated but their account is not allowed to use this app. */
-export class AccountInactiveError extends AuthError {
-  public readonly code = 'AUTH_ACCOUNT_INACTIVE';
+// DEAD CODE (unused): commented out pending removal.
+// /** The user authenticated but their account is not allowed to use this app. */
+// export class AccountInactiveError extends AuthError {
+//   public readonly code = 'AUTH_ACCOUNT_INACTIVE';
+//
+//   public constructor() {
+//     super('This account is inactive. Please contact your administrator.');
+//   }
+// }
 
-  public constructor() {
-    super('This account is inactive. Please contact your administrator.');
+/** The user's role is prohibited from logging in to this app. */
+export class UserTypeLoginProhibitedError extends AuthError {
+  public readonly code = 'AUTH_USER_TYPE_PROHIBITED';
+
+  public constructor(
+    message = 'The User Type you belong to is prohibited from accessing this application. Please contact your supervisor.',
+  ) {
+    super(message);
   }
 }
 
@@ -32,11 +44,12 @@ export class AuthServiceUnavailableError extends AuthError {
   }
 }
 
-/** A required password was empty. */
-export class EmptyPasswordError extends AuthError {
-  public readonly code = 'AUTH_EMPTY_PASSWORD';
-
-  public constructor() {
-    super('A password is required.');
-  }
-}
+// DEAD CODE (unused; only used by the unused Password VO): commented out pending removal.
+// /** A required password was empty. */
+// export class EmptyPasswordError extends AuthError {
+//   public readonly code = 'AUTH_EMPTY_PASSWORD';
+//
+//   public constructor() {
+//     super('A password is required.');
+//   }
+// }

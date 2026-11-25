@@ -1,7 +1,9 @@
 export interface QuizQuestionProps {
   readonly id: string;
   readonly prompt: string;
+  readonly displayOrder?: number | undefined;
   readonly options: readonly string[];
+  readonly optionIds?: readonly string[];
   /** Indexes into `options` of every correct answer (one or more — "select all that apply"). */
   readonly correctIndexes: readonly number[];
 }
@@ -17,13 +19,20 @@ const sameSet = (a: readonly number[], b: readonly number[]): boolean =>
 export class QuizQuestion {
   public readonly id: string;
   public readonly prompt: string;
+  public readonly displayOrder: number;
   public readonly options: readonly string[];
+  public readonly optionIds: readonly string[];
   public readonly correctIndexes: readonly number[];
 
   public constructor(props: QuizQuestionProps) {
     this.id = props.id;
     this.prompt = props.prompt;
+    this.displayOrder = props.displayOrder ?? 0;
     this.options = props.options;
+    this.optionIds =
+      props.optionIds?.length === props.options.length
+        ? props.optionIds
+        : props.options.map((_, i) => props.optionIds?.[i] ?? `opt-${String(i)}`);
     this.correctIndexes = props.correctIndexes;
   }
 

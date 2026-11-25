@@ -1,4 +1,4 @@
-import type { Result } from '@core/result';
+import { type Result, isErr } from '@core/result';
 import type { Logger } from '@core/logger';
 import type { Announcement, NotificationError, NotificationGateway } from '../../domain';
 
@@ -19,7 +19,7 @@ export class MarkAllReadUseCase {
 
   public async execute(): Promise<Result<readonly Announcement[], NotificationError>> {
     const result = await this.notificationGateway.markAllRead();
-    if (!result.ok) {
+    if (isErr(result)) {
       this.logger.warn('Marking all read failed', { code: result.error.code });
     }
     return result;

@@ -1,0 +1,28 @@
+/* Fixed "master" canvas at 700x495px (must match CANVAS_WIDTH/CANVAS_HEIGHT in
+   certificate-canvas-geometry.ts). `CertificateArtworkScaler` measures its own available width and
+   applies a single `transform: scale()` to this whole block, so every element's position stays
+   proportionally identical whether the certificate renders small (editor) or large (the full-size
+   preview/view modal) — no independent per-property responsive drift. */
+.canvas {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 700px;
+  height: 495px;
+  border-radius: 0;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  background-color: var(--color-surface);
+  background-size: cover;
+  background-position: center;
+}
+
+.textElement {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.2;
+}
+
+.qrElement {
+  object-fit: contain;
+}

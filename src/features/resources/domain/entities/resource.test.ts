@@ -14,4 +14,23 @@ describe('Resource', () => {
     expect(updated.helpful).toBe(0);
     expect(resource.helpful).toBe(10);
   });
+
+  it('tracks canModify and defaults to false when omitted', () => {
+    expect(buildResource().canModify).toBe(false);
+    expect(buildResource({ canModify: true }).canModify).toBe(true);
+  });
+
+  it('preserves canModify across withHelpful, withHelpfulVote, and withDetails', () => {
+    const resource = buildResource({ canModify: true });
+    expect(resource.withHelpful(20).canModify).toBe(true);
+    expect(resource.withHelpfulVote(30, true).canModify).toBe(true);
+    expect(
+      resource.withDetails({
+        title: 'New Title',
+        category: 'New Category',
+        type: 'Doc',
+        description: 'New Desc',
+      }).canModify,
+    ).toBe(true);
+  });
 });

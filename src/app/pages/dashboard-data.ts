@@ -16,9 +16,32 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { StatTone } from '@shared/ui';
+import type { MyCapabilities } from '@features/users';
 
 export type Role = 'admin' | 'manager' | 'consultant';
 export type QuickTone = 'primary' | 'secondary' | 'info' | 'warning';
+
+/**
+ * Dashboard personalization tier, derived from the live permissions API rather than a role
+ * string: `Dashboard.Manage` marks the admin-tier layout, `Submissions.Create` the manager-tier
+ * one (content workspace access); anyone else gets the consultant/learner tier.
+ */
+export const resolveUserTier = (can: MyCapabilities['can']): Role => {
+  if (can('dashboard', 'manage')) {
+    return 'admin';
+  }
+  return can('submissions', 'create') ? 'manager' : 'consultant';
+};
+
+export const subtitleFor = (role: Role, ctx: DashCtx): string => {
+  if (role === 'admin') {
+    return `You have ${String(ctx.pending)} item${ctx.pending === 1 ? '' : 's'} awaiting review.`;
+  }
+  if (ctx.continueTitle !== null) {
+    return `Pick up where you left off — “${ctx.continueTitle}”.`;
+  }
+  return 'No active courses. Browse the catalog to start learning.';
+};
 
 export interface DashCtx {
   readonly pending: number;

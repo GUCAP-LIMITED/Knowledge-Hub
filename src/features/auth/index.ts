@@ -4,16 +4,16 @@
  * to change.
  */
 export { createAuthModule, type AuthModuleDeps } from './auth-module';
-export type { KeyValueStorage } from './infrastructure';
+export { buildPortalParams } from './infrastructure';
+export type { KeyValueStorage, PortalConfig } from './infrastructure';
 export type { AuthStore, AuthState, AuthStatus } from './store';
 export {
   AuthStoreProvider,
   useAuth,
+  usePortalConfig,
+  useSsoSecret,
   ProtectedRoute,
   LoginPage,
-  SignupPage,
-  VerifyPage,
-  ForgotPasswordPage,
   type UseAuthResult,
 } from './presentation';
 export type { AuthenticatedUser, AuthSession } from './domain';

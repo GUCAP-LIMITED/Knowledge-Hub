@@ -1,0 +1,138 @@
+.toolbarContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 0.2rem;
+}
+
+.originTabsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.5rem;
+}
+
+.originTabs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.originTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-text-subtle);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.originTab:hover {
+  color: var(--color-text);
+  background: var(--color-surface-hover);
+}
+
+.originTabActive {
+  color: var(--color-link);
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.tabCount {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-hover);
+  color: var(--color-text-subtle);
+}
+
+.originTabActive .tabCount {
+  background: var(--color-primary-subtle, rgba(59, 130, 246, 0.1));
+  color: var(--color-link);
+}
+
+.assignedScopesRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  width: fit-content;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scopePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--color-text-subtle);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.scopePill:hover {
+  color: var(--color-text);
+  background: var(--color-surface-hover);
+}
+
+.scopePillActive {
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  font-weight: 600;
+}
+
+.scopeCount {
+  font-size: 0.72rem;
+  opacity: 0.8;
+}
+
+.filtersRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  padding: 1.1rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.searchCell {
+  flex: 3 1 220px;
+  min-width: 0;
+}
+
+.filterCell {
+  flex: 1 1 160px;
+  min-width: 0;
+}

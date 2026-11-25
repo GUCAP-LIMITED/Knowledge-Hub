@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { CheckCheck } from 'lucide-react';
 import { Button } from '@shared/ui';
+import { useMyCapabilities } from '@features/users';
 import styles from './ApprovalsPage.module.css';
 
 export interface BulkActionBarProps {
@@ -17,6 +18,7 @@ export const BulkActionBar = ({
   onApprove,
   onClear,
 }: BulkActionBarProps): ReactElement | null => {
+  const { can } = useMyCapabilities();
   if (count === 0) {
     return null;
   }
@@ -27,9 +29,11 @@ export const BulkActionBar = ({
         <Button size="sm" variant="ghost" onClick={onClear}>
           Clear
         </Button>
-        <Button size="sm" disabled={busy} onClick={onApprove}>
-          <CheckCheck size={14} aria-hidden="true" /> Approve selected
-        </Button>
+        {can('approvals', 'approve') ? (
+          <Button size="sm" disabled={busy} onClick={onApprove}>
+            <CheckCheck size={14} aria-hidden="true" /> Approve selected
+          </Button>
+        ) : null}
       </div>
     </div>
   );

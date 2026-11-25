@@ -6,8 +6,10 @@ export interface AuthSessionOverrides {
   readonly id?: string;
   readonly email?: string;
   readonly fullName?: string;
-  readonly roles?: readonly string[];
   readonly userType?: string | null;
+  readonly branchIds?: readonly string[];
+  readonly teamIds?: readonly string[];
+  readonly teamNames?: readonly string[];
   readonly accessToken?: string;
   readonly refreshToken?: string | null;
   readonly tokenType?: string;
@@ -23,8 +25,10 @@ const buildUser = (overrides: AuthSessionOverrides): AuthenticatedUser => {
     id: overrides.id ?? 'user-1',
     email: email.value,
     fullName: overrides.fullName ?? 'Test User',
-    roles: overrides.roles ?? ['member'],
     userType: overrides.userType ?? null,
+    branchIds: overrides.branchIds ?? [],
+    teamIds: overrides.teamIds ?? [],
+    teamNames: overrides.teamNames ?? [],
   });
 };
 

@@ -1,6 +1,4 @@
 .screen {
-  max-width: 1120px;
-  margin: 0 auto;
   padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -99,14 +97,31 @@
   align-items: center;
   justify-content: space-between;
 }
+.cardTopLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
 .iconTile {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-md);
   background-color: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-link);
+}
+.iconCourse {
+  background-color: var(--color-primary-soft);
+  color: var(--color-link);
+}
+.iconTutorial {
+  background-color: var(--color-warning-soft);
+  color: var(--color-warning-strong);
+}
+.iconResource {
+  background-color: var(--color-success-soft);
+  color: var(--color-success-strong);
 }
 .cardTitle {
   margin: 0;
@@ -152,6 +167,68 @@
   color: var(--color-text);
   font-weight: 600;
 }
+.assigneesWrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+}
+.assigneeText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.moreAssigneesTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px;
+  color: var(--color-text-muted);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 1;
+  transition:
+    background-color var(--motion-base) var(--motion-ease-out),
+    color var(--motion-base) var(--motion-ease-out),
+    border-color var(--motion-base) var(--motion-ease-out);
+}
+.moreAssigneesTrigger:hover,
+.moreAssigneesTrigger:focus-visible {
+  background-color: var(--color-primary-soft);
+  color: var(--color-link);
+  border-color: var(--color-primary);
+  outline: none;
+}
+.moreIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* Tooltip content override — same visual spec as Tooltip.module.css, themed via tokens */
+.customTooltip {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  box-shadow: var(--shadow-md) !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+}
+.customTooltipContent {
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tooltipMethod {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  white-space: nowrap;
+}
 .cardActions {
   display: flex;
   align-items: center;
@@ -190,4 +267,103 @@
   margin: 0;
   font-size: 0.9rem;
   color: var(--color-text-muted);
+}
+
+/* Modal Content Type Filter Pills */
+.typeFilterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.typePills {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.typePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.32rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+.typePill:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+.typePillActive {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+.typePillActive:hover {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* Infinite scroll & caught-up banner (matches CoursesPage) */
+.loadingMoreContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  color: var(--color-text-subtle);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.endBanner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-text-subtle);
+  border-top: 1px dashed var(--color-border);
+  margin-top: 1.5rem;
+}
+
+.endBannerTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.endBannerSub {
+  font-size: 0.85rem;
+}
+
+.sentinel {
+  width: 100%;
+  height: 20px;
+  pointer-events: none;
+  visibility: hidden;
 }

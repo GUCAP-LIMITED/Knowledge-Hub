@@ -1,8 +1,8 @@
-import type { ReactElement } from 'react';
-import { AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { useEffect, useRef, type ReactElement } from 'react';
+import { AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
 import { Avatar, Badge, ProgressBar } from '@shared/ui';
 import { cn } from '@shared/utils';
-import type { TeamMember } from '../domain';
+import type { ProgressDistributionProps, TeamMember } from '../domain';
 import styles from './TeamProgressPage.module.css';
 
 const AT_RISK_CEILING = 50;
@@ -28,16 +28,23 @@ const BANDS: readonly Band[] = [
   { key: 'complete', label: 'Complete (100%)', min: 100, max: 100, cls: 'bandSuccess' },
 ];
 
-const countInBand = (members: readonly TeamMember[], band: Band): number =>
-  members.filter((m) => m.progress >= band.min && m.progress <= band.max).length;
-
-/** A segmented bar + legend showing how the team is spread across completion bands. */
+/** A segmented bar + legend showing how the team is spread across completion bands using backend data. */
 export const ProgressDistribution = ({
-  members,
+  distribution,
 }: {
-  readonly members: readonly TeamMember[];
+  readonly distribution: ProgressDistributionProps;
 }): ReactElement => {
-  const bands = BANDS.map((band) => ({ ...band, count: countInBand(members, band) }));
+  const countMap: Record<string, number> = {
+    risk: distribution.risk,
+    progressing: distribution.progressing,
+    ontrack: distribution.onTrack,
+    complete: distribution.complete,
+  };
+  const bands = BANDS.map((band) => ({
+    ...band,
+    count: countMap[band.key] ?? 0,
+  }));
+
   return (
     <section className={styles.insightCard}>
       <h2 className={styles.insightTitle}>Progress distribution</h2>
@@ -82,15 +89,51 @@ const AtRiskRow = ({ member }: { readonly member: TeamMember }): ReactElement =>
   </li>
 );
 
-/** Surfaces learners below the at-risk threshold so admins can intervene early. */
-export const AtRiskPanel = ({
-  members,
-}: {
-  readonly members: readonly TeamMember[];
-}): ReactElement => {
-  const atRisk = members.filter((m) => m.progress < AT_RISK_CEILING);
+export interface AtRiskPanelProps {
+  readonly atRiskMembers: readonly TeamMember[];
+  readonly totalCount: number;
+  readonly hasNextPage?: boolean;
+  readonly isFetchingNextPage?: boolean;
+  readonly onFetchNextPage?: () => void;
+}
 
-  if (atRisk.length === 0) {
+/** Surfaces learners below the at-risk threshold with infinite scroll inside the card. */
+export const AtRiskPanel = ({
+  atRiskMembers,
+  totalCount,
+  hasNextPage = false,
+  isFetchingNextPage = false,
+  onFetchNextPage,
+}: AtRiskPanelProps): ReactElement => {
+  const listRef = useRef<HTMLUListElement | null>(null);
+  const sentinelRef = useRef<HTMLLIElement | null>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    const container = listRef.current;
+    if (!sentinel || !hasNextPage || isFetchingNextPage || !onFetchNextPage) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          onFetchNextPage();
+        }
+      },
+      {
+        root: container,
+        threshold: 0.1,
+      },
+    );
+
+    observer.observe(sentinel);
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, onFetchNextPage]);
+
+  if (totalCount === 0 && atRiskMembers.length === 0) {
     return (
       <section className={cn(styles.insightCard, styles.riskOk)}>
         <CheckCircle2 size={20} aria-hidden="true" className={styles.riskOkIcon} />
@@ -109,12 +152,25 @@ export const AtRiskPanel = ({
       <div className={styles.riskHead}>
         <AlertTriangle size={18} aria-hidden="true" className={styles.riskIcon} />
         <h2 className={styles.insightTitle}>At-risk learners</h2>
-        <Badge tone="warning">{atRisk.length}</Badge>
+        <Badge tone="warning">{totalCount}</Badge>
       </div>
-      <ul className={styles.riskList}>
-        {atRisk.map((member) => (
+      <ul ref={listRef} className={styles.riskList}>
+        {atRiskMembers.map((member) => (
           <AtRiskRow key={member.id} member={member} />
         ))}
+        {hasNextPage ? (
+          <li ref={sentinelRef} className={styles.infiniteSentinel}>
+            {isFetchingNextPage ? (
+              <span className={styles.loadingMoreText}>
+                <Loader2 size={14} className={styles.spinner} /> Loading more...
+              </span>
+            ) : null}
+          </li>
+        ) : atRiskMembers.length > 5 ? (
+          <li className={styles.endOfListText}>
+            All {totalCount} at-risk learners loaded
+          </li>
+        ) : null}
       </ul>
     </section>
   );

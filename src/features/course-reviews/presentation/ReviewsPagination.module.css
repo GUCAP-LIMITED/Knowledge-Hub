@@ -1,0 +1,28 @@
+﻿.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem) 0;
+  margin-top: var(--space-4, 1rem);
+  border-top: 1px solid var(--color-border, #e2e8f0);
+}
+
+.info {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-muted, #64748b);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+}
+
+.pageIndicator {
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--color-text, #1e293b);
+  padding: 0 var(--space-2, 0.5rem);
+}

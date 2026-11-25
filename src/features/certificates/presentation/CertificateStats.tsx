@@ -1,34 +1,55 @@
 import type { ReactElement } from 'react';
-import { AlertTriangle, Award, LayoutGrid, Star } from 'lucide-react';
+import { AlertTriangle, Award, LayoutGrid, Users } from 'lucide-react';
 import { StatCard } from '@shared/ui';
-import type { Certificate } from '../domain';
+import type { Certificate, CertificateStatisticsOverview } from '../domain';
 import styles from './CertificatesPage.module.css';
 
 export interface CertificateStatsProps {
-  readonly certificates: readonly Certificate[];
+  readonly statistics?: CertificateStatisticsOverview | null | undefined;
+  readonly totalCount?: number | undefined;
+  readonly myTotalCertificates?: number | undefined;
+  readonly certificates?: readonly Certificate[] | undefined;
   readonly now: Date;
-  readonly isAdmin?: boolean;
+  readonly isAdmin?: boolean | undefined;
 }
+const resolveTotal = (
+  isAdmin: boolean,
+  stats: CertificateStatisticsOverview | null | undefined,
+  total: number,
+  myTotal: number,
+): number => {
+  if (isAdmin) {
+    return stats?.totalIssuedCertificates ?? total;
+  }
+  return myTotal > 0 ? myTotal : total;
+};
 
-/** Summary tiles: total earned/issued, distinctions, expiring soon, categories. */
-export const CertificateStats = ({
-  certificates,
-  now,
-  isAdmin = false,
-}: CertificateStatsProps): ReactElement => {
-  const distinctions = certificates.filter((cert) => cert.isDistinction()).length;
-  const expiring = certificates.filter((cert) => cert.isExpiringSoon(now)).length;
-  const categories = new Set(certificates.map((cert) => cert.category)).size;
+/** Summary tiles: total earned/issued, teams with certificates, expiring soon, categories. */
+export const CertificateStats = (props: CertificateStatsProps): ReactElement => {
+  const isAdmin = props.isAdmin === true;
+  const total = props.totalCount ?? 0;
+  const myTotal = props.myTotalCertificates ?? 0;
+  const stats = props.statistics;
+  const totalValue = resolveTotal(isAdmin, stats, total, myTotal);
+  const teamsCount = stats?.totalTeamsWithCertificates ?? 0;
+  const categoriesCount = stats?.totalCategories ?? 0;
+  const list = props.certificates ?? [];
+  const expiring = list.filter((cert) => cert.isExpiringSoon(props.now)).length;
 
   return (
     <div className={styles.stats}>
       <StatCard
         label={isAdmin ? 'Total Issued' : 'Total Earned'}
-        value={certificates.length}
+        value={totalValue}
         icon={Award}
         tone="secondary"
       />
-      <StatCard label="Distinctions" value={distinctions} icon={Star} tone="warning" />
+      <StatCard
+        label="Teams with Certificates"
+        value={teamsCount}
+        icon={Users}
+        tone="warning"
+      />
       <StatCard
         label="Expiring Soon"
         value={expiring}
@@ -36,7 +57,12 @@ export const CertificateStats = ({
         tone="danger"
         hint="Within 90 days"
       />
-      <StatCard label="Categories" value={categories} icon={LayoutGrid} tone="info" />
+      <StatCard
+        label="Categories"
+        value={categoriesCount}
+        icon={LayoutGrid}
+        tone="info"
+      />
     </div>
   );
 };

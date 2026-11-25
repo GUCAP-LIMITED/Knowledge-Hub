@@ -1,6 +1,4 @@
 .screen {
-  max-width: 1120px;
-  margin: 0 auto;
   padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -64,7 +62,7 @@
   flex-direction: row;
   gap: 0.4rem;
   border-style: dashed;
-  color: var(--color-primary);
+  color: var(--color-link);
   font-weight: 600;
 }
 .setCardActive {
@@ -89,7 +87,7 @@
 .setCardCount {
   font-size: 0.72rem;
   font-weight: 600;
-  color: var(--color-primary);
+  color: var(--color-link);
 }
 .permBody {
   display: grid;
@@ -124,11 +122,11 @@
   text-align: left;
 }
 .moduleRow:hover {
-  background-color: var(--color-surface-muted);
+  background-color: var(--color-surface-hover);
 }
 .moduleRowActive {
   background-color: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-link);
   font-weight: 600;
 }
 .moduleName {
@@ -199,6 +197,20 @@
 
 .toggles > *:last-child {
   border-bottom: none;
+}
+
+.toggleSkeletonRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.toggleSkeletonText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
 }
 
 /* Users table */

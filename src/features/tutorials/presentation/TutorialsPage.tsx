@@ -1,44 +1,126 @@
-import { useMemo, useState, type ReactElement } from 'react';
-import { PageHeader, useDeleteConfirm } from '@shared/ui';
-import { useAuth } from '@features/auth';
-import { useContentTypes } from '@features/content-types';
-import type { Tutorial } from '../domain';
-import { useDeleteTutorial, useTutorials, useUpdateTutorial } from './use-tutorials';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement,
+} from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Lightbulb } from 'lucide-react';
+import { CatalogCounterRow, PageHeader, useDeleteConfirm } from '@shared/ui';
+import { useContentCategories } from '@features/content';
+import type { Tutorial, TutorialCatalogParams } from '../domain';
+import {
+  useDeleteTutorial,
+  useInfiniteTutorials,
+  useUpdateTutorial,
+} from './use-tutorials';
 import { TutorialsResults } from './TutorialsResults';
-import { TutorialsModals } from './TutorialsModals';
+import { TutorialEditModal } from './TutorialEditModal';
 import { TutorialsToolbar } from './TutorialsToolbar';
-import { CategoryPills } from './CategoryPills';
-import { type TutorialSort, filterAndSortTutorials } from './tutorials-filter';
+import type { TutorialSort } from './tutorials-filter';
 import styles from './TutorialsPage.module.css';
 
-/** Routed tutorials-library page: category filter, search, video player, admin edit/delete. */
+interface TutorialParamsInput {
+  readonly query: string;
+  readonly categoryId: string | undefined;
+  readonly sort: TutorialSort;
+}
+
+const buildTutorialParams = (
+  input: TutorialParamsInput,
+): Omit<TutorialCatalogParams, 'skipCount'> => ({
+  filter: input.query.trim() !== '' ? input.query.trim() : undefined,
+  categoryId: input.categoryId,
+  sorting: input.sort,
+  maxResultCount: 12,
+});
+
+/** Routed tutorials-library page: category filter, search, admin edit/delete. */
+// eslint-disable-next-line max-lines-per-function
 export const TutorialsPage = (): ReactElement => {
-  const { user } = useAuth();
-  const isAdmin = user?.hasAnyRole(['admin']) ?? false;
-  const tutorials = useTutorials();
+  const navigate = useNavigate();
   const update = useUpdateTutorial();
   const remove = useDeleteTutorial();
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('all');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
   const [sort, setSort] = useState<TutorialSort>('recent');
-  const [watching, setWatching] = useState<Tutorial | null>(null);
   const [editing, setEditing] = useState<Tutorial | null>(null);
-  const [quizzing, setQuizzing] = useState<Tutorial | null>(null);
-  const categories = useContentTypes('tutorial');
-  const del = useDeleteConfirm(
-    tutorials.data ?? [],
-    'tutorial',
-    (id) => {
-      remove.mutate(id);
-    },
-    remove.isPending,
+  const categoriesQuery = useContentCategories('tutorial');
+  const categories = categoriesQuery.data ?? [];
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 350);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [query]);
+
+  const queryParams = useMemo(
+    () =>
+      buildTutorialParams({
+        query: debouncedQuery,
+        categoryId,
+        sort,
+      }),
+    [debouncedQuery, categoryId, sort],
   );
 
-  const visible = useMemo(
-    () => filterAndSortTutorials(tutorials.data ?? [], query, category, sort),
-    [tutorials.data, query, category, sort],
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteTutorials(queryParams);
+
+  const visible = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
+  const totalCount = data?.pages[0]?.totalCount ?? 0;
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const target = sentinelRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          void fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' },
+    );
+
+    observer.observe(target);
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      remove.mutate(id);
+    },
+    [remove],
   );
-  const filtered = query.trim() !== '' || category !== 'all';
+
+  const del = useDeleteConfirm(visible, 'tutorial', handleDelete, remove.isPending);
+
+  const filtered = query.trim() !== '' || categoryId !== undefined;
+
+  const handleClearAll = useCallback((): void => {
+    setQuery('');
+    setDebouncedQuery('');
+    setCategoryId(undefined);
+  }, []);
 
   return (
     <section className={styles.screen}>
@@ -47,48 +129,50 @@ export const TutorialsPage = (): ReactElement => {
         subtitle="Short, focused how-to guides for everyday tasks."
       />
 
-      <TutorialsToolbar query={query} sort={sort} onQuery={setQuery} onSort={setSort} />
-
-      <CategoryPills
-        categories={categories}
-        active={category}
-        allLabel="All Tutorials"
-        onSelect={setCategory}
+      <CatalogCounterRow
+        count={totalCount}
+        isLoading={isLoading}
+        filtered={filtered}
+        singular="tutorial"
+        plural="tutorials"
+        icon={Lightbulb}
       />
 
-      <div className={styles.resultRow}>
-        <span className={styles.count}>
-          {visible.length} tutorial{visible.length === 1 ? '' : 's'}
-          {category === 'all' ? '' : ` in ${category}`}
-        </span>
-      </div>
+      <TutorialsToolbar
+        query={query}
+        categoryId={categoryId}
+        categories={categories}
+        sort={sort}
+        onQuery={setQuery}
+        onCategory={setCategoryId}
+        onSort={setSort}
+        onClearAll={handleClearAll}
+      />
 
       <TutorialsResults
         tutorials={visible}
-        isLoading={tutorials.isLoading}
-        error={tutorials.isError ? tutorials.error : null}
+        isLoading={isLoading}
+        error={isError ? error : null}
         filtered={filtered}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        sentinelRef={sentinelRef}
+        totalCount={totalCount}
         removingId={remove.isPending ? remove.variables : null}
-        onWatch={setWatching}
+        onWatch={(tutorial) => {
+          navigate(`/tutorials/${tutorial.slug || tutorial.id}`);
+        }}
         onEdit={setEditing}
         onDelete={del.request}
-        onQuiz={setQuizzing}
+        onClearAll={handleClearAll}
       />
 
-      <TutorialsModals
-        watching={watching}
+      <TutorialEditModal
         editing={editing}
-        quizzing={quizzing}
-        isAdmin={isAdmin}
+        categories={categories}
         update={update}
-        onCloseWatch={() => {
-          setWatching(null);
-        }}
-        onCloseEdit={() => {
+        onClose={() => {
           setEditing(null);
-        }}
-        onCloseQuiz={() => {
-          setQuizzing(null);
         }}
       />
 

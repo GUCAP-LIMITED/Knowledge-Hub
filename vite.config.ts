@@ -33,54 +33,52 @@ function getManualChunks(id: string): string | undefined {
   return undefined;
 }
 
-export default defineConfig(() => {
-  return {
-    plugins: [react()],
-    resolve: {
-      alias: {
-        '@app': resolvePath('./src/app'),
-        '@core': resolvePath('./src/core'),
-        '@shared': resolvePath('./src/shared'),
-        '@features': resolvePath('./src/features'),
-        '@testing': resolvePath('./src/testing'),
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@app': resolvePath('./src/app'),
+      '@core': resolvePath('./src/core'),
+      '@shared': resolvePath('./src/shared'),
+      '@features': resolvePath('./src/features'),
+      '@testing': resolvePath('./src/testing'),
+    },
+  },
+  server: {
+    port: 5173,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: getManualChunks,
       },
     },
-    server: {
-      port: 5173,
-    },
-    build: {
-      rollupOptions: {
-        output: {
-          manualChunks: getManualChunks,
-        },
+  },
+  test: {
+    globals: false,
+    environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts'],
+    testTimeout: 15_000,
+    hookTimeout: 15_000,
+    css: false,
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.{test,spec}.{ts,tsx}',
+        'src/**/index.ts',
+        'src/testing/**',
+        'src/main.tsx',
+        'src/**/*.d.ts',
+      ],
+      thresholds: {
+        statements: 80,
+        branches: 80,
+        functions: 80,
+        lines: 80,
       },
     },
-    test: {
-      globals: false,
-      environment: 'jsdom',
-      setupFiles: ['./vitest.setup.ts'],
-      testTimeout: 15_000,
-      hookTimeout: 15_000,
-      css: false,
-      include: ['src/**/*.{test,spec}.{ts,tsx}'],
-      coverage: {
-        provider: 'v8',
-        reporter: ['text', 'html'],
-        include: ['src/**/*.{ts,tsx}'],
-        exclude: [
-          'src/**/*.{test,spec}.{ts,tsx}',
-          'src/**/index.ts',
-          'src/testing/**',
-          'src/main.tsx',
-          'src/**/*.d.ts',
-        ],
-        thresholds: {
-          statements: 80,
-          branches: 80,
-          functions: 80,
-          lines: 80,
-        },
-      },
-    },
-  };
+  },
 });

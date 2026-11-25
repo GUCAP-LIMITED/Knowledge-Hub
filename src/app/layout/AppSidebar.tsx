@@ -1,26 +1,13 @@
 import { useState, type ReactElement } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import {
-  LayoutDashboard,
-  PlayCircle,
-  Lightbulb,
-  FolderOpen,
-  Award,
-  BookOpen,
-  Star,
-  ChevronDown,
-  FileCheck,
-  ClipboardList,
-  MessageSquare,
-  BarChart3,
-  CalendarCheck,
-  Upload,
-  type LucideIcon,
-  Settings,
-} from 'lucide-react';
+import { NavLink, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { ChevronRight, type LucideIcon } from 'lucide-react';
 import { cn } from '@shared/utils';
-import type { AuthenticatedUser } from '@features/auth';
-import { SETTINGS_SECTIONS, useMyCapabilities, type CapId } from '@features/users';
+import { AcademyLogo, DropdownMenu, Skeleton, Tooltip } from '@shared/ui';
+import {
+  iconFor,
+  useMyPermissionModules,
+  type SidebarModule,
+} from '@features/permissions';
 import styles from './AppLayout.module.css';
 
 interface SubLink {
@@ -28,149 +15,143 @@ interface SubLink {
   readonly label: string;
 }
 
-/** A capability that must be held for a nav entry to show (in addition to its role gate). */
-interface NavCap {
-  readonly module: string;
-  readonly cap: CapId;
-}
-
-type NavEntry =
-  | {
-      readonly kind: 'section';
-      readonly label: string;
-      readonly anyOf?: readonly string[];
-    }
-  | {
-      readonly kind: 'link';
-      readonly to: string;
-      readonly label: string;
-      readonly icon: LucideIcon;
-      readonly anyOf?: readonly string[];
-      readonly cap?: NavCap;
-      readonly children?: readonly SubLink[];
-    };
-
-const SETTINGS_CHILDREN: readonly SubLink[] = SETTINGS_SECTIONS.map((section) => ({
-  to: `/settings/${section.key}`,
-  label: section.label,
-}));
-
-const NAV: readonly NavEntry[] = [
-  { kind: 'section', label: 'Learn' },
-  { kind: 'link', to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  {
-    kind: 'link',
-    to: '/my-learning',
-    label: 'My Learning',
-    icon: BookOpen,
-    anyOf: ['manager', 'consultant'],
-  },
-  { kind: 'link', to: '/courses', label: 'Courses', icon: PlayCircle },
-  { kind: 'link', to: '/tutorials', label: 'Tutorials', icon: Lightbulb },
-  { kind: 'link', to: '/resources', label: 'Resources', icon: FolderOpen },
-  { kind: 'link', to: '/certificates', label: 'Certificates', icon: Award },
-  { kind: 'link', to: '/reviews', label: 'Reviews', icon: Star },
-  { kind: 'section', label: 'Workspace', anyOf: ['admin', 'manager'] },
-  {
-    kind: 'link',
-    to: '/upload',
-    label: 'Upload Document',
-    icon: Upload,
-    anyOf: ['admin', 'manager'],
-    cap: { module: 'submissions', cap: 'create' },
-  },
-  {
-    kind: 'link',
-    to: '/submissions',
-    label: 'My Submissions',
-    icon: FileCheck,
-    anyOf: ['admin', 'manager'],
-    cap: { module: 'submissions', cap: 'view' },
-  },
-  { kind: 'section', label: 'Team', anyOf: ['admin'] },
-  {
-    kind: 'link',
-    to: '/team-progress',
-    label: 'Team Progress',
-    icon: BarChart3,
-    anyOf: ['admin'],
-    cap: { module: 'team', cap: 'view' },
-  },
-  {
-    kind: 'link',
-    to: '/assign',
-    label: 'Assign Training',
-    icon: CalendarCheck,
-    anyOf: ['admin'],
-    cap: { module: 'team', cap: 'assign' },
-  },
-  { kind: 'section', label: 'Administration', anyOf: ['admin'] },
-  {
-    kind: 'link',
-    to: '/approvals',
-    label: 'Approvals',
-    icon: ClipboardList,
-    anyOf: ['admin'],
-    cap: { module: 'approvals', cap: 'view' },
-  },
-  {
-    kind: 'link',
-    to: '/course-reviews',
-    label: 'Course Reviews',
-    icon: MessageSquare,
-    anyOf: ['admin'],
-    cap: { module: 'reviews', cap: 'moderate' },
-  },
-  {
-    kind: 'link',
-    to: '/settings/platform',
-    label: 'Settings',
-    icon: Settings,
-    anyOf: ['admin'],
-    cap: { module: 'settings', cap: 'manage' },
-    children: SETTINGS_CHILDREN,
-  },
-];
-
+/**
+ * Active state is computed here (via useMatch) rather than NavLink's function-typed `className`
+ * prop: Radix's Slot (used by <Tooltip asChild> in the collapsed rail) joins className values with
+ * `Array.prototype.join`, which stringifies a function instead of calling it — corrupting the class
+ * and silently dropping all our styling. A plain string className sidesteps that.
+ */
 const NavItem = ({
   to,
   label,
   icon: Icon,
+  count,
+  collapsed,
   onNavigate,
 }: {
-  to: string;
-  label: string;
-  icon: LucideIcon;
-  onNavigate: () => void;
-}): ReactElement => (
-  <NavLink
-    to={to}
-    end={to === '/'}
-    onClick={onNavigate}
-    className={({ isActive }) => cn(styles.navLink, isActive && styles.navLinkActive)}
-  >
-    <Icon size={18} aria-hidden="true" />
-    {label}
-  </NavLink>
-);
+  readonly to: string;
+  readonly label: string;
+  readonly icon: LucideIcon;
+  readonly count: number | null;
+  readonly collapsed: boolean;
+  readonly onNavigate: () => void;
+}): ReactElement => {
+  const isDashboardLink = to === '/' || to === '/dashboard';
+  const isRootMatch = useMatch({ path: '/', end: true }) !== null;
+  const isDashboardMatch = useMatch({ path: '/dashboard', end: true }) !== null;
+  const isDirectMatch = useMatch({ path: to, end: to === '/' }) !== null;
+  const isActive = isDashboardLink ? isRootMatch || isDashboardMatch : isDirectMatch;
+  const link = (
+    <NavLink
+      to={to}
+      end={to === '/' || to === '/dashboard'}
+      onClick={onNavigate}
+      className={cn(styles.navLink, isActive && styles.navLinkActive)}
+    >
+      <Icon size={16} aria-hidden="true" />
+      <span className={styles.navLabel}>{label}</span>
+      {count !== null && count > 0 ? (
+        <span className={styles.navBadge} aria-label={`${String(count)} new`}>
+          {count}
+        </span>
+      ) : null}
+    </NavLink>
+  );
+  const tooltipLabel =
+    count !== null && count > 0 ? `${label} (${String(count)})` : label;
+  return collapsed ? (
+    <Tooltip label={tooltipLabel} side="right">
+      {link}
+    </Tooltip>
+  ) : (
+    link
+  );
+};
+
+/** Collapsed rail: a click-to-open flyout listing the group's children next to the icon. */
+const CollapsedNavGroup = ({
+  label,
+  icon: Icon,
+  items,
+  onSection,
+  onNavigate,
+}: {
+  readonly label: string;
+  readonly icon: LucideIcon;
+  readonly items: readonly SubLink[];
+  readonly onSection: boolean;
+  readonly onNavigate: () => void;
+}): ReactElement => {
+  const navigate = useNavigate();
+  return (
+    <DropdownMenu
+      side="right"
+      align="start"
+      trigger={
+        <button
+          type="button"
+          aria-label={label}
+          className={cn(
+            styles.navLink,
+            styles.navGroupToggle,
+            onSection && styles.navLinkActive,
+          )}
+        >
+          <Icon size={16} aria-hidden="true" />
+        </button>
+      }
+      items={items.map((child) => ({
+        label: child.label,
+        onSelect: () => {
+          onNavigate();
+          navigate(child.to);
+        },
+      }))}
+    />
+  );
+};
+
+const isGroupActive = (
+  base: string,
+  items: readonly SubLink[],
+  pathname: string,
+): boolean =>
+  pathname.startsWith(base) ||
+  items.some(
+    (item) => pathname === item.to || (item.to !== '/' && pathname.startsWith(item.to)),
+  );
 
 const NavGroup = ({
   to,
   label,
   icon: Icon,
   items,
+  collapsed,
   onNavigate,
 }: {
-  to: string;
-  label: string;
-  icon: LucideIcon;
-  items: readonly SubLink[];
-  onNavigate: () => void;
+  readonly to: string;
+  readonly label: string;
+  readonly icon: LucideIcon;
+  readonly items: readonly SubLink[];
+  readonly collapsed: boolean;
+  readonly onNavigate: () => void;
 }): ReactElement => {
   const location = useLocation();
   const base = `/${to.split('/')[1] ?? ''}`;
-  const onSection = location.pathname.startsWith(base);
+  const onSection = isGroupActive(base, items, location.pathname);
   const [open, setOpen] = useState(onSection);
+
+  if (collapsed) {
+    return (
+      <CollapsedNavGroup
+        label={label}
+        icon={Icon}
+        items={items}
+        onSection={onSection}
+        onNavigate={onNavigate}
+      />
+    );
+  }
 
   return (
     <div className={styles.navGroup}>
@@ -186,9 +167,9 @@ const NavGroup = ({
           setOpen((value) => !value);
         }}
       >
-        <Icon size={18} aria-hidden="true" />
-        {label}
-        <ChevronDown
+        <Icon size={16} aria-hidden="true" />
+        <span className={styles.navLabel}>{label}</span>
+        <ChevronRight
           size={16}
           aria-hidden="true"
           className={cn(styles.navChevron, open && styles.navChevronOpen)}
@@ -214,69 +195,115 @@ const NavGroup = ({
   );
 };
 
-const renderEntry = (entry: NavEntry, onNavigate: () => void): ReactElement => {
-  if (entry.kind === 'section') {
-    return (
-      <div key={`section-${entry.label}`} className={styles.section}>
-        {entry.label}
-      </div>
-    );
-  }
-  if (entry.children !== undefined) {
-    return (
-      <NavGroup
-        key={entry.to}
-        to={entry.to}
-        label={entry.label}
-        icon={entry.icon}
-        items={entry.children}
-        onNavigate={onNavigate}
-      />
-    );
-  }
-  return (
+/**
+ * User Types now opens from a "Manage User Types" CTA inside Settings → Users
+ * (see `UsersSection`) instead of its own sidebar entry; the standalone `/user-types`
+ * route still exists for direct links, so it's filtered out here rather than dropped
+ * from the backend registry.
+ */
+const HIDDEN_SETTINGS_CHILD_HREFS: readonly string[] = [
+  '/user-types',
+  '/settings/users/user-types',
+];
+
+/**
+ * Sub-menu links for a module. Derived directly from the backend registry's permission-gated
+ * `children` (e.g. Settings -> Platform, Content Types, Certificates, Users, Permissions,
+ * Configure Dashboard).
+ */
+const childrenFor = (module: SidebarModule): readonly SubLink[] =>
+  module.children
+    .filter((child) => !HIDDEN_SETTINGS_CHILD_HREFS.includes(child.href))
+    .map((child) => ({
+      to: child.href,
+      label: child.sidebarMenu.length > 0 ? child.sidebarMenu : child.name,
+    }));
+
+const renderModule = (
+  module: SidebarModule,
+  onNavigate: () => void,
+  collapsed: boolean,
+): ReactElement => {
+  const Icon = iconFor(module.icon);
+  const label = module.sidebarMenu.length > 0 ? module.sidebarMenu : module.name;
+  const children = childrenFor(module);
+  return children.length > 0 ? (
+    <NavGroup
+      key={module.id}
+      to={module.href}
+      label={label}
+      icon={Icon}
+      items={children}
+      collapsed={collapsed}
+      onNavigate={onNavigate}
+    />
+  ) : (
     <NavItem
-      key={entry.to}
-      to={entry.to}
-      label={entry.label}
-      icon={entry.icon}
+      key={module.id}
+      to={module.href}
+      label={label}
+      icon={Icon}
+      count={module.count}
+      collapsed={collapsed}
       onNavigate={onNavigate}
     />
   );
 };
 
+const SidebarSkeleton = (): ReactElement => (
+  <div className={styles.navSkeleton}>
+    {['a', 'b', 'c', 'd', 'e', 'f', 'g'].map((key) => (
+      <Skeleton key={key} height={32} />
+    ))}
+  </div>
+);
+
 export interface AppSidebarProps {
-  readonly user: AuthenticatedUser | null;
   /** Whether the mobile drawer is open (ignored on desktop, where it is always visible). */
   readonly open: boolean;
+  /** Whether the desktop rail is collapsed to icon-only (ignored on mobile). */
+  readonly collapsed: boolean;
   /** Called when a nav item is chosen, to dismiss the mobile drawer. */
   readonly onNavigate: () => void;
 }
 
-/** Brand + role-aware grouped navigation. Acts as a fixed sidebar on desktop, a drawer on mobile. */
-export const AppSidebar = ({ user, open, onNavigate }: AppSidebarProps): ReactElement => {
-  const { can } = useMyCapabilities();
-
-  // Role is the outer backstop; a capability (when present) refines visibility within it.
-  const visible = (entry: NavEntry): boolean => {
-    const roleOk = entry.anyOf === undefined || (user?.hasAnyRole(entry.anyOf) ?? false);
-    if (!roleOk) return false;
-    return entry.kind === 'link' && entry.cap !== undefined
-      ? can(entry.cap.module, entry.cap.cap)
-      : true;
-  };
+/**
+ * Brand + permission-driven grouped navigation, rendered from `GET /api/app/my/permission-modules`
+ * (the backend registry is the single source of truth). Fixed sidebar on desktop, drawer on mobile.
+ */
+export const AppSidebar = ({
+  open,
+  collapsed,
+  onNavigate,
+}: AppSidebarProps): ReactElement => {
+  const { data: groups, isPending } = useMyPermissionModules();
 
   return (
     <aside className={cn(styles.sidebar, open && styles.sidebarOpen)}>
       <div className={styles.brand}>
-        <span className={styles.brandMark}>UA</span>
+        <span className={styles.brandMark}>
+          <AcademyLogo size={32} />
+        </span>
         <span className={styles.brandText}>
-          <strong>UAPP Academy</strong>
-          <small>Knowledge Hub</small>
+          <strong>
+            UAPP<sup className={styles.reg}>®</sup>
+          </strong>
+          <span className={styles.brandProduct}>Academy</span>
         </span>
       </div>
       <nav className={styles.nav}>
-        {NAV.filter(visible).map((entry) => renderEntry(entry, onNavigate))}
+        {isPending ? (
+          <SidebarSkeleton />
+        ) : (
+          (groups ?? []).map((group) => (
+            <div key={group.id} className={styles.group}>
+              <div className={styles.section}>{group.label}</div>
+              <div className={styles.groupItems}>
+                {group.items.map((module) => renderModule(module, onNavigate, collapsed))}
+              </div>
+            </div>
+          ))
+        )}
       </nav>
     </aside>
   );

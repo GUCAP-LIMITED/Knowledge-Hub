@@ -1,2 +1,1 @@
-export * from './in-memory-resource-gateway';
-export * from './resource-seed';
+export * from './http-resource-gateway';

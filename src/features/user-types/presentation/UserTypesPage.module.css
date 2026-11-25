@@ -1,0 +1,640 @@
+.screen {
+  width: 100%;
+  padding: 1rem 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-sizing: border-box;
+}
+
+@media (min-width: 960px) {
+  .screen {
+    height: calc(100vh - 60px);
+    max-height: calc(100vh - 60px);
+    min-height: 520px;
+  }
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  transition: color 150ms ease;
+  flex-shrink: 0;
+}
+
+.backLink:hover {
+  color: var(--color-link, var(--color-primary));
+}
+
+.backLink:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.pageHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.headerIcon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #045d5e 0%, #0d9488 100%);
+  color: #ffffff;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.headerTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.headerSubtitle {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(340px, 390px) minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .layout {
+    grid-template-columns: minmax(360px, 420px) minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  .layout {
+    grid-template-columns: minmax(380px, 460px) minmax(0, 1fr);
+    gap: 1.75rem;
+  }
+}
+
+/* ── Left Column: Form Card ── */
+
+.formCard {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.15rem;
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+@media (min-width: 960px) {
+  .formSticky {
+    height: 100%;
+  }
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fieldLabelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fieldLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.requiredStar {
+  color: var(--color-danger);
+  margin-left: 0.2rem;
+}
+
+.counter {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+.counterError {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.adminToggleBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+
+.toggleText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.toggleLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.toggleDesc {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.scopeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.scopeCard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.5rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  cursor: pointer;
+  text-align: center;
+  min-height: 2rem;
+  transition:
+    border-color var(--motion-base) ease,
+    background-color var(--motion-base) ease,
+    box-shadow var(--motion-base) ease;
+}
+
+.scopeCard:hover {
+  border-color: var(--color-border-strong);
+}
+
+.scopeCardSelected {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+}
+
+.scopeCardIcon {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.scopeCardSelected .scopeCardIcon {
+  color: var(--color-primary);
+}
+
+.scopeCardLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.scopeHelpText {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  line-height: 1.2;
+  padding: 0.1rem 0.2rem;
+}
+
+.positionNotice {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.positionNoticeSelected {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  border: 1px solid rgba(4, 93, 94, 0.25);
+}
+
+.positionNoticeEmpty {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  border: 1px dashed var(--color-border-strong);
+}
+
+.formScrollArea {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  padding-right: 0.35rem;
+  margin-right: -0.35rem;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+.formScrollArea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.formScrollArea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.formScrollArea::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-strong);
+  border-radius: var(--radius-full);
+}
+
+.formActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+/* ── Right Column: Hierarchy Tree ── */
+
+.treeCard {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.15rem 1.25rem;
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.treeHead {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.treeScrollArea {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.4rem;
+  padding-bottom: 0.5rem;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+.treeScrollArea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.treeScrollArea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.treeScrollArea::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-strong);
+  border-radius: var(--radius-full);
+}
+
+.treeTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.treeTitle {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.treeSubtitle {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.treeList {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.nodeItem {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.nodeCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.95rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  transition:
+    border-color var(--motion-base) ease,
+    box-shadow var(--motion-base) ease;
+}
+
+.nodeCard:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-xs);
+}
+
+.nodeLead {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.nodeIconBox {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+}
+
+.nodeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.nodeTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.nodeName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.nodeSub {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+}
+
+.nodeActions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.connectorSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.15rem 0;
+}
+
+.connectorLine {
+  width: 2px;
+  height: 10px;
+  background-color: var(--color-border);
+  transition: background-color var(--motion-base) ease;
+}
+
+.connectorLineActive {
+  background-color: var(--color-primary);
+}
+
+.insertBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-full);
+  border: 1.5px dashed var(--color-border-strong);
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  font-size: 0.73rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--motion-base) ease;
+}
+
+.insertBtn:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+}
+
+.insertBtnSelected {
+  border: 2px solid var(--color-primary);
+  background-color: var(--color-primary);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(4, 93, 94, 0.25);
+}
+
+.insertBtnSelected:hover {
+  background-color: var(--color-primary-strong);
+  border-color: var(--color-primary-strong);
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.defaultNotice {
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-warning-soft);
+  color: var(--color-on-warning);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* ── In-Place Edit Mode Enhancements ── */
+
+.nodeCardActive {
+  border-color: var(--color-primary);
+  box-shadow:
+    0 0 0 2px rgba(4, 93, 94, 0.22),
+    var(--shadow-sm);
+  background-color: var(--color-surface);
+}
+
+.nodeCardDimmed {
+  opacity: 0.38;
+  filter: saturate(0.6);
+  transition:
+    opacity var(--motion-base) ease,
+    filter var(--motion-base) ease;
+}
+
+.nodeCardDimmed:hover {
+  opacity: 0.75;
+}
+
+.connectorDimmed {
+  opacity: 0.42;
+  transition: opacity var(--motion-base) ease;
+}
+
+.connectorDimmed:hover {
+  opacity: 0.85;
+}
+
+.insertBtnDisabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.cardHeadEdit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.cancelEditBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-sm);
+  transition: color var(--motion-base) ease;
+}
+
+.cancelEditBtn:hover {
+  color: var(--color-text);
+}
+
+.positionNoticeFixed {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.revertPositionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.1rem 0.25rem;
+  text-decoration: underline;
+}
+
+.nameDisabledHelp {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-top: 0.2rem;
+}

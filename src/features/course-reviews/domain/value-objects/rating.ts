@@ -12,8 +12,16 @@ export class Rating {
   private constructor(public readonly value: number) {}
 
   public static create(raw: number): Result<Rating, InvalidRatingError> {
-    if (!Number.isInteger(raw) || raw < MIN || raw > MAX) {
-      return err(new InvalidRatingError(raw));
+    if (!Number.isInteger(raw)) {
+      return err(new InvalidRatingError(raw, 'must be a whole number'));
+    }
+    if (raw < MIN || raw > MAX) {
+      return err(
+        new InvalidRatingError(
+          raw,
+          `must be between ${String(MIN)} and ${String(MAX)} stars`,
+        ),
+      );
     }
     return ok(new Rating(raw));
   }

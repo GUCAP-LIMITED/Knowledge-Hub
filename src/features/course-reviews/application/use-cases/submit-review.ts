@@ -10,8 +10,8 @@ import {
 } from '../../domain';
 
 export interface SubmitReviewInput {
-  readonly courseId: string;
-  readonly courseName: string;
+  readonly contentId: string;
+  readonly contentName: string;
   readonly userId: string;
   readonly userName: string;
   readonly userRole: string;
@@ -53,7 +53,7 @@ export class SubmitReviewUseCase {
       return feedback;
     }
 
-    const id = Review.idFor(input.courseId, input.userId);
+    const id = Review.idFor(input.contentId, input.userId);
     const existing = await this.reviewGateway.getById(id);
     if (isErr(existing)) {
       return existing;
@@ -62,8 +62,8 @@ export class SubmitReviewUseCase {
 
     const review = new Review({
       id,
-      courseId: input.courseId,
-      courseName: input.courseName,
+      contentId: input.contentId,
+      contentName: input.contentName,
       userId: input.userId,
       userName: input.userName,
       userRole: input.userRole,

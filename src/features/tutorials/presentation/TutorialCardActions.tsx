@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { ClipboardList, Pencil, Play, Trash2 } from 'lucide-react';
+import { Pencil, Play, Trash2 } from 'lucide-react';
 import { Button, IconButton } from '@shared/ui';
 import { useMyCapabilities } from '@features/users';
 import type { Tutorial } from '../domain';
@@ -11,21 +11,20 @@ export interface TutorialCardActionsProps {
   readonly onWatch: (tutorial: Tutorial) => void;
   readonly onEdit: (tutorial: Tutorial) => void;
   readonly onDelete: (id: string) => void;
-  readonly onQuiz: (tutorial: Tutorial) => void;
 }
 
-/** Footer actions for a tutorial card: primary Watch, secondary Quiz, capability-gated edit/delete. */
+/** Footer actions for a tutorial card: primary Watch action + capability-gated edit/delete. */
 export const TutorialCardActions = ({
   tutorial,
   isBusy,
   onWatch,
   onEdit,
   onDelete,
-  onQuiz,
 }: TutorialCardActionsProps): ReactElement => {
   const { can } = useMyCapabilities();
-  const canEdit = can('tutorials', 'edit');
-  const canDelete = can('tutorials', 'delete');
+  const canEdit = can('tutorials', 'edit') && tutorial.canModify;
+  const canDelete = can('tutorials', 'delete') && tutorial.canModify;
+
   return (
     <div className={styles.cardFoot}>
       <Button
@@ -35,15 +34,6 @@ export const TutorialCardActions = ({
         }}
       >
         <Play size={14} aria-hidden="true" /> Watch
-      </Button>
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={() => {
-          onQuiz(tutorial);
-        }}
-      >
-        <ClipboardList size={14} aria-hidden="true" /> Quiz
       </Button>
       {canEdit || canDelete ? (
         <div className={styles.cardAdmin}>

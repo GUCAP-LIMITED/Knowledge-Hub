@@ -1,17 +1,46 @@
 import type { ReactElement, ReactNode } from 'react';
-import type { FieldErrors, UseFormRegister } from 'react-hook-form';
-import { Image, Info, Search, Tags } from 'lucide-react';
-import { Select, TextField, Textarea } from '@shared/ui';
-import { type ContentKind, useContentTypes } from '@features/content-types';
+import type { UseQueryResult } from '@tanstack/react-query';
 import {
-  DIFFICULTIES,
-  type Details,
-  LANGUAGES,
-  VISIBILITY_OPTIONS,
-} from './upload-details';
+  Controller,
+  type Control,
+  type FieldErrors,
+  type UseFormRegister,
+} from 'react-hook-form';
+import { Image, Info, Search, Tags } from 'lucide-react';
+import { RichTextEditor, Select, TextField, type SelectOption } from '@shared/ui';
+import {
+  type CategoryKind,
+  type ContentCategory,
+  useContentCategories,
+} from '@features/content';
+import { DIFFICULTIES, type Details, LANGUAGES } from './upload-details';
 import styles from './UploadPage.module.css';
 
 type Register = UseFormRegister<Details>;
+
+/** Category options for the current type — value is the category id (what the backend persists). */
+function categoryOptions(
+  query: UseQueryResult<readonly ContentCategory[]>,
+): SelectOption[] {
+  return (query.data ?? []).map((cat) => ({ value: cat.id, label: cat.name }));
+}
+
+function categoryPlaceholder(query: UseQueryResult<readonly ContentCategory[]>): string {
+  if (query.isLoading) {
+    return 'Loading…';
+  }
+  return (query.data ?? []).length === 0 ? 'No categories yet' : 'Select…';
+}
+
+const DIFFICULTY_OPTIONS: SelectOption[] = DIFFICULTIES.map((level) => ({
+  value: level,
+  label: level,
+}));
+
+const LANGUAGE_OPTIONS: SelectOption[] = LANGUAGES.map((lang) => ({
+  value: lang,
+  label: lang,
+}));
 
 export const DetailsSection = ({
   icon: Icon,
@@ -33,63 +62,110 @@ export const DetailsSection = ({
   </section>
 );
 
+const GeneralSectionMeta = ({
+  register,
+  control,
+  errors,
+  categories,
+}: {
+  readonly register: Register;
+  readonly control: Control<Details>;
+  readonly errors: FieldErrors<Details>;
+  readonly categories: UseQueryResult<readonly ContentCategory[]>;
+}): ReactElement => (
+  <div className={styles.formRow}>
+    <Controller
+      name="category"
+      control={control}
+      render={({ field }) => (
+        <Select
+          label="Category"
+          required
+          error={errors.category?.message ?? ''}
+          placeholder={categoryPlaceholder(categories)}
+          disabled={categories.isLoading}
+          value={field.value}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          options={categoryOptions(categories)}
+        />
+      )}
+    />
+    <TextField
+      label="Topic"
+      placeholder="e.g. Objection handling"
+      maxChars={200}
+      error={errors.topic?.message}
+      {...register('topic')}
+    />
+    <Controller
+      name="difficulty"
+      control={control}
+      render={({ field }) => (
+        <Select
+          label="Difficulty"
+          required
+          error={errors.difficulty?.message ?? ''}
+          placeholder="Select…"
+          value={field.value}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          options={DIFFICULTY_OPTIONS}
+        />
+      )}
+    />
+  </div>
+);
+
 export const GeneralSection = ({
   register,
+  control,
   errors,
   kind,
 }: {
   readonly register: Register;
+  readonly control: Control<Details>;
   readonly errors: FieldErrors<Details>;
-  readonly kind: ContentKind | null;
+  readonly kind: CategoryKind | null;
 }): ReactElement => {
-  const categories = useContentTypes(kind ?? 'course');
+  const categories = useContentCategories(kind ?? 'course');
   return (
     <DetailsSection icon={Info} title="General information">
       <div className={styles.form}>
         <TextField
           label="Title"
+          required
           placeholder="e.g. Mastering the UAPP Sales Pipeline"
+          maxChars={200}
           error={errors.title?.message ?? ''}
           {...register('title')}
         />
         <TextField
           label="Subtitle"
           placeholder="Short, benefit-led summary"
+          maxChars={300}
+          error={errors.subtitle?.message}
           {...register('subtitle')}
         />
-        <Textarea
-          label="Description"
-          rows={4}
-          placeholder="What will learners take away? Who is it for?"
-          error={errors.description?.message ?? ''}
-          {...register('description')}
+        <Controller
+          name="description"
+          control={control}
+          render={({ field }) => (
+            <RichTextEditor
+              label="Description"
+              required
+              initialValue={field.value}
+              onChange={field.onChange}
+              error={errors.description?.message}
+            />
+          )}
         />
-        <div className={styles.formRow}>
-          <Select
-            label="Category"
-            error={errors.category?.message ?? ''}
-            {...register('category')}
-          >
-            <option value="">Select…</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </Select>
-          <TextField
-            label="Topic"
-            placeholder="e.g. Objection handling"
-            {...register('topic')}
-          />
-          <Select label="Difficulty" {...register('difficulty')}>
-            {DIFFICULTIES.map((level) => (
-              <option key={level} value={level}>
-                {level}
-              </option>
-            ))}
-          </Select>
-        </div>
+        <GeneralSectionMeta
+          register={register}
+          control={control}
+          errors={errors}
+          categories={categories}
+        />
       </div>
     </DetailsSection>
   );
@@ -97,49 +173,59 @@ export const GeneralSection = ({
 
 export const MetadataSection = ({
   register,
+  control,
+  errors,
 }: {
   readonly register: Register;
+  readonly control: Control<Details>;
+  readonly errors?: FieldErrors<Details>;
 }): ReactElement => (
   <DetailsSection icon={Tags} title="Metadata">
     <div className={styles.form}>
       <TextField
         label="Tags"
-        placeholder="Comma-separated — helps search & recommendations"
+        placeholder="Comma-separated (max 80 chars per tag)"
+        error={errors?.tags?.message}
         {...register('tags')}
       />
-      <div className={styles.formRow}>
-        <Select label="Language" {...register('language')}>
-          {LANGUAGES.map((lang) => (
-            <option key={lang} value={lang}>
-              {lang}
-            </option>
-          ))}
-        </Select>
-        <TextField
-          label="Duration (min)"
-          placeholder="e.g. 45"
-          {...register('duration')}
-        />
-      </div>
+      <Controller
+        name="language"
+        control={control}
+        render={({ field }) => (
+          <Select
+            label="Language"
+            value={field.value}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            options={LANGUAGE_OPTIONS}
+          />
+        )}
+      />
     </div>
   </DetailsSection>
 );
 
 export const MediaSection = ({
   register,
+  errors,
 }: {
   readonly register: Register;
+  readonly errors?: FieldErrors<Details>;
 }): ReactElement => (
   <DetailsSection icon={Image} title="Media">
     <div className={styles.formRow}>
       <TextField
         label="Thumbnail alt text"
         placeholder="For accessibility"
+        maxChars={300}
+        error={errors?.thumbnailAlt?.message}
         {...register('thumbnailAlt')}
       />
       <TextField
         label="Cover image alt"
         placeholder="For the banner image"
+        maxChars={300}
+        error={errors?.coverAlt?.message}
         {...register('coverAlt')}
       />
     </div>
@@ -148,34 +234,18 @@ export const MediaSection = ({
 
 export const SeoSection = ({
   register,
+  errors,
 }: {
   readonly register: Register;
+  readonly errors?: FieldErrors<Details>;
 }): ReactElement => (
   <DetailsSection icon={Search} title="SEO & discovery">
     <TextField
       label="Search keywords"
       placeholder="onboarding, portal, new joiner"
+      maxChars={1000}
+      error={errors?.keywords?.message}
       {...register('keywords')}
     />
-  </DetailsSection>
-);
-
-export const VisibilitySection = ({
-  register,
-}: {
-  readonly register: Register;
-}): ReactElement => (
-  <DetailsSection icon={Search} title="Visibility">
-    <div className={styles.visList}>
-      {VISIBILITY_OPTIONS.map((option) => (
-        <label key={option.value} className={styles.visOption}>
-          <input type="radio" value={option.value} {...register('visibility')} />
-          <span>
-            <span className={styles.visTitle}>{option.title}</span>
-            <span className={styles.visDesc}>{option.desc}</span>
-          </span>
-        </label>
-      ))}
-    </div>
   </DetailsSection>
 );

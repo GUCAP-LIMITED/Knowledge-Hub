@@ -1,0 +1,80 @@
+.bottomNav {
+  display: none;
+}
+
+/* Mirrors AppLayout's sidebar-to-drawer breakpoint — the sidebar becomes an off-canvas drawer
+   below 720px, so this tab bar takes over as the always-visible primary navigation. */
+@media (max-width: 720px) {
+  .bottomNav {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    background-color: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+.item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.5rem 0.25rem 0.4rem;
+  border-top: 2px solid transparent;
+  color: var(--color-text-subtle);
+  text-decoration: none;
+  transition: color var(--motion-base) var(--motion-ease-out);
+}
+
+.item:active {
+  background-color: var(--color-surface-muted);
+}
+
+.itemActive {
+  color: var(--color-link);
+  border-top-color: var(--color-primary);
+}
+
+/* Icon stage: a soft radial glow fades in behind the active icon, centred above it, so the
+   icon reads as lit from above rather than just recoloured. */
+.iconWrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 28px;
+  border-radius: var(--radius-full);
+}
+
+.iconWrap::before {
+  content: '';
+  position: absolute;
+  inset: -6px 2px 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    ellipse 120% 130% at 50% -35%,
+    color-mix(in srgb, var(--color-primary) 30%, transparent) 0%,
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity var(--motion-base) var(--motion-ease-out);
+}
+
+.itemActive .iconWrap::before {
+  opacity: 1;
+}
+
+.label {
+  position: relative;
+  font-size: 0.68rem;
+  font-weight: 600;
+  white-space: nowrap;
+}

@@ -1,6 +1,9 @@
 /** The grade tiers a certificate can carry. */
 export type CertificateGrade = 'Distinction' | 'Merit' | 'Pass';
 
+/** Which content kind this certificate was issued for — picks the matching design. */
+export type CertificateContentKind = 'course' | 'tutorial' | 'resource';
+
 /** A certificate is treated as "expiring soon" within this many days of its expiry. */
 export const EXPIRING_SOON_DAYS = 90;
 
@@ -8,15 +11,17 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 export interface CertificateProps {
   readonly id: string;
-  readonly courseId: string;
   readonly courseName: string;
   readonly userName: string;
   readonly userRole: string;
   readonly issuedDate: Date;
-  readonly expiryDate: Date;
+  readonly expiryDate?: Date | undefined;
   readonly credentialId: string;
   readonly category: string;
-  readonly grade: CertificateGrade;
+  readonly grade?: CertificateGrade | undefined;
+  readonly contentKind: CertificateContentKind;
+  readonly blobUrl?: string | undefined;
+  readonly blobName?: string | undefined;
 }
 
 /**
@@ -27,19 +32,20 @@ export interface CertificateProps {
  */
 export class Certificate {
   public readonly id: string;
-  public readonly courseId: string;
   public readonly courseName: string;
   public readonly userName: string;
   public readonly userRole: string;
   public readonly issuedDate: Date;
-  public readonly expiryDate: Date;
+  public readonly expiryDate?: Date | undefined;
   public readonly credentialId: string;
   public readonly category: string;
   public readonly grade: CertificateGrade;
+  public readonly contentKind: CertificateContentKind;
+  public readonly blobUrl?: string | undefined;
+  public readonly blobName?: string | undefined;
 
   public constructor(props: CertificateProps) {
     this.id = props.id;
-    this.courseId = props.courseId;
     this.courseName = props.courseName;
     this.userName = props.userName;
     this.userRole = props.userRole;
@@ -47,7 +53,10 @@ export class Certificate {
     this.expiryDate = props.expiryDate;
     this.credentialId = props.credentialId;
     this.category = props.category;
-    this.grade = props.grade;
+    this.grade = props.grade ?? 'Pass';
+    this.contentKind = props.contentKind;
+    this.blobUrl = props.blobUrl;
+    this.blobName = props.blobName;
   }
 
   /** True when this certificate was issued to the given learner (case-insensitive). */
@@ -62,11 +71,17 @@ export class Certificate {
 
   /** Whole days from `now` until expiry (negative once expired). Time is injected, never read. */
   public daysUntilExpiry(now: Date): number {
+    if (this.expiryDate === undefined) {
+      return 365;
+    }
     return Math.ceil((this.expiryDate.getTime() - now.getTime()) / MS_PER_DAY);
   }
 
   /** True when the certificate expires within {@link EXPIRING_SOON_DAYS}. */
   public isExpiringSoon(now: Date): boolean {
+    if (this.expiryDate === undefined) {
+      return false;
+    }
     return this.daysUntilExpiry(now) < EXPIRING_SOON_DAYS;
   }
 

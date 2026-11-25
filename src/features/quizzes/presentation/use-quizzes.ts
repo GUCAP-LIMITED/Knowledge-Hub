@@ -17,10 +17,14 @@ export const quizzesQueryKey = (contentId: string): readonly string[] => [
 ];
 
 /** Fetch every quiz attached to a piece of content. */
-export const useQuizzes = (contentId: string): UseQueryResult<readonly Quiz[]> => {
+export const useQuizzes = (
+  contentId: string,
+  options?: { readonly enabled?: boolean },
+): UseQueryResult<readonly Quiz[]> => {
   const { listQuizzes } = useQuizzesModule();
   return useQuery({
     queryKey: quizzesQueryKey(contentId),
+    enabled: options?.enabled ?? true,
     queryFn: async (): Promise<readonly Quiz[]> => {
       const result = await listQuizzes.execute(contentId);
       if (isErr(result)) {

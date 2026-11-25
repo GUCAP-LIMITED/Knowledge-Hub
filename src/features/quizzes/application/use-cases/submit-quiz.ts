@@ -1,4 +1,4 @@
-import { type Result, err, ok } from '@core/result';
+import { type Result, err } from '@core/result';
 import type { Logger } from '@core/logger';
 import {
   type QuizAnswers,
@@ -35,6 +35,6 @@ export class SubmitQuizUseCase {
       this.logger.warn('No quiz to grade', { quizId });
       return err(new QuizNotFoundError(quizId));
     }
-    return ok(found.value.grade(answers));
+    return this.quizGateway.submit(quizId, answers, found.value);
   }
 }

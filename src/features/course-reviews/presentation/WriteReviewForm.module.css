@@ -19,7 +19,6 @@
   font-weight: 600;
 }
 
-.select,
 .textarea {
   padding: 0.55rem 0.75rem;
   border: 1px solid var(--color-border);
@@ -27,18 +26,10 @@
   background-color: var(--color-surface);
   color: var(--color-text);
   font: inherit;
-}
-
-.select {
-  height: 40px;
-}
-
-.textarea {
   resize: vertical;
   min-height: 72px;
 }
 
-.select:focus-visible,
 .textarea:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 1px;
@@ -47,4 +38,28 @@
 .error {
   font-size: 0.8rem;
   color: var(--color-danger);
+}
+
+.submit {
+  align-self: flex-end;
+}
+
+.topRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4, 1rem);
+  flex-wrap: wrap;
+}
+
+.fieldGrow {
+  flex: 1 1 200px;
+  min-width: 180px;
+}
+
+.ratingField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-bottom: 0.25rem;
+  min-width: fit-content;
 }

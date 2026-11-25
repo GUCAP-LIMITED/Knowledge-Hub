@@ -9,9 +9,12 @@ export {
 } from './quizzes-module';
 export {
   QuizzesModuleProvider,
-  QuizManagerModal,
+  QuizRunner,
   useQuizzes,
+  useQuizLearnerStatus,
+  quizLearnerStatusQueryKey,
   useQuizPassed,
+  useQuizProgressStore,
   quizzesQueryKey,
 } from './presentation';
 export { Quiz, QuizResult, type QuizContentKind } from './domain';

@@ -12,8 +12,10 @@ export interface QuizProps {
   readonly contentId: string;
   readonly contentKind: QuizContentKind;
   readonly title: string;
-  /** Percentage (0–100) a learner must reach to pass. */
-  readonly passMark: number;
+  /** Percentage (0–100, decimals allowed) a learner must reach to pass. */
+  readonly passingPercentage?: number | undefined;
+  readonly isMultipleAttemptAllowed?: boolean | undefined;
+  readonly version?: number | undefined;
   readonly questions: readonly QuizQuestionProps[];
 }
 
@@ -27,7 +29,9 @@ export class Quiz {
   public readonly contentId: string;
   public readonly contentKind: QuizContentKind;
   public readonly title: string;
-  public readonly passMark: number;
+  public readonly passingPercentage: number;
+  public readonly isMultipleAttemptAllowed: boolean;
+  public readonly version: number;
   public readonly questions: readonly QuizQuestion[];
 
   public constructor(props: QuizProps) {
@@ -35,8 +39,12 @@ export class Quiz {
     this.contentId = props.contentId;
     this.contentKind = props.contentKind;
     this.title = props.title;
-    this.passMark = clampPct(props.passMark);
-    this.questions = props.questions.map((q) => new QuizQuestion(q));
+    this.passingPercentage = clampPct(props.passingPercentage ?? 80);
+    this.isMultipleAttemptAllowed = props.isMultipleAttemptAllowed ?? true;
+    this.version = props.version ?? 1;
+    this.questions = [...props.questions]
+      .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+      .map((q) => new QuizQuestion(q));
   }
 
   /** Number of questions in the quiz. */
@@ -44,19 +52,27 @@ export class Quiz {
     return this.questions.length;
   }
 
-  /** Grade a set of answers against the questions and pass mark. */
+  /** Grade a set of answers against the questions and passing percentage. */
   public grade(answers: QuizAnswers): QuizResult {
     const correct = this.questions.reduce(
       (total, question) =>
         total + (question.isCorrect(answers[question.id] ?? []) ? 1 : 0),
       0,
     );
-    return QuizResult.from(correct, this.questions.length, this.passMark);
+    return QuizResult.from(
+      correct,
+      this.questions.length,
+      this.passingPercentage,
+      this.isMultipleAttemptAllowed,
+      1,
+      1,
+      this.version,
+    );
   }
 
-  /** Return a copy with a new pass mark (clamped to 0–100). */
-  public withPassMark(passMark: number): Quiz {
-    return new Quiz({ ...this.toProps(), passMark });
+  /** Return a copy with a new passing percentage (clamped to 0–100). */
+  public withPassingPercentage(passingPercentage: number): Quiz {
+    return new Quiz({ ...this.toProps(), passingPercentage });
   }
 
   /** Return a copy with a replaced question list. */
@@ -70,15 +86,20 @@ export class Quiz {
       contentId: this.contentId,
       contentKind: this.contentKind,
       title: this.title,
-      passMark: this.passMark,
+      passingPercentage: this.passingPercentage,
+      isMultipleAttemptAllowed: this.isMultipleAttemptAllowed,
+      version: this.version,
       questions: this.questions.map((q) => ({
         id: q.id,
         prompt: q.prompt,
+        displayOrder: q.displayOrder,
         options: q.options,
+        optionIds: q.optionIds,
         correctIndexes: q.correctIndexes,
       })),
     };
   }
 }
 
-const clampPct = (value: number): number => Math.max(0, Math.min(100, Math.round(value)));
+const clampPct = (value: number): number =>
+  Math.max(0, Math.min(100, Number.isFinite(value) ? value : 80));

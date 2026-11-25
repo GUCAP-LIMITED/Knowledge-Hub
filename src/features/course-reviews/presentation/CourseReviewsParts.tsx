@@ -1,46 +1,63 @@
-import { useMemo, useState, type ReactElement } from 'react';
-import { useNavigate } from 'react-router-dom';
+import type { ReactElement } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { ExternalLink, MoreHorizontal, Trash2 } from 'lucide-react';
 import {
+  Alert,
   Avatar,
   DropdownMenu,
+  type DropdownMenuItem,
   EmptyState,
   FilterBar,
   IconButton,
+  RowListSkeleton,
   Select,
   TextField,
 } from '@shared/ui';
+import { useMyCapabilities } from '@features/users';
 import { cn } from '@shared/utils';
-import type { Review } from '../domain';
+import type { RecentReview, TopRatedCourse } from '../domain';
 import { StarRating } from './StarRating';
-import { type CourseRating, ratingBand } from './course-reviews-analytics';
+import { ratingBand } from './course-reviews-analytics';
 import styles from './CourseReviewsPage.module.css';
 
 export interface TopRatedCardProps {
-  readonly courses: readonly CourseRating[];
+  readonly courses: readonly TopRatedCourse[];
 }
 
 /** Ranked list of courses by average rating. */
 export const TopRatedCard = ({ courses }: TopRatedCardProps): ReactElement => (
   <div className={styles.card}>
     <h2 className={styles.cardHeading}>Top Rated Courses</h2>
-    {courses.map((course, index) => (
-      <div key={course.courseId} className={styles.rankRow}>
-        <span className={cn(styles.rank, index === 0 && styles.rankTop)}>
-          {index + 1}
-        </span>
-        <div className={styles.rankBody}>
-          <span className={styles.rankTitle}>{course.courseName}</span>
-          <div className={styles.rankMeta}>
-            <StarRating value={Math.round(course.avg)} size="sm" />
-            <span className={styles.rankStat}>
-              {course.avg.toFixed(1)} • {course.count} review
-              {course.count === 1 ? '' : 's'}
+    {courses.length === 0 ? (
+      <EmptyState
+        title="No rated courses"
+        description="Courses with reviews will appear here."
+      />
+    ) : (
+      <div className={styles.rankScroll}>
+        {courses.map((course, index) => (
+          <Link
+            key={course.courseId}
+            to={`/courses/${course.slug || course.courseId}`}
+            className={styles.rankRow}
+          >
+            <span className={cn(styles.rank, index === 0 && styles.rankTop)}>
+              {index + 1}
             </span>
-          </div>
-        </div>
+            <div className={styles.rankBody}>
+              <span className={styles.rankTitle}>{course.title}</span>
+              <div className={styles.rankMeta}>
+                <StarRating value={Math.round(course.averageRating)} size="sm" />
+                <span className={styles.rankStat}>
+                  {course.averageRating.toFixed(1)} • {course.totalReviews} review
+                  {course.totalReviews === 1 ? '' : 's'}
+                </span>
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
-    ))}
+    )}
   </div>
 );
 
@@ -50,87 +67,116 @@ const RecentReviewItem = ({
   onDelete,
   onViewCourse,
 }: {
-  readonly review: Review;
+  readonly review: RecentReview;
   readonly deleting: boolean;
   readonly onDelete: (id: string) => void;
   readonly onViewCourse: (courseId: string) => void;
-}): ReactElement => (
-  <div className={cn(styles.reviewItem, styles[ratingBand(review.rating)])}>
-    <div className={styles.reviewTop}>
-      <div className={styles.reviewer}>
-        <Avatar name={review.userName} size={28} />
-        <div>
-          <div className={styles.reviewerName}>{review.userName}</div>
-          <div className={styles.reviewerCourse}>{review.courseName}</div>
+}): ReactElement => {
+  const { can } = useMyCapabilities();
+  const canDelete = can('reviews', 'delete');
+
+  const menuItems: DropdownMenuItem[] = [
+    {
+      label: 'View course',
+      icon: <ExternalLink size={15} />,
+      onSelect: () => {
+        onViewCourse(review.contentItemId);
+      },
+    },
+  ];
+
+  if (canDelete) {
+    menuItems.push({
+      label: 'Delete review',
+      danger: true,
+      disabled: deleting,
+      icon: <Trash2 size={15} />,
+      onSelect: () => {
+        onDelete(review.id);
+      },
+    });
+  }
+
+  return (
+    <div className={cn(styles.reviewItem, styles[ratingBand(review.rating)])}>
+      <div className={styles.reviewTop}>
+        <div className={styles.reviewer}>
+          <Avatar name={review.reviewerName} size={28} />
+          <div>
+            <div className={styles.reviewerName}>{review.reviewerName}</div>
+            <Link
+              to={`/courses/${review.courseSlug || review.contentItemId}`}
+              className={styles.reviewerCourse}
+            >
+              {review.courseTitle}
+            </Link>
+          </div>
+        </div>
+        <div className={styles.reviewRight}>
+          <StarRating value={review.rating} size="sm" />
+          {canDelete ? (
+            <IconButton
+              label="Delete review"
+              variant="danger"
+              disabled={deleting}
+              onClick={() => {
+                onDelete(review.id);
+              }}
+            >
+              <Trash2 size={15} />
+            </IconButton>
+          ) : null}
+          <DropdownMenu
+            align="end"
+            trigger={
+              <IconButton label="Review actions">
+                <MoreHorizontal size={16} />
+              </IconButton>
+            }
+            items={menuItems}
+          />
         </div>
       </div>
-      <div className={styles.reviewRight}>
-        <StarRating value={review.rating} size="sm" />
-        <DropdownMenu
-          align="end"
-          trigger={
-            <IconButton label="Review actions">
-              <MoreHorizontal size={16} />
-            </IconButton>
-          }
-          items={[
-            {
-              label: 'View course',
-              icon: <ExternalLink size={15} />,
-              onSelect: () => {
-                onViewCourse(review.courseId);
-              },
-            },
-            {
-              label: 'Delete review',
-              danger: true,
-              disabled: deleting,
-              icon: <Trash2 size={15} />,
-              onSelect: () => {
-                onDelete(review.id);
-              },
-            },
-          ]}
-        />
-      </div>
+      <p className={styles.reviewText}>{review.feedback}</p>
     </div>
-    <p className={styles.reviewText}>{review.feedback}</p>
-  </div>
-);
+  );
+};
 
 export interface RecentReviewsCardProps {
-  readonly reviews: readonly Review[];
+  readonly reviews: readonly RecentReview[];
+  readonly totalCount: number;
+  readonly query: string;
+  readonly rating: string;
+  readonly onQueryChange: (query: string) => void;
+  readonly onRatingChange: (rating: string) => void;
   readonly deleting: boolean;
   readonly onDelete: (id: string) => void;
+  readonly isLoading?: boolean | undefined;
+  readonly isError?: boolean | undefined;
+  readonly errorMessage?: string | undefined;
 }
 
 /** Filterable, scrollable list of reviews with per-item moderation actions. */
 export const RecentReviewsCard = ({
   reviews,
+  totalCount,
+  query,
+  rating,
+  onQueryChange,
+  onRatingChange,
   deleting,
   onDelete,
+  isLoading,
+  isError,
+  errorMessage,
 }: RecentReviewsCardProps): ReactElement => {
   const navigate = useNavigate();
-  const [query, setQuery] = useState('');
-  const [rating, setRating] = useState('all');
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return reviews.filter(
-      (r) =>
-        (rating === 'all' || r.rating === Number(rating)) &&
-        (q === '' ||
-          r.userName.toLowerCase().includes(q) ||
-          r.courseName.toLowerCase().includes(q) ||
-          r.feedback.toLowerCase().includes(q)),
-    );
-  }, [reviews, query, rating]);
 
   return (
     <div className={styles.card}>
       <div className={styles.recentHead}>
         <h2 className={styles.cardHeading}>Recent Reviews</h2>
-        <span className={styles.recentCount}>{filtered.length}</span>
+        <span className={styles.recentCount}>{totalCount}</span>
       </div>
       <FilterBar
         search={
@@ -139,7 +185,7 @@ export const RecentReviewsCard = ({
             placeholder="Search reviewer, course, feedback…"
             value={query}
             onChange={(event) => {
-              setQuery(event.target.value);
+              onQueryChange(event.target.value);
             }}
           />
         }
@@ -147,20 +193,26 @@ export const RecentReviewsCard = ({
           <Select
             label="Rating"
             value={rating}
-            onChange={(event) => {
-              setRating(event.target.value);
-            }}
-          >
-            <option value="all">All ratings</option>
-            {[5, 4, 3, 2, 1].map((n) => (
-              <option key={n} value={n}>
-                {n} star{n === 1 ? '' : 's'}
-              </option>
-            ))}
-          </Select>
+            onChange={onRatingChange}
+            options={[
+              { value: 'all', label: 'All ratings' },
+              ...[5, 4, 3, 2, 1].map((n) => ({
+                value: String(n),
+                label: `${String(n)} star${n === 1 ? '' : 's'}`,
+              })),
+            ]}
+          />
         }
       />
-      {filtered.length === 0 ? (
+      {isError ? (
+        <Alert tone="error" title="Could not load reviews">
+          {errorMessage ?? 'Review data is currently unavailable.'}
+        </Alert>
+      ) : isLoading && reviews.length === 0 ? (
+        <div className={styles.reviewScroll}>
+          <RowListSkeleton count={4} />
+        </div>
+      ) : reviews.length === 0 ? (
         <EmptyState
           title="No reviews match"
           description="Try another search or rating."
@@ -168,7 +220,7 @@ export const RecentReviewsCard = ({
       ) : (
         <div className={styles.reviewScroll}>
           <div className={styles.reviewList}>
-            {filtered.map((review) => (
+            {reviews.map((review) => (
               <RecentReviewItem
                 key={review.id}
                 review={review}

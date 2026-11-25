@@ -1,34 +1,43 @@
 import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { PlayCircle } from 'lucide-react';
-import { Badge, EmptyState, ProgressBar, StatCard } from '@shared/ui';
+import { Badge, Button, EmptyState, ProgressBar, StatCard } from '@shared/ui';
 import { cn } from '@shared/utils';
-import type { Course } from '@features/courses';
+import { useCourseCategoryName, type Course } from '@features/courses';
 import type { Announcement } from '@features/notifications';
 import type { QuickAction, Stat } from './dashboard-data';
 import styles from './DashboardPage.module.css';
 
 export const WelcomeHero = ({
+  name,
   firstName,
   subtitle,
+  className,
 }: {
-  readonly firstName: string;
+  readonly name?: string | undefined;
+  readonly firstName?: string | undefined;
   readonly subtitle: string;
-}): ReactElement => (
-  <div className={styles.hero}>
-    <div className={styles.heroBlob} />
-    <div className={styles.heroEyebrow}>Knowledge Hub</div>
-    <h1 className={styles.heroTitle}>Welcome back, {firstName}</h1>
-    <p className={styles.heroSubtitle}>{subtitle}</p>
-  </div>
-);
+  readonly className?: string | undefined;
+}): ReactElement => {
+  const displayName = name ?? firstName ?? 'there';
+  return (
+    <div className={cn(styles.hero, className)}>
+      {/* <div className={styles.heroBlob} /> */}
+      <div className={styles.heroEyebrow}>Academy</div>
+      <h1 className={styles.heroTitle}>Welcome back, {displayName}</h1>
+      <p className={styles.heroSubtitle}>{subtitle}</p>
+    </div>
+  );
+};
 
 export const QuickActions = ({
   actions,
+  className,
 }: {
   readonly actions: readonly QuickAction[];
+  readonly className?: string | undefined;
 }): ReactElement => (
-  <div className={styles.actions}>
+  <div className={cn(styles.actions, className)}>
     {actions.map((action) => {
       const Icon = action.icon;
       return (
@@ -66,6 +75,26 @@ export const StatsGrid = ({
   </div>
 );
 
+const ContinueLearningRow = ({ course }: { readonly course: Course }): ReactElement => {
+  const categoryName = useCourseCategoryName(course.categoryId);
+
+  return (
+    <Link to={`/courses/${course.slug || course.id}`} className={styles.courseRow}>
+      <span className={styles.courseThumb}>
+        <PlayCircle size={22} aria-hidden="true" />
+      </span>
+      <span className={styles.courseInfo}>
+        <span className={styles.courseTitle}>{course.title}</span>
+        <span className={styles.courseMeta}>
+          {categoryName ? `${categoryName} · ` : ''}
+          {course.duration} · {course.progress}%
+        </span>
+        <ProgressBar value={course.progress} tone="auto" />
+      </span>
+    </Link>
+  );
+};
+
 export const ContinueLearningCard = ({
   courses,
 }: {
@@ -74,9 +103,9 @@ export const ContinueLearningCard = ({
   <div className={styles.panel}>
     <div className={styles.panelHead}>
       <h2 className={styles.panelTitle}>Continue Learning</h2>
-      <Link to="/my-learning" className={styles.viewAll}>
-        View all
-      </Link>
+      <Button asChild variant="link" size="sm">
+        <Link to="/my-learning">View all</Link>
+      </Button>
     </div>
     {courses.length === 0 ? (
       <EmptyState
@@ -86,18 +115,7 @@ export const ContinueLearningCard = ({
     ) : (
       <div className={styles.rows}>
         {courses.slice(0, 4).map((course) => (
-          <Link key={course.id} to={`/courses/${course.id}`} className={styles.courseRow}>
-            <span className={styles.courseThumb}>
-              <PlayCircle size={22} aria-hidden="true" />
-            </span>
-            <span className={styles.courseInfo}>
-              <span className={styles.courseTitle}>{course.title}</span>
-              <span className={styles.courseMeta}>
-                {course.category} · {course.duration} · {course.progress}%
-              </span>
-              <ProgressBar value={course.progress} tone="auto" />
-            </span>
-          </Link>
+          <ContinueLearningRow key={course.id} course={course} />
         ))}
       </div>
     )}
@@ -124,9 +142,9 @@ export const AnnouncementsCard = ({
         ) : null}
       </h2>
       {unread > 0 ? (
-        <button type="button" className={styles.viewAll} onClick={onMarkAll}>
+        <Button variant="link" size="sm" onClick={onMarkAll}>
           Mark all read
-        </button>
+        </Button>
       ) : null}
     </div>
     {announcements.length === 0 ? (

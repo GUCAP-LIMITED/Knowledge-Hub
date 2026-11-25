@@ -7,5 +7,40 @@ export {
   type TutorialsModule,
   type TutorialsModuleDeps,
 } from './tutorials-module';
-export { TutorialsModuleProvider, useTutorials, tutorialsQueryKey } from './presentation';
-export { Tutorial, type TutorialProps } from './domain';
+export {
+  TutorialsModuleProvider,
+  useTutorials,
+  useInfiniteTutorials,
+  useTutorial,
+  useUpdateTutorial,
+  useMarkTutorialComplete,
+  useMarkTutorialHelpful,
+  useMarkVideoComplete,
+  tutorialsQueryKey,
+  tutorialQueryKey,
+  TutorialEditModal,
+  type TutorialEditModalProps,
+  formatVideoTitle,
+  formatVideoTimestamp,
+  formatPlaylistDuration,
+  computePlaylistTotalDuration,
+  type PlaylistDurationVideoItem,
+  measureVideoDuration,
+  TutorialPlaylistSidebar,
+  TutorialPlayerControls,
+  ExternalVideoHint,
+  type ExternalVideoHintProps,
+  useTutorialAutoplay,
+  type UseTutorialAutoplayReturn,
+  type AutoplayPhase,
+} from './presentation';
+export {
+  Tutorial,
+  type TutorialProps,
+  type TutorialVideo,
+  type TutorialCatalogParams,
+  type PagedResult,
+  getSavedPlaylistOrder,
+  savePlaylistOrder,
+  sortMediaBySavedOrder,
+} from './domain';

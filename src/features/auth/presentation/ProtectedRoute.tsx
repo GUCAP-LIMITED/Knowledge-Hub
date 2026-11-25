@@ -4,18 +4,16 @@ import { Spinner } from '@shared/ui';
 import { useAuth } from './use-auth';
 
 export interface ProtectedRouteProps {
-  /** Optional role gate — user must hold at least one of these roles. */
-  readonly anyOf?: readonly string[];
   readonly redirectTo?: string;
 }
 
 /**
- * Route guard. Renders the matched child route only for an authenticated (and, optionally,
- * suitably-authorized) user; otherwise redirects to sign-in. Keeping this in one place means no
- * page re-implements the "am I allowed here?" check.
+ * Route guard. Renders the matched child route only for an authenticated user; otherwise
+ * redirects to sign-in. Authorization (which permission a route needs) is a separate concern —
+ * see <RequirePermission>. Keeping this in one place means no page re-implements the
+ * "am I signed in?" check.
  */
 export const ProtectedRoute = ({
-  anyOf,
   redirectTo = '/login',
 }: ProtectedRouteProps): ReactElement => {
   const { status, user } = useAuth();
@@ -36,10 +34,6 @@ export const ProtectedRoute = ({
 
   if (status !== 'authenticated' || user === null) {
     return <Navigate to={redirectTo} replace />;
-  }
-
-  if (anyOf !== undefined && anyOf.length > 0 && !user.hasAnyRole(anyOf)) {
-    return <Navigate to="/forbidden" replace />;
   }
 
   return <Outlet />;

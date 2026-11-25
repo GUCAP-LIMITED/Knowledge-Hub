@@ -101,59 +101,109 @@
 .runner {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
+  padding: 2rem;
+  border-radius: var(--radius-xl, 1.5rem);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
 }
 
-.runnerMeta {
-  margin: 0;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--color-secondary-strong);
+.runnerHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.progressText {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-subtle);
+}
+
+.progressPercentage {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.progressBarWrapper {
+  height: 6px;
+  background-color: var(--color-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  width: 100%;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: 99px;
+}
+
+.questionContainer {
+  min-height: 350px;
+  display: flex;
+  flex-direction: column;
 }
 
 .question {
   margin: 0;
-  padding: 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-surface);
+  padding: 0;
+  border: none;
+  background: transparent;
 }
 
 .questionPrompt {
-  padding: 0;
-  font-weight: 600;
-  font-size: 0.95rem;
+  padding: 0 0 1.5rem 0;
+  font-weight: 800;
+  font-size: 1.5rem;
+  line-height: 1.4;
   color: var(--color-text);
 }
 
 .options {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
+  gap: 1rem;
 }
 
-.option {
+.optionCard {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 0.75rem;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg, 1rem);
+  background-color: var(--color-surface);
   cursor: pointer;
-  font-size: 0.9rem;
-  transition:
-    border-color 0.15s ease,
-    background-color 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-xs);
 }
 
-.option:hover {
-  border-color: var(--color-primary);
+.optionCard:hover {
+  background-color: var(--color-bg-subtle);
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
 }
 
-.optionSelected {
-  border-color: var(--color-primary);
+.optionCardSelected {
   background-color: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  box-shadow: var(--ring);
 }
 
 .optionInput {
@@ -166,102 +216,462 @@
 .optionBox {
   display: grid;
   place-items: center;
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-on-primary);
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease;
+  border-radius: 8px;
+  border: 2px solid var(--color-border-strong);
+  background-color: var(--color-surface);
+  color: transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .optionBoxOn {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: 0 0 12px var(--color-primary-soft);
+}
+
+.optionText {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 .runnerFoot {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+  margin-top: auto;
 }
 
-.runnerProgress {
-  font-size: 0.85rem;
-  color: var(--color-text-subtle);
-}
-
+/* --- Result --- */
 /* --- Result --- */
 .result {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  padding: 1.75rem 1.25rem;
-  border-radius: var(--radius-lg);
+  gap: 1.5rem;
+  padding: 3.5rem 2.5rem;
+  border-radius: var(--radius-xl, 1.5rem);
   text-align: center;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background glows for the result card */
+.result::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at top, var(--color-bg-subtle) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .resultPass {
-  background-color: var(--color-success-soft, rgba(4, 93, 94, 0.08));
-  border: 1px solid var(--color-primary);
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(
+    180deg,
+    var(--color-success-soft) 0%,
+    var(--color-surface) 100%
+  );
+  border-top: 4px solid var(--color-success);
 }
 
 .resultFail {
-  background-color: var(--color-danger-soft);
-  border: 1px solid var(--color-danger);
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(
+    180deg,
+    var(--color-danger-soft) 0%,
+    var(--color-surface) 100%
+  );
+  border-top: 4px solid var(--color-danger);
 }
 
 .resultIcon {
+  position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
+  width: 90px;
+  height: 90px;
   border-radius: var(--radius-full);
-  background-color: var(--color-surface);
+  background-color: var(--color-danger-soft);
   color: var(--color-danger);
+  box-shadow:
+    0 0 30px var(--color-danger-soft),
+    inset 0 0 0 1px var(--color-danger);
 }
 
 .resultPass .resultIcon {
-  color: var(--color-primary);
+  background-color: var(--color-success-soft);
+  color: var(--color-success);
+  box-shadow:
+    0 0 30px var(--color-success-soft),
+    inset 0 0 0 1px var(--color-success);
 }
 
 .resultTitle {
+  position: relative;
+  z-index: 1;
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 2.25rem;
   font-weight: 800;
   color: var(--color-text);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.resultScore {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-}
-
-.resultActions {
+.resultScoreContainer {
+  position: relative;
+  z-index: 1;
   display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 0.5rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
 }
 
-.certLink {
+.resultScoreCircle {
+  width: 140px;
+  height: 140px;
+  position: relative;
+}
+
+.circularChart {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 250px;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.05));
+}
+
+.circleBg {
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 3.8;
+}
+
+.circle {
+  fill: none;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+}
+
+.circlePass {
+  stroke: var(--color-success);
+  filter: drop-shadow(0 0 8px var(--color-success-soft));
+}
+
+.circleFail {
+  stroke: var(--color-danger);
+  filter: drop-shadow(0 0 8px var(--color-danger-soft));
+}
+
+.percentage {
+  fill: var(--color-text);
+  font-family: inherit;
+  font-size: 0.45em;
+  text-anchor: middle;
+  font-weight: 800;
+}
+
+.resultSubtitle {
+  position: relative;
+  z-index: 1;
+  margin: 0.25rem 0 0 0;
+  font-size: 0.95rem;
+  color: var(--color-text-subtle);
+  font-weight: 500;
+}
+
+.scoreGaugeWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.gaugeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+}
+
+@media (max-width: 520px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metricCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.85rem 0.75rem;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-soft, var(--color-border));
+}
+
+.metricLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-subtle);
+}
+
+.metricValue {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.metricSubtext {
+  font-size: 0.72rem;
+  color: var(--color-text-subtle);
+}
+
+/* Rich Best Score Showcase Card */
+.bestCard {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.09) 0%,
+    rgba(217, 119, 6, 0.04) 100%
+  );
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 4px 20px -2px rgba(245, 158, 11, 0.12);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: left;
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.bestCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, #f59e0b, #d97706);
+}
+
+.bestCardNewBest {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1) 0%,
+    rgba(245, 158, 11, 0.05) 100%
+  );
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 4px 20px -2px rgba(16, 185, 129, 0.15);
+}
+
+.bestCardNewBest::before {
+  background: linear-gradient(180deg, #10b981, #059669);
+}
+
+.bestCardMatched {
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.08) 0%,
+    rgba(79, 70, 229, 0.04) 100%
+  );
+  border-color: rgba(99, 102, 241, 0.32);
+  box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.12);
+}
+
+.bestCardMatched::before {
+  background: linear-gradient(180deg, #6366f1, #4f46e5);
+}
+
+.bestCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.bestBadgePill {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.55rem 1rem;
-  border-radius: var(--radius-md);
-  background-color: var(--color-primary);
-  color: var(--color-on-primary);
-  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #d97706;
+}
+
+.bestCardNewBest .bestBadgePill {
+  color: #059669;
+}
+
+.bestCardMatched .bestBadgePill {
+  color: #4f46e5;
+}
+
+.bestAttemptChip {
+  font-size: 0.75rem;
   font-weight: 600;
-  font-size: 0.95rem;
+  color: var(--color-text-subtle);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 0.2rem 0.65rem;
+  border-radius: 99px;
+}
+
+.bestCardBody {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.bestScoreGroup {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.bestScoreNumber {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.bestScoreLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-subtle);
+}
+
+.bestStatusPill {
+  padding: 0.25rem 0.65rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bestStatusPass {
+  background-color: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.bestStatusFail {
+  background-color: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.bestCardFooter {
+  font-size: 0.8125rem;
+  color: var(--color-text-subtle);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.reviewSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.5rem;
+}
+
+.reviewSectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.resultScoreText {
+  margin: 0;
+  color: var(--color-text-subtle);
+  font-size: 1.1rem;
+  font-weight: 500;
+  max-width: 80%;
+  line-height: 1.5;
+}
+
+.resultActions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 1.5rem;
+  width: 100%;
 }
 
 /* --- Admin builder --- */
@@ -275,6 +685,12 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .builderTop {
+    grid-template-columns: 1fr;
+  }
 }
 
 .builderFoot {
@@ -398,4 +814,17 @@
   width: 1.6rem;
   height: 1.6rem;
   min-width: 1.6rem;
+}
+
+/* Dark mode: the deeper label hues fall under AA on the navy surface; lift them. */
+[data-theme='dark'] .bestBadgePill {
+  color: #fbbf24;
+}
+
+[data-theme='dark'] .bestCardNewBest .bestBadgePill {
+  color: #34d399;
+}
+
+[data-theme='dark'] .bestCardMatched .bestBadgePill {
+  color: #a5b4fc;
 }

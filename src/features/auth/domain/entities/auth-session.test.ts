@@ -33,13 +33,12 @@ describe('AuthSession', () => {
   });
 
   it('round-trips through snapshot/restore', () => {
-    const original = buildAuthSession({ email: 'jane@example.com', roles: ['admin'] });
+    const original = buildAuthSession({ email: 'jane@example.com' });
     const restored = AuthSession.restore(original.snapshot());
 
     expect(isOk(restored)).toBe(true);
     if (isOk(restored)) {
       expect(restored.value.user.email.value).toBe('jane@example.com');
-      expect(restored.value.user.hasRole('admin')).toBe(true);
       expect(restored.value.accessToken).toBe(original.accessToken);
     }
   });

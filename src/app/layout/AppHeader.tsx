@@ -1,10 +1,12 @@
 import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Menu, Moon, PanelLeft, Search, Settings, Sun, User } from 'lucide-react';
-import { Avatar, DropdownMenu, IconButton } from '@shared/ui';
+import { AcademyLogo, Avatar, DropdownMenu, IconButton } from '@shared/ui';
+import { formatDisplayName, formatUserType } from '@shared/utils';
 import type { AuthenticatedUser } from '@features/auth';
 import { NotificationsBell } from '@features/notifications';
 import { useTheme } from '@app/theme/use-theme';
+import { AppLauncher } from './AppLauncher';
 import styles from './AppLayout.module.css';
 
 export interface AppHeaderProps {
@@ -16,6 +18,56 @@ export interface AppHeaderProps {
   readonly onToggleSidebar: () => void;
 }
 
+const UserMenu = ({
+  user,
+  onSignOut,
+}: {
+  readonly user: AuthenticatedUser | null;
+  readonly onSignOut: () => void;
+}): ReactElement => {
+  const navigate = useNavigate();
+  const name = formatDisplayName(user?.fullName);
+  const roleLabel = user?.userType ? formatUserType(user.userType) : null;
+  return (
+    <DropdownMenu
+      align="end"
+      items={[
+        {
+          label: 'Profile',
+          icon: <User size={16} />,
+          onSelect: () => {
+            navigate('/profile');
+          },
+        },
+        {
+          label: 'Settings',
+          icon: <Settings size={16} />,
+          onSelect: () => {
+            navigate('/user-settings');
+          },
+        },
+        {
+          label: 'Sign out',
+          danger: true,
+          icon: <LogOut size={16} />,
+          onSelect: onSignOut,
+        },
+      ]}
+      trigger={
+        <button type="button" className={styles.userTrigger} aria-label={name}>
+          <Avatar name={name} size={32} />
+          <span className={styles.userBox}>
+            <span className={styles.userName}>{name}</span>
+            {roleLabel !== null ? (
+              <span className={styles.userRole}>{roleLabel}</span>
+            ) : null}
+          </span>
+        </button>
+      }
+    />
+  );
+};
+
 /** Top bar: sidebar toggles + search + theme toggle + user menu. */
 export const AppHeader = ({
   user,
@@ -26,70 +78,36 @@ export const AppHeader = ({
   onToggleSidebar,
 }: AppHeaderProps): ReactElement => {
   const { theme, toggle } = useTheme();
-  const navigate = useNavigate();
-  const name = user?.fullName ?? 'Guest';
-  const roleLabel = user?.userType ?? null;
 
   return (
     <header className={styles.header}>
+      <span className={styles.headerBrand} aria-hidden="true">
+        <AcademyLogo size={28} />
+      </span>
       <IconButton label="Open menu" className={styles.menuBtn} onClick={onOpenNav}>
-        <Menu size={18} />
+        <Menu size={16} />
       </IconButton>
       <IconButton
         label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         className={styles.collapseBtn}
         onClick={onToggleSidebar}
       >
-        <PanelLeft size={18} />
+        <PanelLeft size={16} />
       </IconButton>
       <button type="button" className={styles.searchTrigger} onClick={onOpenSearch}>
-        <Search size={15} aria-hidden="true" />
+        <Search size={16} aria-hidden="true" />
         <span>Search</span>
         <kbd className={styles.kbd}>⌘K</kbd>
       </button>
-      <NotificationsBell />
+      <AppLauncher />
       <IconButton
         label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
         onClick={toggle}
       >
-        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+        {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
       </IconButton>
-      <DropdownMenu
-        align="end"
-        items={[
-          {
-            label: 'Profile',
-            icon: <User size={16} />,
-            onSelect: () => {
-              navigate('/profile');
-            },
-          },
-          {
-            label: 'Settings',
-            icon: <Settings size={16} />,
-            onSelect: () => {
-              navigate('/user-settings');
-            },
-          },
-          {
-            label: 'Sign out',
-            danger: true,
-            icon: <LogOut size={16} />,
-            onSelect: onSignOut,
-          },
-        ]}
-        trigger={
-          <button type="button" className={styles.userTrigger}>
-            <Avatar name={name} size={32} />
-            <span className={styles.userBox}>
-              <span className={styles.userName}>{name}</span>
-              {roleLabel !== null ? (
-                <span className={styles.userRole}>{roleLabel}</span>
-              ) : null}
-            </span>
-          </button>
-        }
-      />
+      <NotificationsBell />
+      <UserMenu user={user} onSignOut={onSignOut} />
     </header>
   );
 };

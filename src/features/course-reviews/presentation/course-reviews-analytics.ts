@@ -23,11 +23,11 @@ const mean = (values: readonly number[]): number =>
  * `resource-`), so the admin course dashboard filters to course ids to avoid mislabeling.
  */
 export const courseReviewsOnly = (reviews: readonly Review[]): readonly Review[] =>
-  reviews.filter((review) => review.courseId.startsWith('course-'));
+  reviews.filter((review) => review.contentId.startsWith('course-'));
 
 /** Top-line metrics across every review. */
 export const computeStats = (reviews: readonly Review[]): ReviewStats => {
-  const courses = new Set(reviews.map((review) => review.courseId));
+  const courses = new Set(reviews.map((review) => review.contentId));
   return {
     total: reviews.length,
     avg: reviews.length > 0 ? mean(reviews.map((r) => r.rating)).toFixed(1) : '—',
@@ -40,14 +40,14 @@ export const computeStats = (reviews: readonly Review[]): ReviewStats => {
 export const topRatedCourses = (reviews: readonly Review[]): readonly CourseRating[] => {
   const byCourse = new Map<string, Review[]>();
   for (const review of reviews) {
-    const bucket = byCourse.get(review.courseId) ?? [];
+    const bucket = byCourse.get(review.contentId) ?? [];
     bucket.push(review);
-    byCourse.set(review.courseId, bucket);
+    byCourse.set(review.contentId, bucket);
   }
   return [...byCourse.entries()]
     .map(([courseId, items]) => ({
       courseId,
-      courseName: items[0]?.courseName ?? 'Course',
+      courseName: items[0]?.contentName ?? 'Course',
       avg: mean(items.map((r) => r.rating)),
       count: items.length,
     }))

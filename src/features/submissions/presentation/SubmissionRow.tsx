@@ -1,5 +1,6 @@
 import type { ReactElement, ReactNode } from 'react';
 import { Clock, FileText } from 'lucide-react';
+import { Badge, type BadgeTone } from '@shared/ui';
 import { cn } from '@shared/utils';
 import type { Submission } from '../domain';
 import { StatusBadge } from './StatusBadge';
@@ -8,6 +9,12 @@ import styles from './SubmissionRow.module.css';
 const waitingLabel = (submittedAt: Date): string => {
   const days = Math.floor((Date.now() - submittedAt.getTime()) / 86_400_000);
   return days <= 0 ? 'today' : `${String(days)}d waiting`;
+};
+
+const TYPE_TONE: Readonly<Record<string, BadgeTone>> = {
+  Course: 'info',
+  Tutorial: 'warning',
+  Resource: 'success',
 };
 
 export interface SubmissionRowProps {
@@ -50,7 +57,9 @@ export const SubmissionRow = ({
           {showStatus ? <StatusBadge status={submission.status} /> : null}
         </div>
         <div className={styles.metaChips}>
-          <span className={styles.chip}>{submission.type}</span>
+          <Badge tone={TYPE_TONE[submission.type] ?? 'neutral'} size="sm">
+            {submission.type}
+          </Badge>
           {submission.awaitsDecision() ? (
             <span className={styles.waiting}>
               <Clock size={12} aria-hidden="true" />{' '}

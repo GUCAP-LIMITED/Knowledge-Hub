@@ -1,5 +1,6 @@
 export * from './errors/quiz-errors';
 export * from './value-objects/quiz-result';
+export * from './value-objects/quiz-learner-status';
 export * from './entities/quiz-question';
 export * from './entities/quiz';
 export * from './quiz-rules';

@@ -6,7 +6,9 @@ export interface UpdateTutorialInput {
   readonly id: string;
   readonly title: string;
   readonly category: string;
+  readonly categoryId?: string | null;
   readonly duration: string;
+  readonly durationSeconds?: number;
   readonly difficulty: Difficulty;
   readonly description: string;
   /** New content file (data URL). Omitted/empty keeps the existing media. */
@@ -41,7 +43,9 @@ export class UpdateTutorialUseCase {
       existing.value.withDetails({
         title: input.title,
         category: input.category,
+        categoryId: input.categoryId,
         duration: input.duration,
+        durationSeconds: input.durationSeconds,
         difficulty: input.difficulty,
         description: input.description,
         ...(input.mediaUrl !== undefined ? { mediaUrl: input.mediaUrl } : {}),

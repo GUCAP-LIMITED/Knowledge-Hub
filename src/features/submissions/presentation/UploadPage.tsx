@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { PageHeader } from '@shared/ui';
 import { cn } from '@shared/utils';
+import { useMyPermissions } from '@features/permissions';
 import { typeLabel } from './upload-content-types';
 import { DoneCard } from './UploadSteps';
 import { DraftBanner } from './DraftBanner';
@@ -12,12 +13,18 @@ import styles from './UploadPage.module.css';
 /** Upload Document: a type-aware create wizard (type → details → upload → review → publish). */
 export const UploadPage = (): ReactElement => {
   const flow = useUploadFlow();
+  const { data: permissions } = useMyPermissions();
+  const canCreateSubmission = permissions?.['Submissions.Create'] === true;
 
   if (flow.done) {
     return (
       <section className={styles.screen}>
         <PageHeader title="Upload Document" />
-        <DoneCard isAdmin={flow.isAdmin} onReset={flow.reset} />
+        <DoneCard
+          isAdmin={flow.publishesDirectly}
+          created={flow.created}
+          onReset={flow.reset}
+        />
       </section>
     );
   }
@@ -31,13 +38,14 @@ export const UploadPage = (): ReactElement => {
       <PageHeader
         title="Upload Document"
         subtitle={
-          flow.isAdmin
+          flow.publishesDirectly
             ? 'Publish content directly to the platform.'
             : 'Submit content for admin review.'
         }
       />
       {showDraftBanner ? (
         <DraftBanner
+          draftInfo={flow.draft.draftInfo}
           savedAt={flow.draft.savedAt}
           onResume={flow.draft.resume}
           onDiscard={flow.draft.dismiss}
@@ -52,22 +60,27 @@ export const UploadPage = (): ReactElement => {
         slots={flow.slots}
         files={flow.files}
         onFiles={flow.setFiles}
+        videoPlaylist={flow.videoPlaylist}
+        onVideoPlaylistChange={flow.setVideoPlaylist}
         details={flow.details}
         onDetailsSubmit={flow.submitDetails}
         sections={flow.sections}
         onSections={flow.setSections}
+        quiz={flow.quiz}
+        onQuizChange={flow.setQuiz}
         missing={flow.missing}
+        attempt={flow.attempt}
         author={flow.author}
-        isAdmin={flow.isAdmin}
+        isAdmin={flow.publishesDirectly}
         submitError={flow.submitError}
+        wasCancelled={flow.wasCancelled}
         footer={
           <UploadFooter
             stepKey={stepKey}
             isFirst={flow.current === 0}
-            fileReady={flow.fileReady}
-            canPublish={flow.missing.length === 0}
-            isAdmin={flow.isAdmin}
+            isAdmin={flow.publishesDirectly}
             isSubmitting={flow.isSubmitting}
+            canCreateSubmission={canCreateSubmission}
             selectedTypeLabel={
               flow.contentType === null ? null : typeLabel(flow.contentType)
             }

@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { AlertTriangle, Award } from 'lucide-react';
 import { Avatar, Button } from '@shared/ui';
-import { cn } from '@shared/utils';
+import { cn, formatUserType } from '@shared/utils';
 import type { Certificate } from '../domain';
 import { gradeTone } from './certificate-view';
 import styles from './CertificatesPage.module.css';
@@ -45,7 +45,9 @@ export const CertificateCard = ({
           <Avatar name={certificate.userName} size={32} />
           <div>
             <div className={styles.recipientName}>{certificate.userName}</div>
-            <div className={styles.recipientRole}>{certificate.userRole}</div>
+            <div className={styles.recipientRole}>
+              {formatUserType(certificate.userRole)}
+            </div>
           </div>
         </div>
         <div className={styles.issued}>
@@ -60,8 +62,9 @@ export const CertificateCard = ({
         ) : null}
         <Button
           size="sm"
-          variant="secondary"
+          variant="outline"
           fullWidth
+          className={styles.viewBtn}
           onClick={() => {
             onView(certificate);
           }}

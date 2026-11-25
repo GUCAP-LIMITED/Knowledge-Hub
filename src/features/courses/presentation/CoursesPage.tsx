@@ -1,225 +1,224 @@
-import { useMemo, useState, type ReactElement } from 'react';
 import {
-  DetailsEditModal,
-  type EditDraft,
-  type EditFieldConfig,
-  PageHeader,
-  useDeleteConfirm,
-} from '@shared/ui';
-import { useContentTypes } from '@features/content-types';
-import type { Course } from '../domain';
-import type { UpdateCourseInput } from '../application';
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement,
+} from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { Button, PageHeader, useDeleteConfirm } from '@shared/ui';
+import type { Course, CourseCatalogParams } from '../domain';
+import { useContentCategories } from '@features/content';
+import { CourseEditModal } from './CourseEditModal';
+import { CoursesCounterRow } from './components/CoursesCounterRow';
 import {
-  useCourses,
+  useInfiniteCourses,
   useDeleteCourse,
   useUpdateCourse,
   useUpdateCourseProgress,
+  useEnrollCourse,
 } from './use-courses';
+import { useEnrollmentStatuses } from './use-enrollment-statuses';
 import { CoursesResults } from './CoursesResults';
-import {
-  CoursesToolbar,
-  type CourseSort,
-  type CourseStatusFilter,
-  type CourseTypeFilter,
-} from './CoursesToolbar';
+import { CoursesToolbar, type CourseSort } from './CoursesToolbar';
 import styles from './CoursesPage.module.css';
 
 const nextProgress = (course: Course): number =>
   course.hasStarted() ? Math.min(100, course.progress + 10) : 5;
 
-const courseFields = (
-  course: Course,
-  categories: readonly string[],
-): readonly EditFieldConfig[] => [
-  { name: 'title', label: 'Title', kind: 'text', initial: course.title },
-  {
-    name: 'category',
-    label: 'Category',
-    kind: 'select',
-    initial: course.category,
-    options: categories,
-  },
-  { name: 'duration', label: 'Duration', kind: 'text', initial: course.duration },
-  {
-    name: 'mandatory',
-    label: 'Requirement',
-    kind: 'select',
-    initial: course.mandatory ? 'Mandatory' : 'Optional',
-    options: ['Mandatory', 'Optional'],
-  },
-  {
-    name: 'description',
-    label: 'Description',
-    kind: 'textarea',
-    initial: course.description,
-  },
-  {
-    name: 'content',
-    label: 'Replace content file',
-    kind: 'file',
-    initial: '',
-    accept: 'video/*,application/pdf,.doc,.docx,.ppt,.pptx',
-  },
-  {
-    name: 'thumbnail',
-    label: 'Cover image',
-    kind: 'file',
-    initial: '',
-    accept: 'image/*',
-  },
-];
-
-const toCourseUpdate = (id: string, draft: EditDraft): UpdateCourseInput => ({
-  id,
-  title: draft.title ?? '',
-  category: draft.category ?? '',
-  duration: draft.duration ?? '',
-  mandatory: draft.mandatory === 'Mandatory',
-  description: draft.description ?? '',
-  ...(draft.content !== undefined && draft.content !== ''
-    ? { mediaUrl: draft.content }
-    : {}),
-  ...(draft.thumbnail !== undefined && draft.thumbnail !== ''
-    ? { thumbnailUrl: draft.thumbnail }
-    : {}),
-});
-
-const matchesStatus = (course: Course, status: CourseStatusFilter): boolean => {
-  if (status === 'completed') {
-    return course.isCompleted();
-  }
-  if (status === 'in-progress') {
-    return course.hasStarted() && !course.isCompleted();
-  }
-  if (status === 'not-started') {
-    return !course.hasStarted();
-  }
-  return true;
-};
-
-const matchesType = (course: Course, type: CourseTypeFilter): boolean => {
-  if (type === 'mandatory') {
-    return course.mandatory;
-  }
-  if (type === 'optional') {
-    return !course.mandatory;
-  }
-  return true;
-};
-
-const sortCourses = (courses: readonly Course[], sort: CourseSort): readonly Course[] => {
-  const copy = [...courses];
-  if (sort === 'popular') {
-    return copy.sort((a, b) => b.enrolled - a.enrolled);
-  }
-  if (sort === 'rating') {
-    return copy.sort((a, b) => b.rating - a.rating);
-  }
-  if (sort === 'duration') {
-    return copy.sort((a, b) => parseFloat(a.duration) - parseFloat(b.duration));
-  }
-  return copy.sort((a, b) => b.addedDate.getTime() - a.addedDate.getTime());
-};
-
-interface CourseFilters {
+interface CatalogParamsInput {
   readonly query: string;
-  readonly category: string;
-  readonly status: CourseStatusFilter;
-  readonly type: CourseTypeFilter;
+  readonly categoryId: string | undefined;
+  readonly status: number | undefined;
   readonly sort: CourseSort;
 }
 
-const selectCourses = (
-  courses: readonly Course[],
-  f: CourseFilters,
-): readonly Course[] => {
-  const q = f.query.trim().toLowerCase();
-  const filtered = courses.filter(
-    (course) =>
-      (f.category === 'all' || course.category === f.category) &&
-      matchesStatus(course, f.status) &&
-      matchesType(course, f.type) &&
-      (q === '' ||
-        course.title.toLowerCase().includes(q) ||
-        course.category.toLowerCase().includes(q)),
-  );
-  return sortCourses(filtered, f.sort);
+const buildCatalogParams = (
+  input: CatalogParamsInput,
+): Omit<CourseCatalogParams, 'skipCount'> => ({
+  filter: input.query.trim() !== '' ? input.query.trim() : undefined,
+  categoryId: input.categoryId,
+  status: input.status,
+  sorting: input.sort,
+  maxResultCount: 12,
+});
+
+const getAdvancingId = (
+  isProgressPending: boolean,
+  progressId?: string,
+  isEnrollPending?: boolean,
+  enrollId?: string,
+): string | null => {
+  if (isProgressPending && progressId) return progressId;
+  if (isEnrollPending && enrollId) return enrollId;
+  return null;
 };
 
-/** Routed course-catalog page with search, category/status/type filters and sort. */
+const isFromDashboardAction = (state: unknown): boolean =>
+  Boolean((state as { fromDashboardAction?: boolean } | null)?.fromDashboardAction);
+
+const isFilterActive = (query: string, categoryId?: string, status?: number): boolean =>
+  query.trim() !== '' || categoryId !== undefined || status !== undefined;
+
+/** Routed course-catalog page with search, category/status filters and sort. */
+// eslint-disable-next-line max-lines-per-function
 export const CoursesPage = (): ReactElement => {
-  const courses = useCourses();
-  const updateProgress = useUpdateCourseProgress();
-  const update = useUpdateCourse();
-  const remove = useDeleteCourse();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isFromDashboard = isFromDashboardAction(location.state);
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('all');
-  const [status, setStatus] = useState<CourseStatusFilter>('all');
-  const [type, setType] = useState<CourseTypeFilter>('all');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
+  const [status, setStatus] = useState<number | undefined>(undefined);
   const [sort, setSort] = useState<CourseSort>('popular');
   const [editing, setEditing] = useState<Course | null>(null);
-  const courseTypes = useContentTypes('course');
-  const del = useDeleteConfirm(
-    courses.data ?? [],
-    'course',
-    remove.mutate,
-    remove.isPending,
+  const categoriesQuery = useContentCategories('course');
+  const categories = categoriesQuery.data ?? [];
+  const statusesQuery = useEnrollmentStatuses();
+  const statuses = statusesQuery.data ?? [];
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 350);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [query]);
+
+  const queryParams = useMemo(
+    () =>
+      buildCatalogParams({
+        query: debouncedQuery,
+        categoryId,
+        status,
+        sort,
+      }),
+    [debouncedQuery, categoryId, status, sort],
   );
 
-  const visible = useMemo(
-    () => selectCourses(courses.data ?? [], { query, category, status, type, sort }),
-    [courses.data, query, category, status, type, sort],
-  );
-  const filtered =
-    query.trim() !== '' || category !== 'all' || status !== 'all' || type !== 'all';
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteCourses(queryParams);
 
-  const handleAdvance = (course: Course): void => {
-    updateProgress.mutate({ id: course.id, progress: nextProgress(course) });
-  };
+  const updateProgress = useUpdateCourseProgress();
+  const enroll = useEnrollCourse();
+  const update = useUpdateCourse();
+  const remove = useDeleteCourse();
+
+  const visible = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
+  const totalCount = data?.pages[0]?.totalCount ?? 0;
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const target = sentinelRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          void fetchNextPage();
+        }
+      },
+      { rootMargin: '300px' },
+    );
+
+    observer.observe(target);
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const del = useDeleteConfirm(visible, 'course', remove.mutate, remove.isPending);
+
+  const filtered = isFilterActive(query, categoryId, status);
+
+  const handleClearAll = useCallback((): void => {
+    setQuery('');
+    setDebouncedQuery('');
+    setCategoryId(undefined);
+    setStatus(undefined);
+  }, []);
+
+  const handleAdvance = useCallback(
+    (course: Course): void => {
+      if (!course.isEnrolled) enroll.mutate(course.id);
+      else updateProgress.mutate({ id: course.id, progress: nextProgress(course) });
+    },
+    [enroll, updateProgress],
+  );
+
+  const advancingId = getAdvancingId(
+    updateProgress.isPending,
+    updateProgress.variables?.id,
+    enroll.isPending,
+    enroll.variables,
+  );
 
   return (
     <section className={styles.screen}>
-      <PageHeader title="Course Catalog" subtitle="Find what you need to learn next." />
+      <PageHeader title="Course Catalog" subtitle="Find what you need to learn next.">
+        {isFromDashboard ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              navigate('/dashboard');
+            }}
+          >
+            <ArrowLeft size={16} aria-hidden="true" /> Back to dashboard
+          </Button>
+        ) : null}
+      </PageHeader>
+
+      <CoursesCounterRow count={totalCount} isLoading={isLoading} filtered={filtered} />
 
       <CoursesToolbar
         query={query}
-        category={category}
+        categoryId={categoryId}
+        categories={categories}
         status={status}
-        type={type}
+        statuses={statuses}
         sort={sort}
         onQuery={setQuery}
-        onCategory={setCategory}
+        onCategory={setCategoryId}
         onStatus={setStatus}
-        onType={setType}
         onSort={setSort}
+        onClearAll={handleClearAll}
       />
 
       <CoursesResults
         courses={visible}
-        isLoading={courses.isLoading}
-        error={courses.isError ? courses.error : null}
+        isLoading={isLoading}
+        error={isError ? error : null}
         filtered={filtered}
-        advancingId={updateProgress.isPending ? updateProgress.variables.id : null}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        sentinelRef={sentinelRef}
+        totalCount={totalCount}
+        advancingId={advancingId}
         removingId={remove.isPending ? remove.variables : null}
         onAdvance={handleAdvance}
         onEdit={setEditing}
         onDelete={del.request}
+        onClearAll={handleClearAll}
       />
 
-      <DetailsEditModal
-        item={editing === null ? null : { id: editing.id }}
-        heading="Edit course"
-        fields={editing === null ? [] : courseFields(editing, courseTypes)}
-        isSubmitting={update.isPending}
+      <CourseEditModal
+        editing={editing}
+        update={update}
         onClose={() => {
           setEditing(null);
-        }}
-        onSave={(id, draft) => {
-          update.mutate(toCourseUpdate(id, draft), {
-            onSuccess: () => {
-              setEditing(null);
-            },
-          });
         }}
       />
       {del.dialog}

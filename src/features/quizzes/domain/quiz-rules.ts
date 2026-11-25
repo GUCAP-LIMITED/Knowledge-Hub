@@ -16,6 +16,9 @@ export const quizPropsError = (props: QuizProps): string | null => {
     if (question.options.length < 2) {
       return 'every question needs at least two answers';
     }
+    if (question.options.some((opt) => opt.trim() === '')) {
+      return 'every answer option must have text';
+    }
     if (question.correctIndexes.length === 0) {
       return 'every question needs at least one correct answer';
     }

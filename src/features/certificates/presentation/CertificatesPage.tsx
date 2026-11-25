@@ -1,83 +1,174 @@
-import { useMemo, useState, type ReactElement } from 'react';
-import { Alert, EmptyState, PageHeader, Spinner } from '@shared/ui';
-import { useAuth } from '@features/auth';
+import type { ReactElement } from 'react';
+import { Alert, CardGridSkeleton, EmptyState, PageHeader } from '@shared/ui';
 import type { Certificate } from '../domain';
-import { useCertificates } from './use-certificates';
-import { useCertificatesModule } from './use-certificates-module';
 import { CertificateCard } from './CertificateCard';
 import { CertificateStats } from './CertificateStats';
 import { CertificateInsights } from './CertificateInsights';
-import { CertCategoryPills } from './CertCategoryPills';
 import { CertificateModal } from './CertificateModal';
-import { byCategory, certSubtitle, scopeCertificates } from './certificate-view';
+import { CertificatesToolbar } from './CertificatesToolbar';
+import { CertificatesPagination } from './CertificatesPagination';
+import { useCertificatesPage } from './use-certificates-page';
+import { certSubtitle } from './certificate-view';
 import styles from './CertificatesPage.module.css';
 
-/** Routed certificates page: role-aware directory with filters, stats and a detail modal. */
-export const CertificatesPage = (): ReactElement => {
-  const { clock } = useCertificatesModule();
-  const { user } = useAuth();
-  const certificates = useCertificates();
-  const [category, setCategory] = useState('all');
-  const [active, setActive] = useState<Certificate | null>(null);
-  const now = useMemo(() => clock.now(), [clock]);
-  const isAdmin = user?.hasAnyRole(['admin']) ?? false;
+interface CertificatesGridProps {
+  readonly items: readonly Certificate[];
+  readonly now: Date;
+  readonly onView: (certificate: Certificate) => void;
+  readonly hasSearch: boolean;
+}
 
-  if (certificates.isLoading) {
+const CertificatesGrid = ({
+  items,
+  now,
+  onView,
+  hasSearch,
+}: CertificatesGridProps): ReactElement => {
+  if (items.length === 0) {
     return (
-      <div className={styles.center}>
-        <Spinner size="lg" label="Loading certificates" />
-      </div>
+      <EmptyState
+        title="No certificates yet"
+        description={
+          hasSearch
+            ? 'No certificates match your search query.'
+            : 'Complete courses to earn certificates.'
+        }
+      />
     );
   }
-  if (certificates.isError) {
+  return (
+    <div className={styles.grid}>
+      {items.map((certificate) => (
+        <CertificateCard
+          key={certificate.id}
+          certificate={certificate}
+          now={now}
+          onView={onView}
+        />
+      ))}
+    </div>
+  );
+};
+
+interface CertificatesContentProps {
+  readonly items: readonly Certificate[];
+  readonly isLoading: boolean;
+  readonly error: Error | null;
+  readonly hasSearch: boolean;
+  readonly page: number;
+  readonly totalPages: number;
+  readonly now: Date;
+  readonly onPageChange: (page: number) => void;
+  readonly onView: (certificate: Certificate) => void;
+}
+
+const CertificatesContent = ({
+  items,
+  isLoading,
+  error,
+  hasSearch,
+  page,
+  totalPages,
+  now,
+  onPageChange,
+  onView,
+}: CertificatesContentProps): ReactElement => {
+  if (isLoading) {
+    return <CardGridSkeleton />;
+  }
+  if (error !== null) {
     return (
       <Alert tone="error" title="Could not load certificates">
-        {certificates.error.message}
+        {error.message}
       </Alert>
     );
   }
+  return (
+    <>
+      <CertificatesGrid items={items} now={now} onView={onView} hasSearch={hasSearch} />
+      <CertificatesPagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
+    </>
+  );
+};
 
-  const mine = scopeCertificates(certificates.data ?? [], isAdmin, user?.fullName ?? '');
-  const visible = byCategory(mine, category);
+/** Routed certificates page: role-aware paginated directory with overview stats and insights. */
+export const CertificatesPage = (): ReactElement => {
+  const {
+    isAdmin,
+    search,
+    selection,
+    page,
+    active,
+    now,
+    filter,
+    roles,
+    allCount,
+    myCount,
+    showAll,
+    totalCount,
+    myTotal,
+    items,
+    totalPages,
+    subtitleCount,
+    isSelfView,
+    statistics,
+    certificates,
+    handleSearch,
+    handleSelect,
+    setPage,
+    setActive,
+    handleCloseModal,
+  } = useCertificatesPage();
+
+  const isOverview = isAdmin && !isSelfView;
 
   return (
     <section className={styles.screen}>
       <PageHeader
-        title={isAdmin ? 'All Certificates' : 'My Certificates'}
-        subtitle={certSubtitle(isAdmin, mine.length)}
+        title={isOverview ? 'All Certificates' : 'My Certificates'}
+        subtitle={certSubtitle(isOverview, subtitleCount)}
       />
 
-      <CertificateStats certificates={mine} now={now} isAdmin={isAdmin} />
-
-      {isAdmin ? <CertificateInsights certificates={mine} now={now} /> : null}
-
-      <CertCategoryPills certificates={mine} active={category} onSelect={setCategory} />
-
-      {visible.length === 0 ? (
-        <EmptyState
-          title="No certificates yet"
-          description="Complete courses to earn certificates."
-        />
-      ) : (
-        <div className={styles.grid}>
-          {visible.map((certificate) => (
-            <CertificateCard
-              key={certificate.id}
-              certificate={certificate}
-              now={now}
-              onView={setActive}
-            />
-          ))}
-        </div>
-      )}
-
-      <CertificateModal
-        certificate={active}
+      <CertificateStats
+        statistics={statistics.data}
+        totalCount={totalCount}
+        myTotalCertificates={myTotal}
+        certificates={items}
         now={now}
-        onClose={() => {
-          setActive(null);
-        }}
+        isAdmin={isAdmin}
       />
+
+      {isOverview ? <CertificateInsights statistics={statistics.data} /> : null}
+
+      <CertificatesToolbar
+        search={search}
+        onSearchChange={handleSearch}
+        selection={selection}
+        onSelect={handleSelect}
+        allCount={allCount}
+        myCount={myCount}
+        roles={roles}
+        showAll={showAll}
+        isAdmin={isAdmin}
+      />
+
+      <CertificatesContent
+        items={items}
+        isLoading={certificates.isLoading}
+        error={certificates.error}
+        hasSearch={Boolean(filter)}
+        page={page}
+        totalPages={totalPages}
+        now={now}
+        onPageChange={setPage}
+        onView={setActive}
+      />
+
+      <CertificateModal certificate={active} now={now} onClose={handleCloseModal} />
     </section>
   );
 };

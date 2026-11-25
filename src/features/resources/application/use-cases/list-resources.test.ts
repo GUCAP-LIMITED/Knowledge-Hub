@@ -12,14 +12,18 @@ const makeUseCase = (gateway: FakeResourceGateway): ListResourcesUseCase =>
 describe('ListResourcesUseCase', () => {
   it('returns the knowledge base from the gateway', async () => {
     const gateway = new FakeResourceGateway();
-    gateway.listResult = ok([buildResource({ id: 'resource-9' })]);
+    gateway.listResult = ok({
+      items: [buildResource({ id: 'resource-9' })],
+      totalCount: 1,
+    });
 
     const result = await makeUseCase(gateway).execute();
 
     expect(isOk(result)).toBe(true);
     if (isOk(result)) {
-      expect(result.value).toHaveLength(1);
-      expect(result.value[0]?.id).toBe('resource-9');
+      expect(result.value.items).toHaveLength(1);
+      expect(result.value.items[0]?.id).toBe('resource-9');
+      expect(result.value.totalCount).toBe(1);
     }
   });
 

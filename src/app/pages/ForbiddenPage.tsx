@@ -1,9 +1,11 @@
 import type { ReactElement } from 'react';
+import { ShieldAlert } from 'lucide-react';
 import { ErrorLayout } from './ErrorLayout';
 
 export const ForbiddenPage = (): ReactElement => (
   <ErrorLayout
     code="403"
+    icon={ShieldAlert}
     title="Access denied"
     message="You don’t have permission to view this page. Contact an admin if you think this is a mistake."
   />

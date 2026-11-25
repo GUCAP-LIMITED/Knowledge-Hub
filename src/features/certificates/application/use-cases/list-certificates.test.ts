@@ -12,14 +12,22 @@ const makeUseCase = (gateway: FakeCertificateGateway): ListCertificatesUseCase =
 describe('ListCertificatesUseCase', () => {
   it('returns the certificates from the gateway', async () => {
     const gateway = new FakeCertificateGateway();
-    gateway.listResult = ok([buildCertificate({ id: 'CERT-2026-009' })]);
+    gateway.listResult = ok({
+      totalCount: 1,
+      myTotalCertificates: 1,
+      items: [buildCertificate({ id: 'CERT-2026-009' })],
+    });
 
-    const result = await makeUseCase(gateway).execute();
+    const result = await makeUseCase(gateway).execute({
+      skipCount: 0,
+      maxResultCount: 10,
+    });
 
     expect(isOk(result)).toBe(true);
     if (isOk(result)) {
-      expect(result.value).toHaveLength(1);
-      expect(result.value[0]?.id).toBe('CERT-2026-009');
+      expect(result.value.items).toHaveLength(1);
+      expect(result.value.items[0]?.id).toBe('CERT-2026-009');
+      expect(result.value.totalCount).toBe(1);
     }
   });
 

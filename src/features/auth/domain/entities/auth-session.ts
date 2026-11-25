@@ -16,8 +16,10 @@ export interface AuthSessionSnapshot {
     readonly id: string;
     readonly email: string;
     readonly fullName: string;
-    readonly roles: readonly string[];
     readonly userType: string | null;
+    readonly branchIds?: readonly string[]; // optional: absent in sessions persisted before this field existed
+    readonly teamIds?: readonly string[];
+    readonly teamNames?: readonly string[];
   };
   readonly accessToken: string;
   readonly refreshToken: string | null;
@@ -70,8 +72,10 @@ export class AuthSession {
         id: this.user.id,
         email: this.user.email.value,
         fullName: this.user.fullName,
-        roles: this.user.roleNames,
         userType: this.user.userType,
+        branchIds: this.user.branchIds,
+        teamIds: this.user.teamIds,
+        teamNames: this.user.teamNames,
       },
       accessToken: this.accessToken,
       refreshToken: this.refreshToken,
@@ -92,8 +96,10 @@ export class AuthSession {
       id: snapshot.user.id,
       email: email.value,
       fullName: snapshot.user.fullName,
-      roles: snapshot.user.roles,
       userType: snapshot.user.userType,
+      branchIds: snapshot.user.branchIds ?? [],
+      teamIds: snapshot.user.teamIds ?? [],
+      teamNames: snapshot.user.teamNames ?? [],
     });
 
     return ok(

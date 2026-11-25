@@ -1,0 +1,360 @@
+.studioLayout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: stretch;
+  /* Bounded, so a long outline scrolls inside the sidebar (`.studioTree`) rather than stretching
+     the whole step — and the page — as sections and lessons are added. */
+  height: clamp(560px, 75vh, 860px);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.studioSidebar {
+  width: 320px;
+  flex-shrink: 0;
+  background-color: var(--color-bg-subtle);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.studioSidebarHeader {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.studioSidebarTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.studioTree {
+  padding: 1rem 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.studioTreeNode {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.studioTreeNode:hover {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.studioTreeNodeActive {
+  background-color: var(--color-primary-soft);
+  color: var(--color-link);
+  border-right: 3px solid var(--color-primary);
+  font-weight: 600;
+}
+
+.studioTreeNodeActive:hover {
+  background-color: var(--color-primary-soft);
+  color: var(--color-link);
+}
+
+.studioSections {
+  margin-top: 1rem;
+}
+
+.studioSectionBlock {
+  margin-bottom: 0.5rem;
+}
+
+.studioTreeSection {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.studioTreeIndexBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-subtle);
+  font-family: var(--font-mono, monospace);
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+
+.studioTreeNodeActive .studioTreeIndexBadge {
+  color: var(--color-link);
+}
+
+.studioTreeTitle {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.studioTreeUntitled {
+  font-style: italic;
+  color: var(--color-text-subtle);
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.studioTreeNodeActive .studioTreeUntitled {
+  color: var(--color-link);
+  opacity: 0.8;
+}
+
+.studioLessonsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.studioTreeLesson {
+  padding-left: 3rem;
+  font-size: 0.85rem;
+}
+
+.studioTreeLessonTitle {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.studioLearnerPreviewHint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.previewHintLabel {
+  font-weight: 600;
+  color: var(--color-text-subtle);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.previewHintValue {
+  font-weight: 600;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previewHintUntitled {
+  font-style: italic;
+  color: var(--color-text-subtle);
+  font-weight: 400;
+}
+
+.studioAddBtn {
+  margin-top: 0.5rem;
+  margin-left: 3rem;
+}
+
+.studioAddBtnFlush.studioAddBtnFlush {
+  margin: 0;
+}
+
+.studioEditor {
+  flex: 1;
+  padding: 2.5rem;
+  background-color: var(--color-surface);
+  overflow-y: auto;
+}
+
+.studioEditorPanel {
+  max-width: 700px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.studioEditorTitle {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.studioHint {
+  margin: 0 0 2rem 0;
+  font-size: 0.9rem;
+  color: var(--color-text-subtle);
+}
+
+.studioMediaArea {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.studioMediaTitle {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.studioMediaPreview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.studioVideoPlayer {
+  width: 100%;
+  max-width: 600px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  background-color: var(--color-bg-strong);
+}
+
+.studioPdfPreview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 600px;
+  height: 300px;
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-subtle);
+}
+
+.studioDropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  height: 220px;
+  border: 2px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-subtle);
+  cursor: pointer;
+  transition:
+    border-color var(--motion-base) var(--motion-ease-out),
+    background-color var(--motion-base) var(--motion-ease-out),
+    transform var(--motion-fast) var(--motion-ease-out);
+  color: var(--color-text-muted);
+}
+
+.studioDropzone:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+  color: var(--color-link);
+}
+
+.studioDropzone:active {
+  transform: scale(0.99);
+}
+
+.studioDropzoneInvalid,
+.studioDropzoneInvalid:hover {
+  border-color: var(--color-danger);
+  background-color: var(--color-danger-soft);
+  color: var(--color-danger-strong);
+}
+
+.studioAddBtnInvalid.studioAddBtnInvalid,
+.studioAddBtnInvalid.studioAddBtnInvalid:hover:not(:disabled) {
+  border-color: var(--color-danger);
+  background-color: var(--color-danger-soft);
+  color: var(--color-danger-strong);
+}
+
+/* A section/lesson in the outline that still blocks publishing (shown after a blocked attempt). */
+.studioTreeNodeInvalid {
+  color: var(--color-danger-strong);
+  box-shadow: inset 3px 0 0 var(--color-danger);
+}
+
+.studioTreeNodeInvalid .studioTreeIndexBadge {
+  color: var(--color-danger-strong);
+}
+
+.dropIconBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--motion-base) var(--motion-ease-out);
+}
+
+.studioDropzone:hover .dropIconBadge {
+  transform: translateY(-2px);
+}
+
+.dropIcon {
+  color: var(--color-link);
+}
+
+.dropTitle {
+  font-weight: 600;
+}
+
+.dropHint {
+  font-size: 0.78rem;
+  color: var(--color-text-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Below 640px the sidebar tree and editor stack instead of sitting side by side. */
+@media (max-width: 640px) {
+  .studioLayout {
+    flex-direction: column;
+    height: auto;
+  }
+  .studioSidebar {
+    width: 100%;
+    max-height: 240px;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .studioEditor {
+    padding: 1.25rem;
+  }
+}

@@ -1,6 +1,4 @@
 .screen {
-  max-width: 1120px;
-  margin: 0 auto;
   padding: 1.75rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -11,7 +9,12 @@
   overflow: hidden;
   padding: 1.75rem;
   border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
+  background-color: var(--color-primary);
+  background-image: linear-gradient(
+    135deg,
+    var(--color-primary) 44%,
+    var(--color-secondary) 100%
+  );
   color: var(--color-on-primary);
 }
 .heroBlob {
@@ -98,7 +101,7 @@
 }
 .primary {
   background-color: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-link);
 }
 .secondary {
   background-color: var(--color-secondary-soft);
@@ -124,6 +127,10 @@
   align-items: start;
 }
 .panel {
+  /* Grid items default to min-width: auto, so a nowrap-truncated child (courseTitle) would
+     otherwise force this panel past its 1fr track instead of shrinking to it — see the
+     "Continue Learning" card overflowing on narrow viewports. */
+  min-width: 0;
   padding: 1.25rem 1.4rem;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -144,15 +151,6 @@
   align-items: center;
   gap: 0.5rem;
 }
-.viewAll {
-  border: none;
-  background: none;
-  color: var(--color-primary);
-  font-weight: 600;
-  font-size: 0.8rem;
-  cursor: pointer;
-  text-decoration: none;
-}
 .rows {
   display: flex;
   flex-direction: column;
@@ -169,7 +167,7 @@
   color: inherit;
 }
 .courseRow:hover {
-  background-color: var(--color-surface-muted);
+  background-color: var(--color-surface-hover);
 }
 .courseThumb {
   display: grid;
@@ -289,19 +287,6 @@
   font-size: 0.85rem;
   color: var(--color-text-muted);
 }
-.onboardClose {
-  display: inline-flex;
-  padding: 0.35rem;
-  border: none;
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--color-text-subtle);
-  cursor: pointer;
-  transition: background-color var(--motion-base) var(--motion-ease-out);
-}
-.onboardClose:hover {
-  background-color: var(--color-surface-muted);
-}
 .onboardSteps {
   list-style: none;
   margin: 0;
@@ -335,7 +320,7 @@
   flex-shrink: 0;
 }
 .onboardStepIcon {
-  color: var(--color-primary);
+  color: var(--color-link);
   flex-shrink: 0;
 }
 .onboardLabel {
@@ -343,11 +328,4 @@
 }
 .onboardLink {
   margin-left: auto;
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-md);
-  background-color: var(--color-primary);
-  color: var(--color-on-primary);
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-decoration: none;
 }
