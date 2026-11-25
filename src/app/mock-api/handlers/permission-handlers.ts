@@ -1,6 +1,6 @@
 import type { MockState } from '../mock-state';
-import { MockHttpFailure, type MockRequest, type MockRoute } from '../mock-types';
-import { findMockUser } from '../seed/mock-users';
+import { grantsOf, notFound, requireUser } from '../mock-context';
+import type { MockRequest, MockRoute } from '../mock-types';
 import {
   GROUP_LABELS,
   PERMISSION_CATALOG,
@@ -8,18 +8,8 @@ import {
 } from '../seed/permission-catalog';
 import type { MockPermissionSet } from '../seed/permission-sets';
 
-const setFor = (state: MockState, userTypeId: string): MockPermissionSet | undefined => {
-  const setId = state.typeDefaults.get(userTypeId);
-  return state.permissionSets.find((set) => set.id === setId);
-};
-
-const grantsFor = (state: MockState, request: MockRequest): ReadonlySet<string> => {
-  const user = findMockUser(request.userId);
-  if (user === undefined) {
-    throw new MockHttpFailure(401, 'Unauthorized');
-  }
-  return setFor(state, user.userTypeId)?.grants ?? new Set<string>();
-};
+const grantsFor = (state: MockState, request: MockRequest): ReadonlySet<string> =>
+  grantsOf(state, requireUser(request));
 
 const toNavItem = (
   module: CatalogModule,
@@ -103,7 +93,7 @@ export const permissionHandlers = (state: MockState): readonly MockRoute[] => [
     handler: ({ params }) => {
       const set = state.permissionSets.find((s) => s.id === params.id);
       if (set === undefined) {
-        throw new MockHttpFailure(404, 'Permission set not found');
+        throw notFound('Permission set');
       }
       return {
         ...toSummary(set),
