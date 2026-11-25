@@ -14,9 +14,11 @@ export type BadgeTone =
 export type BadgeSize = 'sm' | 'md';
 
 export interface BadgeProps {
-  readonly tone?: BadgeTone;
-  readonly size?: BadgeSize;
-  readonly icon?: LucideIcon;
+  readonly tone?: BadgeTone | undefined;
+  readonly size?: BadgeSize | undefined;
+  readonly icon?: LucideIcon | undefined;
+  readonly className?: string | undefined;
+  readonly title?: string | undefined;
   readonly children: ReactNode;
 }
 
@@ -25,9 +27,11 @@ export const Badge = ({
   tone = 'neutral',
   size = 'md',
   icon: Icon,
+  className,
+  title,
   children,
 }: BadgeProps): ReactElement => (
-  <span className={cn(styles.badge, styles[tone], styles[size])}>
+  <span className={cn(styles.badge, styles[tone], styles[size], className)} title={title}>
     {Icon !== undefined ? (
       <Icon size={size === 'sm' ? 11 : 12} aria-hidden="true" />
     ) : null}

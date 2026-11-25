@@ -6,7 +6,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  /* Background color is set inline per instance — see getAvatarColor(name) in Avatar.tsx. */
   color: var(--color-on-primary);
   font-weight: 700;
   display: flex;

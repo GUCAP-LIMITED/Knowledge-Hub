@@ -8,6 +8,7 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "types": ["@testing-library/jest-dom"],
+    "ignoreDeprecations": "5.0",
 
     /* Bundler mode */
     "moduleResolution": "bundler",

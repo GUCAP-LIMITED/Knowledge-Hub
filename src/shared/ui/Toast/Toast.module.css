@@ -44,7 +44,7 @@
   cursor: pointer;
 }
 .close:hover {
-  background-color: var(--color-surface-muted);
+  background-color: var(--color-surface-hover);
   color: var(--color-text);
 }
 .close:focus-visible {
@@ -56,7 +56,7 @@
   border-left: 3px solid var(--color-primary);
 }
 .success .icon {
-  color: var(--color-primary);
+  color: var(--color-link);
 }
 .error {
   border-left: 3px solid var(--color-danger);

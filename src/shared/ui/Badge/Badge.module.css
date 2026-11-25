@@ -21,7 +21,7 @@
 }
 .primary {
   background-color: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-link);
 }
 .secondary {
   background-color: var(--color-secondary-soft);

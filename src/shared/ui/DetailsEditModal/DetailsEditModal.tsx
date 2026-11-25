@@ -1,18 +1,29 @@
 import { useState, type ChangeEvent, type ReactElement } from 'react';
 import { Button } from '@shared/ui/Button/Button';
 import { Modal } from '@shared/ui/Modal/Modal';
+import { RichTextEditor } from '@shared/ui/RichTextEditor/RichTextEditor';
 import { Select } from '@shared/ui/Select/Select';
 import { TextField } from '@shared/ui/TextField/TextField';
 import { Textarea } from '@shared/ui/Textarea/Textarea';
+import { DurationInput } from '../DurationInput/DurationInput';
 import styles from './DetailsEditModal.module.css';
 
-/** One editable field: free text, a dropdown, a multi-line box, or a file re-upload. */
+export interface EditFieldOption {
+  readonly value: string;
+  readonly label: string;
+}
+
+/** One editable field: free text, a dropdown, a multi-line box, rich text, duration, or a file re-upload. */
 export interface EditFieldConfig {
   readonly name: string;
   readonly label: string;
-  readonly kind: 'text' | 'select' | 'textarea' | 'file';
+  readonly kind: 'text' | 'select' | 'textarea' | 'richtext' | 'file' | 'duration';
   readonly initial: string;
-  readonly options?: readonly string[];
+  readonly options?: readonly (string | EditFieldOption)[];
+  readonly placeholder?: string;
+  readonly required?: boolean;
+  readonly maxLength?: number;
+  readonly validate?: (value: string) => string | undefined;
   /** For `file` fields — the accept filter (e.g. "video/*,application/pdf"). */
   readonly accept?: string;
 }
@@ -26,6 +37,20 @@ export interface EditableItem {
 
 const buildInitial = (fields: readonly EditFieldConfig[]): EditDraft =>
   Object.fromEntries(fields.map((field) => [field.name, field.initial]));
+
+const getFieldError = (field: EditFieldConfig, value: string): string | undefined => {
+  const trimmed = value.trim();
+  if (field.required === true && trimmed.length === 0) {
+    return `${field.label} is required.`;
+  }
+  if (field.maxLength !== undefined && value.length > field.maxLength) {
+    return `${field.label} must not exceed ${field.maxLength.toLocaleString()} characters (current: ${value.length.toLocaleString()}).`;
+  }
+  if (field.validate !== undefined) {
+    return field.validate(value);
+  }
+  return undefined;
+};
 
 const FileField = ({
   field,
@@ -62,30 +87,56 @@ const FileField = ({
   );
 };
 
-const Field = ({
+const DurationEditField = ({
   field,
   value,
+  commonProps,
   onChange,
 }: {
   readonly field: EditFieldConfig;
   readonly value: string;
+  readonly commonProps: Record<string, unknown>;
+  readonly onChange: (value: string) => void;
+}): ReactElement => (
+  <DurationInput
+    label={field.label}
+    mode="string"
+    value={value}
+    {...commonProps}
+    {...(field.placeholder !== undefined ? { placeholder: field.placeholder } : {})}
+    onChange={(val: string | number) => {
+      onChange(String(val));
+    }}
+  />
+);
+
+const Field = ({
+  field,
+  value,
+  error,
+  onChange,
+}: {
+  readonly field: EditFieldConfig;
+  readonly value: string;
+  readonly error?: string | undefined;
   readonly onChange: (value: string) => void;
 }): ReactElement => {
+  const commonProps = {
+    ...(error !== undefined ? { error } : {}),
+    ...(field.required !== undefined ? { required: field.required } : {}),
+  };
+
   if (field.kind === 'select') {
     return (
       <Select
         label={field.label}
         value={value}
-        onChange={(event) => {
-          onChange(event.target.value);
-        }}
-      >
-        {(field.options ?? []).map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </Select>
+        {...commonProps}
+        onChange={onChange}
+        options={(field.options ?? []).map((option) =>
+          typeof option === 'string' ? { value: option, label: option } : option,
+        )}
+      />
     );
   }
   if (field.kind === 'textarea') {
@@ -94,19 +145,43 @@ const Field = ({
         label={field.label}
         rows={3}
         value={value}
+        {...commonProps}
+        {...(field.placeholder !== undefined ? { placeholder: field.placeholder } : {})}
         onChange={(event) => {
           onChange(event.target.value);
         }}
       />
     );
   }
+  if (field.kind === 'richtext') {
+    return (
+      <RichTextEditor
+        label={field.label}
+        initialValue={field.initial}
+        {...commonProps}
+        onChange={onChange}
+      />
+    );
+  }
   if (field.kind === 'file') {
     return <FileField field={field} value={value} onChange={onChange} />;
+  }
+  if (field.kind === 'duration') {
+    return (
+      <DurationEditField
+        field={field}
+        value={value}
+        commonProps={commonProps}
+        onChange={onChange}
+      />
+    );
   }
   return (
     <TextField
       label={field.label}
       value={value}
+      {...commonProps}
+      {...(field.placeholder !== undefined ? { placeholder: field.placeholder } : {})}
       onChange={(event) => {
         onChange(event.target.value);
       }}
@@ -114,55 +189,83 @@ const Field = ({
   );
 };
 
-const EditForm = ({
-  fields,
-  isSubmitting,
-  onCancel,
-  onSave,
-}: {
+interface DetailsEditModalInnerProps {
+  readonly item: EditableItem | null;
+  readonly heading: string;
+  readonly description?: string | undefined;
   readonly fields: readonly EditFieldConfig[];
   readonly isSubmitting: boolean;
-  readonly onCancel: () => void;
-  readonly onSave: (draft: EditDraft) => void;
-}): ReactElement => {
+  readonly onClose: () => void;
+  readonly onSave: (id: string, draft: EditDraft) => void;
+}
+
+const DetailsEditModalInner = ({
+  item,
+  heading,
+  description = 'Update the content details.',
+  fields,
+  isSubmitting,
+  onClose,
+  onSave,
+}: DetailsEditModalInnerProps): ReactElement => {
   const [draft, setDraft] = useState<EditDraft>(() => buildInitial(fields));
-  const titleEmpty = (draft.title ?? '').trim().length === 0;
+  const fieldErrors = Object.fromEntries(
+    fields.map((field) => [field.name, getFieldError(field, draft[field.name] ?? '')]),
+  );
+  const hasErrors = Object.values(fieldErrors).some((err) => err !== undefined);
+  const isSaveDisabled = isSubmitting || hasErrors;
 
   return (
-    <div className={styles.body}>
+    <Modal
+      open={item !== null}
+      onOpenChange={(next) => {
+        if (!next) {
+          onClose();
+        }
+      }}
+      title={heading}
+      description={description}
+      size="lg"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            isLoading={isSubmitting}
+            disabled={isSaveDisabled}
+            onClick={() => {
+              if (!isSaveDisabled && item !== null) {
+                onSave(item.id, draft);
+              }
+            }}
+          >
+            Save changes
+          </Button>
+        </>
+      }
+    >
       <div className={styles.fields}>
         {fields.map((field) => (
           <Field
             key={field.name}
             field={field}
             value={draft[field.name] ?? ''}
+            error={fieldErrors[field.name]}
             onChange={(value) => {
               setDraft((prev) => ({ ...prev, [field.name]: value }));
             }}
           />
         ))}
       </div>
-      <div className={styles.footer}>
-        <Button variant="ghost" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button
-          isLoading={isSubmitting}
-          disabled={titleEmpty}
-          onClick={() => {
-            onSave(draft);
-          }}
-        >
-          Save changes
-        </Button>
-      </div>
-    </div>
+    </Modal>
   );
 };
 
 export interface DetailsEditModalProps {
   readonly item: EditableItem | null;
   readonly heading: string;
+  readonly description?: string | undefined;
   readonly fields: readonly EditFieldConfig[];
   readonly isSubmitting: boolean;
   readonly onClose: () => void;
@@ -173,32 +276,20 @@ export interface DetailsEditModalProps {
 export const DetailsEditModal = ({
   item,
   heading,
+  description,
   fields,
   isSubmitting,
   onClose,
   onSave,
 }: DetailsEditModalProps): ReactElement => (
-  <Modal
-    open={item !== null}
-    onOpenChange={(next) => {
-      if (!next) {
-        onClose();
-      }
-    }}
-    title={heading}
-    description="Update the content details, and replace the file if needed."
-    size="lg"
-  >
-    {item !== null ? (
-      <EditForm
-        key={item.id}
-        fields={fields}
-        isSubmitting={isSubmitting}
-        onCancel={onClose}
-        onSave={(draft) => {
-          onSave(item.id, draft);
-        }}
-      />
-    ) : null}
-  </Modal>
+  <DetailsEditModalInner
+    key={item?.id ?? 'closed'}
+    item={item}
+    heading={heading}
+    description={description}
+    fields={fields}
+    isSubmitting={isSubmitting}
+    onClose={onClose}
+    onSave={onSave}
+  />
 );

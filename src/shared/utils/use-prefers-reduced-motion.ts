@@ -5,10 +5,15 @@ const QUERY = '(prefers-reduced-motion: reduce)';
 /** Tracks the user's OS "reduce motion" preference, updating live if it changes. */
 export const usePrefersReducedMotion = (): boolean => {
   const [reduced, setReduced] = useState<boolean>(() =>
-    typeof window === 'undefined' ? false : window.matchMedia(QUERY).matches,
+    typeof window === 'undefined' || typeof window.matchMedia !== 'function'
+      ? false
+      : window.matchMedia(QUERY).matches,
   );
 
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return undefined;
+    }
     const media = window.matchMedia(QUERY);
     const onChange = (): void => {
       setReduced(media.matches);

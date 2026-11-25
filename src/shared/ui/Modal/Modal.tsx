@@ -11,7 +11,7 @@ export interface ModalProps {
   readonly description?: string | undefined;
   readonly children: ReactNode;
   readonly footer?: ReactNode;
-  readonly size?: 'md' | 'lg';
+  readonly size?: 'md' | 'lg' | 'xl';
 }
 
 /**
@@ -33,7 +33,13 @@ export const Modal = ({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className={styles.overlay} />
-        <Dialog.Content className={cn(styles.content, size === 'lg' && styles.lg)}>
+        <Dialog.Content
+          className={cn(
+            styles.content,
+            size === 'lg' && styles.lg,
+            size === 'xl' && styles.xl,
+          )}
+        >
           <header className={styles.header}>
             <div className={styles.heading}>
               <Dialog.Title className={styles.title}>{title}</Dialog.Title>

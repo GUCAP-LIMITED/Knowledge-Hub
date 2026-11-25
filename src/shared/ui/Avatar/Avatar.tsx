@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { cn } from '@shared/utils';
+import { cn, getAvatarColor } from '@shared/utils';
 import styles from './Avatar.module.css';
 
 const initialsOf = (name: string): string => {
@@ -22,7 +22,11 @@ export interface AvatarProps {
 /** Circular initials avatar with an optional online indicator. */
 export const Avatar = ({ name, size = 40, online }: AvatarProps): ReactElement => (
   <div className={styles.wrap} style={{ width: size, height: size }}>
-    <div className={styles.avatar} style={{ fontSize: size / 2.6 }} aria-hidden="true">
+    <div
+      className={styles.avatar}
+      style={{ fontSize: size / 2.6, backgroundColor: getAvatarColor(name) }}
+      aria-hidden="true"
+    >
       {initialsOf(name)}
     </div>
     {online !== undefined ? (

@@ -1,0 +1,101 @@
+.viewer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-surface);
+}
+
+.sheetTabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem 0;
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.sheetTab {
+  padding: 0.5rem 0.9rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sheetTab:hover {
+  color: var(--color-text);
+}
+
+.sheetTabActive {
+  color: var(--color-link);
+  border-bottom-color: var(--color-primary);
+}
+
+.tableScroll {
+  flex: 1;
+  overflow: auto;
+}
+
+.table {
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.table td {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  min-width: 90px;
+  max-width: 320px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  vertical-align: top;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: var(--color-surface-muted);
+}
+
+.cornerHeader,
+.colHeader,
+.rowHeader {
+  position: sticky;
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  z-index: 1;
+}
+
+.colHeader,
+.cornerHeader {
+  top: 0;
+  z-index: 2;
+  padding: 0.35rem 0.7rem;
+  min-width: 90px;
+}
+
+.rowHeader {
+  left: 0;
+  padding: 0.35rem 0.6rem;
+}
+
+.cornerHeader {
+  left: 0;
+  z-index: 3;
+}
+
+.empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-subtle);
+  font-size: 0.9rem;
+}

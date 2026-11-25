@@ -19,6 +19,9 @@
   font-weight: 600;
   color: var(--color-text-subtle);
 }
+[data-theme='dark'] .label {
+  color: var(--color-text);
+}
 .iconTile {
   display: inline-flex;
   align-items: center;
@@ -52,7 +55,7 @@
 }
 .primary {
   background-color: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-link);
 }
 .secondary {
   background-color: var(--color-secondary-soft);

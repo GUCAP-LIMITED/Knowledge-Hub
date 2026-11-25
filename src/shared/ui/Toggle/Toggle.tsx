@@ -7,6 +7,8 @@ export interface ToggleProps {
   readonly onChange: (checked: boolean) => void;
   readonly label: string;
   readonly description?: string;
+  /** Drops the row's built-in vertical padding, for callers that supply their own (e.g. a bordered wrapper). */
+  readonly compact?: boolean;
 }
 
 /** Labelled on/off switch. */
@@ -15,8 +17,9 @@ export const Toggle = ({
   onChange,
   label,
   description,
+  compact = false,
 }: ToggleProps): ReactElement => (
-  <div className={styles.row}>
+  <div className={cn(styles.row, compact && styles.compact)}>
     <div className={styles.text}>
       <div className={styles.label}>{label}</div>
       {description !== undefined ? (
