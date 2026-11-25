@@ -10,7 +10,13 @@ import {
   TimeoutHttpClient,
   type HttpClient,
 } from '@core/http';
-import { MockHttpClient, buildMockRoutes, createMockState } from '@app/mock-api';
+import {
+  MockHttpClient,
+  buildMockRoutes,
+  createMockState,
+  restoreMockState,
+  saveMockState,
+} from '@app/mock-api';
 import { createAuthModule, type AuthStore, type KeyValueStorage } from '@features/auth';
 import { createCoursesModule, type CoursesModule } from '@features/courses';
 import { createTutorialsModule, type TutorialsModule } from '@features/tutorials';
@@ -210,6 +216,33 @@ const createFeatureModules = ({
   emailTemplatesModule: createEmailTemplatesModule({ httpClient, logger }),
 });
 
+interface MockHttpClientParams {
+  readonly clock: Clock;
+  readonly logger: Logger;
+  readonly getAuthToken: () => string | undefined;
+}
+
+/**
+ * The offline backend. Its data survives a page reload (per browser tab) so a walkthrough is not
+ * wiped by an accidental refresh; signing in again through the mock portal starts fresh.
+ */
+const createMockHttpClient = ({
+  clock,
+  logger,
+  getAuthToken,
+}: MockHttpClientParams): HttpClient => {
+  const state = createMockState(clock.now());
+  restoreMockState(state, window.sessionStorage);
+  return new MockHttpClient({
+    routes: buildMockRoutes({ state, clock }),
+    logger,
+    getAuthToken,
+    onWrite: () => {
+      saveMockState(state, window.sessionStorage);
+    },
+  });
+};
+
 /**
  * THE composition root. The one place that knows concrete implementations and wires the whole
  * graph. Feature data is served by in-memory gateways seeded from the prototype (no backend yet);
@@ -230,11 +263,7 @@ export const createComposition = ({ env, storage }: CompositionInput): AppCompos
 
   const getAuthToken = (): string | undefined => accessToken;
   const httpClient: HttpClient = config.mockApi
-    ? new MockHttpClient({
-        routes: buildMockRoutes({ state: createMockState(), clock }),
-        logger,
-        getAuthToken,
-      })
+    ? createMockHttpClient({ clock, logger, getAuthToken })
     : createAppHttpClient({
         baseUrl: config.api.baseUrl,
         logger,

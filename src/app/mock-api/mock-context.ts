@@ -67,16 +67,6 @@ export const sortBy = <T>(
   });
 };
 
-/** Case-insensitive query lookup — the backend accepts both `Filter` and `filter`. */
-export const queryParam = (
-  query: Readonly<Record<string, string>>,
-  name: string,
-): string | undefined => {
-  const wanted = name.toLowerCase();
-  const key = Object.keys(query).find((k) => k.toLowerCase() === wanted);
-  return key === undefined ? undefined : query[key];
-};
-
 /** Lower-cases every query key so handlers can use one spelling. */
 export const normalizeQuery = (
   query: Readonly<Record<string, string>>,

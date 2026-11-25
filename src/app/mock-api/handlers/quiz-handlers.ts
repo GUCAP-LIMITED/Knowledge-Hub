@@ -1,3 +1,4 @@
+import { completeQuizLessons } from '../enrollment-actions';
 import { can, notFound, patch, requireUser } from '../mock-context';
 import { nextId, type MockQuizAttempt, type MockState } from '../mock-state';
 import type { MockRequest, MockRoute } from '../mock-types';
@@ -89,6 +90,9 @@ const submit = (state: MockState, request: MockRequest): unknown => {
   };
   const next = [...attempts, attempt];
   state.quizAttempts.set(`${user.id}:${quiz.id}`, next);
+  if (attempt.passed) {
+    completeQuizLessons(state, user.id, quiz.id, state.now.toISOString());
+  }
   return resultDto(quiz, next, attempt);
 };
 

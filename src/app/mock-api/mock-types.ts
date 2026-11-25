@@ -1,5 +1,3 @@
-import type { QueryValue } from '@core/http';
-
 /** A request as seen by a mock route handler: the matched path params, parsed query and JSON body. */
 export interface MockRequest {
   readonly method: string;
@@ -19,8 +17,6 @@ export interface MockRoute {
   readonly pattern: string;
   readonly handler: MockHandler;
 }
-
-export type MockQuery = Readonly<Record<string, QueryValue>>;
 
 /** Thrown by a handler to answer with a non-2xx status (translated to an `HttpError`). */
 export class MockHttpFailure extends Error {

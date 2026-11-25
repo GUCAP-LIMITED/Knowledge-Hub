@@ -3,6 +3,7 @@ import { SystemClock } from '@core/time';
 import { createAssignmentsModule } from '@features/assignments';
 import { createCertificatesModule } from '@features/certificates';
 import { createContentModule } from '@features/content';
+import { createCoursesModule } from '@features/courses';
 import { createCourseReviewsModule } from '@features/course-reviews';
 import { createEmailTemplatesModule } from '@features/email-templates';
 import { createPermissionsModule } from '@features/permissions';
@@ -38,6 +39,7 @@ interface Connected {
   readonly userTypes: ReturnType<typeof createUserTypesModule>;
   readonly submissions: ReturnType<typeof createSubmissionsModule>;
   readonly content: ReturnType<typeof createContentModule>;
+  readonly courses: ReturnType<typeof createCoursesModule>;
   readonly emailTemplates: ReturnType<typeof createEmailTemplatesModule>;
 }
 
@@ -73,6 +75,7 @@ const modules = (
   userTypes: createUserTypesModule({ httpClient, logger }),
   submissions: createSubmissionsModule({ httpClient, logger }),
   content: createContentModule({ httpClient, logger }),
+  courses: createCoursesModule({ httpClient, logger }),
   emailTemplates: createEmailTemplatesModule({ httpClient, logger }),
 });
 
@@ -106,6 +109,20 @@ describe('mock API contract (content, workflow, admin)', () => {
     expect(result.ok).toBe(true);
     const status = await m.quizzes.getMyQuizStatus.execute(quiz.id);
     expect(status.ok && status.value.attemptCount).toBe(1);
+  });
+
+  it('completes the course lesson when its quiz is passed', async () => {
+    const m = connect('user-manager');
+    const quizzes = await m.quizzes.listQuizzes.execute('quiz-3');
+    if (!quizzes.ok || quizzes.value[0] === undefined) throw new Error('quiz missing');
+    const quiz = quizzes.value[0];
+    const answers = Object.fromEntries(
+      quiz.questions.map((q) => [q.id, [...q.correctIndexes]]),
+    );
+    const result = await m.quizzes.submitQuiz.execute(quiz.id, answers);
+    expect(result.ok && result.value.passed).toBe(true);
+    const course = await m.courses.getCourse.execute('course-compliance');
+    expect(course.ok && course.value.completedLessons).toContain('les-c-4');
   });
 
   it('lists certificates for completed learning', async () => {

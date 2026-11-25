@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MOCK_USERS, type MockUser } from '@app/mock-api';
+import { MOCK_USERS, clearMockState, type MockUser } from '@app/mock-api';
 import styles from './MockPortal.module.css';
 
 const buildReturnUrl = (params: URLSearchParams, user: MockUser): string => {
@@ -34,6 +34,8 @@ export const MockPortalLoginPage = (): ReactElement => {
                 type="button"
                 className={styles.user}
                 onClick={() => {
+                  // A fresh sign-in starts the demo from the seed data again.
+                  clearMockState(window.sessionStorage);
                   window.location.assign(buildReturnUrl(params, user));
                 }}
               >

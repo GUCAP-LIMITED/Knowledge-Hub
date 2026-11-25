@@ -1,7 +1,8 @@
 import type { Clock } from '@core/time';
 import { ratingOf } from '../content-index';
+import { completeLessonFor } from '../enrollment-actions';
 import { notFound, paginate, requireUser, sortBy } from '../mock-context';
-import type { MockState } from '../mock-state';
+import { nextId, type MockState } from '../mock-state';
 import { MockHttpFailure, type MockRequest, type MockRoute } from '../mock-types';
 import {
   allLessons,
@@ -53,25 +54,15 @@ const completeLesson = (
   if (!allLessons(course).some((lesson) => lesson.id === lessonId)) {
     throw notFound('Lesson');
   }
-  const at = clock.now().toISOString();
-  enrollment.completedLessons.set(lessonId, at);
-  const allDone = allLessons(course).every((l) => enrollment.completedLessons.has(l.id));
-  Object.assign(enrollment, {
-    lastAccessedAt: at,
-    status: allDone ? 15 : 5,
-    completedAt: allDone ? at : null,
-  });
+  completeLessonFor(course, enrollment, lessonId, clock.now().toISOString());
 };
-
-const enrollmentSeq = { next: 1000 };
 
 const enroll = (state: MockState, clock: Clock, request: MockRequest): unknown => {
   const user = requireUser(request);
   const course = findCourse(state, request.params.id ?? '');
   if (findEnrollment(state, user.id, course.id) === undefined) {
-    enrollmentSeq.next += 1;
     state.enrollments.push({
-      id: `enr-${String(enrollmentSeq.next)}`,
+      id: nextId(state, 'enr'),
       userId: user.id,
       courseId: course.id,
       status: 0,

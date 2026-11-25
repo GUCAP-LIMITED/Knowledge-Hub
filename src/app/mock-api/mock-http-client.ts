@@ -10,7 +10,23 @@ export interface MockHttpClientDeps {
   readonly getAuthToken: () => string | undefined;
   /** Simulated network latency in ms (0 in tests). */
   readonly latencyMs?: number;
+  /** Called after every successful write (POST/PUT/PATCH/DELETE), e.g. to persist the mock state. */
+  readonly onWrite?: () => void;
 }
+
+/** URL query string plus any `options.query` entries, as plain strings. */
+const mergeQuery = (
+  url: URL,
+  extra: Readonly<Record<string, string | number | boolean | undefined>> | undefined,
+): Record<string, string> => {
+  const query = Object.fromEntries(url.searchParams);
+  for (const [key, value] of Object.entries(extra ?? {})) {
+    if (value !== undefined) {
+      query[key] = String(value);
+    }
+  }
+  return query;
+};
 
 const JSON_ROUNDTRIP = (value: unknown): unknown =>
   value === undefined ? undefined : (JSON.parse(JSON.stringify(value)) as unknown);
@@ -25,12 +41,14 @@ export class MockHttpClient implements HttpClient {
   private readonly logger: Logger;
   private readonly getAuthToken: () => string | undefined;
   private readonly latencyMs: number;
+  private readonly onWrite: (() => void) | undefined;
 
   public constructor(deps: MockHttpClientDeps) {
     this.matcher = new MockRouteMatcher(deps.routes);
     this.logger = deps.logger.child('mock-api');
     this.getAuthToken = deps.getAuthToken;
     this.latencyMs = deps.latencyMs ?? 120;
+    this.onWrite = deps.onWrite;
   }
 
   public get<T>(path: string, options?: RequestOptions): Promise<T> {
@@ -71,15 +89,7 @@ export class MockHttpClient implements HttpClient {
       await new Promise((resolve) => setTimeout(resolve, this.latencyMs));
     }
     const url = new URL(rawPath, 'http://mock.local');
-    const query: Record<string, string> = {};
-    url.searchParams.forEach((value, key) => {
-      query[key] = value;
-    });
-    for (const [key, value] of Object.entries(options?.query ?? {})) {
-      if (value !== undefined) {
-        query[key] = String(value);
-      }
-    }
+    const query = mergeQuery(url, options?.query);
 
     const match = this.matcher.match(method, url.pathname);
     if (match === null) {
@@ -99,6 +109,9 @@ export class MockHttpClient implements HttpClient {
         body: JSON_ROUNDTRIP(body),
         userId: token === undefined ? null : userIdFromAccessToken(token),
       });
+      if (method !== 'GET') {
+        this.onWrite?.();
+      }
       return JSON_ROUNDTRIP(result) as T;
     } catch (cause) {
       if (cause instanceof MockHttpFailure) {

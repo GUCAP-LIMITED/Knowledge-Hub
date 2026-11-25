@@ -19,7 +19,7 @@ apply the primitive rather than hand-rolling the colour:
 - **Brand mark** — the `UA` logo tile's teal→orange gradient (`AppLayout`). The identity.
 - **Page-title accent bar** — the 4px bar beside a screen title (`PageHeader`). One per page.
 - **Accent CTA** — `<Button variant="accent">` for a single secondary-emphasis action on a
-  view (e.g. "Take a quiz"). Never the main action — that's `variant="primary"` (teal).
+  view (e.g. "Take a quiz"). Never the main action — that's `variant="default"` (teal).
 - **Notification badge** — the unread-count dot on the bell (`NotificationsBell`).
 - **Secondary tag** — `<Badge tone="secondary">` for lightweight status chips like
   "Required" / "Updated" (soft orange fill, strong orange text).
@@ -34,8 +34,8 @@ page-title bar and the brand mark are ambient and don't count).
 
 ## Where orange is NOT allowed (the DON'T list)
 
-- **Primary actions / main CTAs** → teal (`variant="primary"`). Orange never outranks teal.
-- **Destructive actions** → red (`--color-danger`, `variant="danger"`).
+- **Primary actions / main CTAs** → teal (`variant="default"`). Orange never outranks teal.
+- **Destructive actions** → red (`--color-danger`, `variant="destructive"`).
 - **Success / positive state** → green (`--color-success`).
 - **Links & inline text** → teal or text tokens; never orange body copy.
 - **Large fills, page/section backgrounds, cards** → surface tokens. Orange is trim, not fill.
